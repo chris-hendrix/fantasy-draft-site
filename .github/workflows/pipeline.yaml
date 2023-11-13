@@ -1,0 +1,85 @@
+name: Pipeline
+
+on:
+  push:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container: cypress/browsers:latest
+
+    env:
+      # database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_HOSTNAME: postgres
+      POSTGRES_PORT: 5432
+      # next-auth
+      SECRET:  nextAuthSecret
+      # host
+      PROTOCOL: http
+      HOSTNAME: localhost
+      PORT: 3000
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Expand env variables
+        run: |
+          echo "DATABASE_URI=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOSTNAME:$POSTGRES_PORT/$POSTGRES_DB?schema=public" >> $GITHUB_ENV
+          echo "NEXTAUTH_URL=$PROTOCOL://$HOSTNAME:$PORT" >> $GITHUB_ENV
+          echo "CYPRESS_BASE_URL=$PROTOCOL://$HOSTNAME:$PORT" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Migrate prisma schema
+        run: npm run migrate
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run Jest tests
+        run: npm run jest
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v5
+        with:
+          build: npm run build
+          start: npm run start
+          wait-on: http://localhost:3000
+          config-file: test/cypress/cypress.config.ts
+
+  tag:
+    needs: [tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+
+      - name: Bump tag for main branch
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor  # change by including #major or #patch in merge commit message
+          INITIAL_VERSION: '2023.0.0'
