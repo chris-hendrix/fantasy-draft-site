@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "npx prisma migrate dev --skip-seed",
+    "push": "npx prisma db push",
+    "generate": "npx prisma db push",
     "up": "docker-compose -f docker-compose.yml up -d && docker-compose logs -f",
     "down": "docker-compose -f docker-compose.yml down",
     "devtest": "NODE_ENV=test && next dev",
@@ -43,7 +45,6 @@
     "next-auth": "^4.24.4",
     "node-mocks-http": "^1.13.0",
     "postcss": "^8.4.31",
-    "prisma": "^5.5.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
@@ -54,5 +55,8 @@
     "typescript": "^5.2.2",
     "unique-names-generator": "^4.7.1",
     "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.5.2"
   }
 }
