@@ -52,6 +52,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   info          Json?
+  commisionerLeagues       League[]
 }
 
 model VerificationToken {
@@ -61,4 +62,13 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+
+model League {
+  id              String   @id @default(cuid())
+  commissionerId  String   @map("user_id")
+  name            String   @unique
+  url             String?
+  commissioner    User     @relation(fields: [commissionerId], references: [id])
 }
