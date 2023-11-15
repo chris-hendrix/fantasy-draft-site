@@ -13,16 +13,15 @@ describe('/api/leagues', () => {
     const user = await createGetServerSessionMock()
     const body = {
       name: `League ${new Date().getTime()}`,
-      commissionerId: user.id
+      sport: 'baseball'
     }
     const req = createNextRequest({ method: 'POST', body })
     const res = await postLeague(req)
     expect(res.status).toBe(200)
 
     const data = await res.json()
-    expect(data).toEqual(
-      expect.objectContaining({ name: body.name }),
-    )
+    expect(data?.league).toEqual(expect.objectContaining({ name: body.name }))
+    expect(data?.commissioner).toEqual(expect.objectContaining({ userId: user.id }))
   })
 
   test('leagues can be retrieved', async () => {

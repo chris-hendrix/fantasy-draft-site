@@ -52,7 +52,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   info          Json?
-  commisionerLeagues       League[]
+  commissioners   Commissioner[]
 }
 
 model VerificationToken {
@@ -64,11 +64,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-
 model League {
   id              String   @id @default(cuid())
-  commissionerId  String   @map("user_id")
   name            String   @unique
+  sport           Sport    @default(baseball)
   url             String?
-  commissioner    User     @relation(fields: [commissionerId], references: [id])
+  commissioners   Commissioner[]
+}
+
+
+model Commissioner {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  leagueId  String @map("league_id")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league    League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leagueId])
+}
+
+enum Sport {
+  baseball
+  football
 }

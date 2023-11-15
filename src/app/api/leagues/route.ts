@@ -11,8 +11,11 @@ export const GET = routeWrapper(
 )
 
 export const POST = routeWrapper(async (req: NextRequest) => {
-  await withSessionUser() // user must be logged in
+  const user = await withSessionUser() // user must be logged in
   const data: any = req.consumedBody
   const league = await prisma.league.create({ data })
-  return NextResponse.json(league)
+  const commissioner = await prisma.commissioner.create({
+    data: { leagueId: league.id, userId: user.id }
+  })
+  return NextResponse.json({ league, commissioner })
 })
