@@ -53,7 +53,6 @@ const CredentialsModal: React.FC<Props> = ({ setOpen, signUp = false }) => {
       </form>
       {errorMessage && <div className="mt-2 h-1 text-sm text-red-500">{errorMessage}</div>}
     </Modal>
-
   )
 }
 

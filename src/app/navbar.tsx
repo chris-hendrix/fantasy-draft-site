@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useSessionUser } from '@/hooks/user'
 import Avatar from '@/components/Avatar'
+import LeagueDropdown from '@/components/LeagueDropdown'
 import CredentialsModal from '@/components/CredentialsModal'
 import { useSignOut } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
@@ -90,7 +91,9 @@ const Dropdown: React.FC = () => {
 
 const Navbar: React.FC = () => (
   <div className="navbar bg-primary text-primary-content">
-    <div className="navbar-start" />
+    <div className="navbar-start">
+      <LeagueDropdown />
+    </div>
     <div className="navbar-center text-xl font-medium">
       <Link href="/">Next.js Boilerplate</Link>
     </div>

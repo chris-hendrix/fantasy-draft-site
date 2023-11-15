@@ -4,13 +4,15 @@ import { appSlice } from './app'
 import { userApi } from './user'
 import { sessionApi } from './session'
 import { storageApi } from './storage'
+import { objectApi as leagueApi } from './league'
 
 export const makeStore = () => configureStore({
   reducer: {
     [appSlice.name]: appSlice.reducer,
     [sessionApi.reducerPath]: sessionApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
-    [storageApi.reducerPath]: storageApi.reducer
+    [storageApi.reducerPath]: storageApi.reducer,
+    [leagueApi.reducerPath]: leagueApi.reducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat([
     sessionApi.middleware,
