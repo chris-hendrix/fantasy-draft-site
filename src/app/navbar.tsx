@@ -9,9 +9,6 @@ import CredentialsModal from '@/components/CredentialsModal'
 import { useSignOut } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
 
-import Home from '@/icons/Home'
-import UserGroup from '@/icons/UserGroup'
-import ArrowLeftOnRectangle from '@/icons/ArrowLeftOnRectangle'
 import Menu from '@/icons/Menu'
 
 const Dropdown: React.FC = () => {
@@ -40,8 +37,8 @@ const Dropdown: React.FC = () => {
     if (isLoading) return null
     if (user) {
       return <>
-        <li><Link href="/profile"><Avatar user={user} />Profile</Link></li>
-        <li><a onClick={() => signOut()}><ArrowLeftOnRectangle />Log out</a></li>
+        <li><Link href="/profile">👤 Profile</Link></li>
+        <li><a onClick={() => signOut()}>⬅️ Log out</a></li>
       </>
     }
     return <>
@@ -66,18 +63,9 @@ const Dropdown: React.FC = () => {
             <ul className="" onClick={() => setDropdownOpen(false)}>
               {renderUserLinks()}
               <div className="divider" />
-              <li>
-                <Link href="/">
-                  <Home height={24} width={24} />
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/users">
-                  <UserGroup height={24} width={24} />
-                  Users
-                </Link>
-              </li>
+              <li><Link href="/">🏠 Home</Link></li>
+              <li><Link href="/users">👥 Users</Link></li>
+              <li><Link href="/leagues">🏆 Leagues</Link></li>
             </ul>
           </div>
         )}

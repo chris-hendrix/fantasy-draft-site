@@ -17,7 +17,8 @@ export const makeStore = () => configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat([
     sessionApi.middleware,
     userApi.middleware,
-    storageApi.middleware
+    storageApi.middleware,
+    leagueApi.middleware
   ]),
   devTools: process.env.NODE_ENV !== 'production'
 })

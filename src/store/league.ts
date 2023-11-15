@@ -30,7 +30,8 @@ export const objectApi = createApi({
         url,
         method: 'POST',
         body,
-      })
+      }),
+      invalidatesTags: (league) => [{ type: url, id: league?.id }],
     }),
     updateObject: build.mutation({
       query: (data) => ({
@@ -38,7 +39,7 @@ export const objectApi = createApi({
         method: 'PUT',
         body: { ...data, id: undefined },
       }),
-      invalidatesTags: (user) => [{ type: url, id: user?.id }],
+      invalidatesTags: (league) => [{ type: url, id: league?.id }],
     })
   })
 })
