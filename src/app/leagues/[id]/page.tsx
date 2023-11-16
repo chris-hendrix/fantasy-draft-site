@@ -10,8 +10,6 @@ interface Props {
 const UsersProfilePage: React.FC<Props> = ({ params }) => {
   const { data: league, isLoading } = useGetLeague(params.id)
 
-  console.log({ params, league })
-
   if (!league && !isLoading) return <NotFound />
   if (!league) return <></>
 

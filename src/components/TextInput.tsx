@@ -9,17 +9,19 @@ type Props = {
   multiline?: boolean,
   validate?: ((value: string) => any) | null,
   labelOverride?: string
+  required?: boolean
 }
 
 const TextInput: React.FC<Props> = ({
-  name, form, disabled = false, multiline = false, validate = null, labelOverride = null
+  name, form, disabled = false, multiline = false,
+  validate = null, labelOverride = null, required = false
 }) => {
   const { register, getValues, formState: { errors } } = form
 
   const registerHelper = (options?: RegisterOptions) => {
     if (!register) return {}
     return register(name, {
-      required: options?.required,
+      required: required || options?.required,
       validate: validate || options?.validate
     })
   }

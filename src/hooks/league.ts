@@ -7,18 +7,17 @@ interface Options {
   showAlertOnSuccess?: boolean;
   successMessage?: string;
   showAlertOnError?: boolean;
-  errorMessage?: string;
+  errorMessage?: string | null;
 }
 
 const defaultOptions: Options = {
   showAlertOnSuccess: false,
   successMessage: 'Success',
   showAlertOnError: false,
-  errorMessage: 'Error'
+  errorMessage: null
 }
 
 export const useGetLeague = (id: string, options: Options = {}) => {
-  console.log({ id })
   const { data, isLoading, isSuccess, error } = useGetObjectQuery(id)
   const { showAlert } = useAlert()
 

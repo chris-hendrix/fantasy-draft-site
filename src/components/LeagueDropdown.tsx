@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { User, Sport } from '@prisma/client'
+import { User } from '@prisma/client'
 import { useForm } from 'react-hook-form'
 import { useSessionUser } from '@/hooks/user'
 import { useAddLeague } from '@/hooks/league'
@@ -13,27 +13,34 @@ interface FormProps {
 }
 
 const CreateLeagueModal: React.FC<FormProps> = ({ user, setOpen }) => {
-  const { addLeague, isLoading } = useAddLeague()
+  const { addLeague, isLoading } = useAddLeague({
+    showAlertOnError: true,
+    showAlertOnSuccess: true,
+    errorMessage: undefined,
+  })
   const form = useForm({ mode: 'onChange' })
 
   const onSubmit = async (data: { [x: string]: unknown }) => {
-    const { name, sport } = data
-    const res = await addLeague({ name: name as string, sport: sport as Sport })
+    const { name } = data
+    const res = await addLeague({ name: name as string, sport: 'baseball' }) // TODO add multi sport
     if ('error' in res) return
     setOpen(false)
   }
 
   if (!user) return <></>
+
   return (
-    <Modal setOpen={setOpen}>
+    <Modal title={'Create league'} setOpen={setOpen}>
       <Form
         form={form}
         onSubmit={onSubmit}
         onCancel={() => setOpen(false)}
         isSubmitting={isLoading}
       >
-        <TextInput name="name" form={form} disabled={isLoading} validate={() => true} />
-        <TextInput name="sport" form={form} disabled={isLoading} validate={() => true} />
+        <TextInput
+          name="name" form={form} disabled={isLoading}
+          required validate={(value: string) => value.length > 4 || 'Too short'}
+        />
       </Form>
     </Modal>
   )
@@ -42,6 +49,9 @@ const CreateLeagueModal: React.FC<FormProps> = ({ user, setOpen }) => {
 const LeagueDropdown: React.FC = () => {
   const { user } = useSessionUser()
   const [modalOpen, setModalOpen] = useState(false)
+
+  if (!user?.admin) return <></> // TODO open up for all users at some point
+
   return (
     <>
       <button className="btn btn-secondary" onClick={() => setModalOpen(true)}>Create league</button>
