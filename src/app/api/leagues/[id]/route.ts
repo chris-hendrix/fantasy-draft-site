@@ -12,5 +12,3 @@ export const GET = routeWrapper(
     return NextResponse.json(league)
   }
 )
-
-export default GET
