@@ -5,9 +5,10 @@ import React, { useEffect, useRef, useCallback } from 'react'
 interface DropdownProps {
   label: React.ReactNode;
   children: React.ReactNode;
+  align?: 'left' | 'right';
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ label, children }) => {
+const Dropdown: React.FC<DropdownProps> = ({ label, children, align = 'left' }) => {
   const dropdown = useRef<HTMLDivElement | null>(null)
 
   // closed dropdown on click
@@ -50,7 +51,7 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children }) => {
       <label tabIndex={0} onClick={handleClick}>
         {label}
       </label>
-      <ul className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
+      <ul className={`absolute ${align}-0 menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52`}>
         {childrenWithProps}
       </ul>
     </div>

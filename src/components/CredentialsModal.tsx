@@ -26,8 +26,6 @@ const CredentialsModal: React.FC<Props> = ({ setOpen, signUp = false }) => {
   } = useSignIn()
   const { showAlert } = useAlert()
 
-  console.log({ isSignInLoading })
-
   const isLoading = isAddUserLoading || isSignInLoading
   const errorMessage = getErrorMessage(addUserError || signInError)
 

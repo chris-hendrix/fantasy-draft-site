@@ -39,15 +39,17 @@ const UserDropdown: React.FC = () => {
   return (
     <>
       <div id="dropdown" className="relative group inline-block">
-        <Dropdown label={
-        <button
-            id="menu-button"
-            className="btn btn-ghost avatar text-primary-content"
-        >
-          <Menu />
-          <Avatar user={user} />
-        </button>
-      }>
+        <Dropdown
+          align="right"
+          label={
+            <button
+              id="menu-button"
+              className="btn btn-ghost avatar text-primary-content"
+            >
+              <Menu />
+              <Avatar user={user} />
+            </button>
+          }>
           {renderUserLinks()}
           <div className="divider" />
           <li><Link href="/">🏠 Home</Link></li>
@@ -81,7 +83,7 @@ const LeagueDropdown: React.FC = () => {
           <div className="btn btn-ghost text-primary-content">
             {selectedLeague ? selectedLeague.name : 'League'} 🔽
           </div>
-      }
+        }
       >
         {commissionerLeagues?.map((league) => (
           <li key={league?.id}>

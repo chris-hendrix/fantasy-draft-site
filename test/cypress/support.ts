@@ -41,4 +41,7 @@ Cypress.Commands.add('loginUser', (user = defaultUser) => {
   cy.contains('button', 'Log in').click()
 })
 
-Cypress.Commands.add('logoutUser', () => cy.openMenuAndClick('Log out'))
+Cypress.Commands.add('logoutUser', () => {
+  cy.visit('')
+  cy.openMenuAndClick('Log out')
+})
