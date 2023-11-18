@@ -2,27 +2,12 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { League } from '@prisma/client'
 import { useGetLeagues } from '@/hooks/league'
-import { formatDate } from '@/lib/date'
+import LeagueCard from '@/components/LeagueCard'
 
 const LOAD_INCREMENT = 5
 
-const LeagueCard: React.FC<{ league: Partial<League> }> = ({ league }) => (
-  <Link href={`/leagues/${league.id}`}>
-    <div className="flex items-center text-center md:text-left justify-between bg-base-200 rounded-box p-4 mt-4 w-full">
-      <div className="flex items-center">
-        <div>
-          <h3 className="text-2xl font-medium">{league?.name}</h3>
-          <p className="text-gray-500">{`Sport: ${league.sport}`}</p>
-          <p className="text-gray-500">{`Created on ${formatDate(String(league.createdAt))}`}</p>
-        </div>
-      </div>
-    </div>
-  </Link>
-)
-
-const Users: React.FC = () => {
+const LeaguesPage: React.FC = () => {
   const [loadedUserCount, setLoadedUserCount] = useState(2 * LOAD_INCREMENT)
   const [visibleCount, setVisibleCount] = useState(LOAD_INCREMENT)
 
@@ -44,7 +29,9 @@ const Users: React.FC = () => {
   return (
     <main className="px-6 py-4 w-full max-w-[800px]">
       {leagues.slice(0, visibleCount).map((league) => (
-        <LeagueCard key={league.id} league={league} />
+        <Link key={league.id} href={`/leagues/${league.id}`}>
+          <LeagueCard league={league} />
+        </Link>
       ))}
       {visibleCount < leagues.length && (
         <div className="flex justify-center mt-4">
@@ -62,4 +49,4 @@ const Users: React.FC = () => {
   )
 }
 
-export default Users
+export default LeaguesPage

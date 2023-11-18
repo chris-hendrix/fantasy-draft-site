@@ -3,6 +3,7 @@
 import { useGetLeague } from '@/hooks/league'
 import Tabs from '@/components/Tabs'
 import NotFound from '@/app/not-found'
+import LeagueInfo from './components/LeagueInfo'
 
 interface LeaguePageProps {
   params: { id: string };
@@ -15,9 +16,9 @@ const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
   if (!league) return <></>
 
   const tabs = [
-    { hash: 'info', name: 'League info', component: <>League info</> },
+    { hash: 'info', name: 'League info', component: <LeagueInfo league={league} /> },
     { hash: 'teams', name: 'Teams', component: <>Teams</> },
-    { hash: 'keepers', name: 'Keepers', component: <>Teams</> },
+    { hash: 'keepers', name: 'Keepers', component: <>Keepers</> },
     { hash: 'draft', name: 'Draft', component: <>Draft</> },
     { hash: 'history', name: 'History', component: <>History</> },
     { hash: 'commissioner', name: 'Commissioner', component: <>Commissioner</> },

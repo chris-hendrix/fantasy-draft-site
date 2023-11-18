@@ -30,18 +30,21 @@ const Tabs: React.FC<TabsProps> = ({ tabs }) => {
   }
 
   return (
-    <div role="tablist" className="tabs tabs-lg tabs-boxed">
-      {tabs.map((tab, i) => (
-        <a
-          key={tab.name}
-          onClick={() => handleTabClick(i)}
-          role="tab"
-          className={`tab ${tabIndex === i ? 'tab-active' : ''}`}
-        >
-          {tab.name}
-        </a>
-      ))}
-    </div>
+    <>
+      <div role="tablist" className="tabs tabs-lg tabs-boxed">
+        {tabs.map((tab, i) => (
+          <a
+            key={tab.name}
+            onClick={() => handleTabClick(i)}
+            role="tab"
+            className={`tab ${tabIndex === i ? 'tab-active' : ''}`}
+          >
+            {tab.name}
+          </a>
+        ))}
+      </div>
+      {tabs[tabIndex].component}
+    </>
   )
 }
 
