@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { stringify } from 'qs'
 import {
   useGetObjectQuery,
   useGetObjectsQuery,
@@ -44,7 +45,7 @@ export const useGetLeague = (id: string, options: Options = {}) => {
 }
 
 export const useGetLeagues = (args: Prisma.LeagueFindManyArgs, options: Options = {}) => {
-  const { data, isLoading, isSuccess, error } = useGetObjectsQuery(args)
+  const { data, isLoading, isSuccess, error } = useGetObjectsQuery(stringify(args))
   const { showAlert } = useAlert()
 
   const {
@@ -100,4 +101,11 @@ export const useUpdateLeague = (options: Options = {}) => {
   }, [error])
 
   return { updateLeague: updateObject, isLoading, isSuccess, error }
+}
+
+export const useUserLeagues = (userId: string | null | undefined) => {
+  const { data: commissionerLeagues } = useGetLeagues({
+    where: { commissioners: { some: { userId: userId || '' } } }
+  }, { skip: !userId })
+  return { commissionerLeagues }
 }

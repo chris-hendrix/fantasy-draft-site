@@ -1,10 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Prisma, League } from '@prisma/client'
+import { League } from '@prisma/client'
 
 const url: 'leagues' = 'leagues'
 const reducerPath = 'leagueApi'
 type Object = League
-type FindManyArgs = Prisma.LeagueFindManyArgs
 
 export const objectApi = createApi({
   reducerPath,
@@ -15,11 +14,8 @@ export const objectApi = createApi({
       query: (id) => `${url}/${id}`,
       providesTags: (_result, _err, id) => [{ type: url, id }],
     }),
-    getObjects: build.query<Object[], FindManyArgs | undefined>({
-      query: (params) => ({
-        url,
-        params
-      }),
+    getObjects: build.query<Object[], string>({
+      query: (searchParams) => `${url}/?${searchParams}`,
       providesTags: (result) => [
         ...(result || []).map(({ id }) => ({ type: url, id })),
         { type: url, id: 'LIST' }

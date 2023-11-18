@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useParams } from 'next/navigation'
 import { useSessionUser } from '@/hooks/user'
+import { useUserLeagues } from '@/hooks/league'
 import Avatar from '@/components/Avatar'
 import Dropdown from '@/components/Dropdown'
 import LeagueModal from '@/components/LeagueModal'
@@ -66,14 +67,14 @@ const UserDropdown: React.FC = () => {
 
 const LeagueDropdown: React.FC = () => {
   const { user } = useSessionUser()
+  const { commissionerLeagues } = useUserLeagues(user?.id)
   const [modalOpen, setModalOpen] = useState(false)
   const pathname = usePathname()
   const { id } = useParams()
 
-  const commissionerLeagues = user?.commissioners?.map((c) => c.league)
   const defaultLeague = commissionerLeagues?.[0]
   const selectedLeague = pathname.startsWith('/leagues') && id
-    ? commissionerLeagues.find((l) => l.id === id)
+    ? commissionerLeagues?.find((l) => l.id === id)
     : defaultLeague
 
   return (

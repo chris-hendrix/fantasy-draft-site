@@ -15,7 +15,6 @@ export const GET = routeWrapper(
 
 export const PUT = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
-    console.log('HERE')
     const { id } = params
 
     if (!id) throw new ApiError('League id required', 400)
