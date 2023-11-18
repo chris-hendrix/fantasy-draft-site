@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import { User } from '@prisma/client'
 import { useForm } from 'react-hook-form'
 import { useSessionUser } from '@/hooks/user'
 import { useAddLeague } from '@/hooks/league'
@@ -8,11 +6,11 @@ import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
 
 interface FormProps {
-  user: Partial<User>;
   setOpen: (open: boolean) => void;
 }
 
-const CreateLeagueModal: React.FC<FormProps> = ({ user, setOpen }) => {
+const LeagueModal: React.FC<FormProps> = ({ setOpen }) => {
+  const { user } = useSessionUser()
   const { addLeague, isLoading } = useAddLeague({
     showAlertOnError: true,
     showAlertOnSuccess: true,
@@ -46,19 +44,4 @@ const CreateLeagueModal: React.FC<FormProps> = ({ user, setOpen }) => {
   )
 }
 
-const CreateLeagueButton: React.FC = () => {
-  const { user } = useSessionUser()
-  const [modalOpen, setModalOpen] = useState(false)
-
-  if (!user?.admin) return <></> // TODO open up for all users at some point
-
-  return (
-    <>
-      <button className="btn btn-secondary btn-sm" onClick={() => setModalOpen(true)}>Create league</button>
-      {modalOpen && user && <CreateLeagueModal user={user} setOpen={setModalOpen} />}
-    </>
-
-  )
-}
-
-export default CreateLeagueButton
+export default LeagueModal
