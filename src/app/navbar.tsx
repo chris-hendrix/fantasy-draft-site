@@ -41,7 +41,7 @@ const UserDropdown: React.FC = () => {
     <>
       <div id="dropdown" className="relative group inline-block">
         <Dropdown
-          align="right"
+          align="right-0"
           label={
             <button
               id="menu-button"
