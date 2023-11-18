@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 import { useAlert } from './app'
 
 interface Options {
+  skip?: boolean
   showAlertOnSuccess?: boolean;
   successMessage?: string;
   showAlertOnError?: boolean;
@@ -11,6 +12,7 @@ interface Options {
 }
 
 const defaultOptions: Options = {
+  skip: false,
   showAlertOnSuccess: false,
   successMessage: 'Success',
   showAlertOnError: false,
@@ -18,7 +20,7 @@ const defaultOptions: Options = {
 }
 
 export const useGetLeague = (id: string, options: Options = {}) => {
-  const { data, isLoading, isSuccess, error } = useGetObjectQuery(id)
+  const { data, isLoading, isSuccess, error } = useGetObjectQuery(id, { skip: options.skip })
   const { showAlert } = useAlert()
 
   const {

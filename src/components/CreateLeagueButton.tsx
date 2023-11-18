@@ -46,7 +46,7 @@ const CreateLeagueModal: React.FC<FormProps> = ({ user, setOpen }) => {
   )
 }
 
-const LeagueDropdown: React.FC = () => {
+const CreateLeagueButton: React.FC = () => {
   const { user } = useSessionUser()
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -54,11 +54,11 @@ const LeagueDropdown: React.FC = () => {
 
   return (
     <>
-      <button className="btn btn-secondary" onClick={() => setModalOpen(true)}>Create league</button>
+      <button className="btn btn-secondary btn-sm" onClick={() => setModalOpen(true)}>Create league</button>
       {modalOpen && user && <CreateLeagueModal user={user} setOpen={setModalOpen} />}
     </>
 
   )
 }
 
-export default LeagueDropdown
+export default CreateLeagueButton

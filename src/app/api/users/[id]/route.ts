@@ -10,7 +10,10 @@ export const GET = routeWrapper(
 
     if (!id) throw new ApiError('User id required', 400)
 
-    const user = await prisma.user.findUnique({ where: { id }, select: sanitizeUserSelect() })
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { ...sanitizeUserSelect(), commissioners: { select: { league: true } } }
+    })
     return NextResponse.json(user)
   }
 )

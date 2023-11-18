@@ -31,7 +31,10 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user, token }) {
       const email = user?.email || token?.email as string
-      session.user = await prisma.user.findUnique({ where: { email } })
+      session.user = await prisma.user.findUnique({
+        where: { email },
+        include: { commissioners: { select: { league: { select: { id: true, name: true } } } } }
+      })
       return session
     }
   }

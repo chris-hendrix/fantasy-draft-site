@@ -1,17 +1,27 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, ReactNode } from 'react'
 import Link from 'next/link'
 import { useSessionUser } from '@/hooks/user'
 import Avatar from '@/components/Avatar'
-import LeagueDropdown from '@/components/LeagueDropdown'
+import CreateLeagueButton from '@/components/CreateLeagueButton'
 import CredentialsModal from '@/components/CredentialsModal'
 import { useSignOut } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
 
 import Menu from '@/icons/Menu'
 
-const Dropdown: React.FC = () => {
+interface DropdownProps {
+  children: ReactNode;
+}
+
+const Dropdown: React.FC<DropdownProps> = ({ children }) => (
+  <div className="absolute right-0 mt-3 p-2 shadow menu menu-compact bg-base-200 rounded-box w-52 text-primary z-50">
+    {children}
+  </div>
+)
+
+const UserDropdown: React.FC = () => {
   const { user, isLoading } = useSessionUser()
   const { signOut, isSuccess: isSignOutSuccess } = useSignOut()
   const { showAlert } = useAlert()
@@ -59,7 +69,7 @@ const Dropdown: React.FC = () => {
           <Avatar user={user} />
         </button>
         {dropdownOpen && (
-          <div className="absolute right-0 mt-3 p-2 shadow menu menu-compact bg-base-200 rounded-box w-52 text-primary z-50">
+          <Dropdown>
             <ul className="" onClick={() => setDropdownOpen(false)}>
               {renderUserLinks()}
               <div className="divider" />
@@ -67,7 +77,7 @@ const Dropdown: React.FC = () => {
               <li><Link href="/users">👥 Users</Link></li>
               <li><Link href="/leagues">🏆 Leagues</Link></li>
             </ul>
-          </div>
+          </Dropdown>
         )}
       </div>
       {signupOpen && <CredentialsModal setOpen={setSignupOpen} signUp />}
@@ -77,18 +87,44 @@ const Dropdown: React.FC = () => {
   )
 }
 
-const Navbar: React.FC = () => (
+const MainNavbar: React.FC = () => (
   <div className="navbar bg-primary text-primary-content">
     <div className="navbar-start">
-      <LeagueDropdown />
-    </div>
-    <div className="navbar-center text-xl font-medium">
-      <Link href="/">Next.js Boilerplate</Link>
+      <a className="btn btn-ghost text-xl">daisyUI</a>
     </div>
     <div className="navbar-end">
-      <Dropdown />
+      <CreateLeagueButton />
+      <UserDropdown />
     </div>
   </div>
 )
+
+const LeagueNavbar: React.FC = () => {
+  const { user } = useSessionUser()
+  const commissionerLeagues = user?.commissioners?.map((c) => c.league)
+  const defaultLeague = commissionerLeagues?.[0]
+  return (
+    <div className="navbar bg-base-200">
+      <div className="dropdown flex-1">
+        <label tabIndex={0} className="btn btn-ghost lg:hidden">
+          {defaultLeague ? defaultLeague.name : 'Select league'}
+        </label>
+        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+          {commissionerLeagues?.map((league) => (<li key={league?.id}><a>{league?.name}</a></li>))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+const Navbar: React.FC = () => {
+  const { user } = useSessionUser()
+  return (
+    <div>
+      <MainNavbar />
+      {user && user?.commissioners?.length && <LeagueNavbar />}
+    </div>
+  )
+}
 
 export default Navbar
