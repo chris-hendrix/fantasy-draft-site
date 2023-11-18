@@ -31,7 +31,7 @@ const LeagueCard: React.FC<LeagueCardProps> = ({ league, canEdit }) => {
           </div>
         </div>
       </div>
-      {modalOpen && <LeagueModal setOpen={setModalOpen} />}
+      {modalOpen && <LeagueModal league={league} setOpen={setModalOpen} />}
     </>
   )
 }

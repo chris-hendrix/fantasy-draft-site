@@ -12,3 +12,18 @@ export const GET = routeWrapper(
     return NextResponse.json(league)
   }
 )
+
+export const PUT = routeWrapper(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
+    console.log('HERE')
+    const { id } = params
+
+    if (!id) throw new ApiError('League id required', 400)
+
+    const updatedLeague = await prisma.league.update({
+      where: { id },
+      data: req.consumedBody,
+    })
+    return NextResponse.json(updatedLeague)
+  }
+)

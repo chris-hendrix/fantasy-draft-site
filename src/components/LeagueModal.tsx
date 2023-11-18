@@ -1,26 +1,39 @@
 import { useForm } from 'react-hook-form'
+import { League } from '@prisma/client'
 import { useSessionUser } from '@/hooks/user'
-import { useAddLeague } from '@/hooks/league'
+import { useAddLeague, useUpdateLeague } from '@/hooks/league'
 import Modal from '@/components/Modal'
 import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
 
-interface FormProps {
-  setOpen: (open: boolean) => void;
+const mutationOptions = {
+  showAlertOnError: true,
+  showAlertOnSuccess: true,
+  errorMessage: undefined,
 }
 
-const LeagueModal: React.FC<FormProps> = ({ setOpen }) => {
+interface FormProps {
+  setOpen: (open: boolean) => void;
+  league?: Partial<League> | null | undefined
+}
+
+const LeagueModal: React.FC<FormProps> = ({ setOpen, league = null }) => {
   const { user } = useSessionUser()
-  const { addLeague, isLoading } = useAddLeague({
-    showAlertOnError: true,
-    showAlertOnSuccess: true,
-    errorMessage: undefined,
+  const { addLeague, isLoading: isAdding } = useAddLeague(mutationOptions)
+  const { updateLeague, isLoading: isUpdating } = useUpdateLeague(mutationOptions)
+  const form = useForm({
+    mode: 'onChange',
+    defaultValues: { name: league?.name || '' },
   })
-  const form = useForm({ mode: 'onChange' })
+  const isLoading = isAdding || isUpdating
 
   const onSubmit = async (data: { [x: string]: unknown }) => {
     const { name } = data
-    const res = await addLeague({ name: name as string, sport: 'baseball' }) // TODO add multi sport
+
+    const res = league
+      ? await updateLeague({ id: league.id, name: name as string })
+      : await addLeague({ name: name as string, sport: 'baseball' }) // TODO add multi sport
+
     if ('error' in res) return
     setOpen(false)
   }

@@ -35,7 +35,7 @@ export const objectApi = createApi({
     }),
     updateObject: build.mutation({
       query: (data) => ({
-        url: `users/${data?.id}`,
+        url: `${url}/${data?.id}`,
         method: 'PUT',
         body: { ...data, id: undefined },
       }),

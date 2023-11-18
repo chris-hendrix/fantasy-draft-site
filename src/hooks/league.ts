@@ -1,5 +1,10 @@
 import { useEffect } from 'react'
-import { useGetObjectQuery, useGetObjectsQuery, useAddObjectMutation } from '@/store/league'
+import {
+  useGetObjectQuery,
+  useGetObjectsQuery,
+  useAddObjectMutation,
+  useUpdateObjectMutation
+} from '@/store/league'
 import { Prisma } from '@prisma/client'
 import { useAlert } from './app'
 
@@ -75,4 +80,24 @@ export const useAddLeague = (options: Options = {}) => {
   }, [error])
 
   return { addLeague: addObject, isLoading, isSuccess, error }
+}
+
+export const useUpdateLeague = (options: Options = {}) => {
+  const [updateObject, { isSuccess, error, isLoading }] = useUpdateObjectMutation()
+  const { showAlert } = useAlert()
+
+  const {
+    showAlertOnSuccess,
+    successMessage,
+    showAlertOnError,
+    errorMessage,
+  } = { ...defaultOptions, ...options }
+
+  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
+  useEffect(() => {
+    showAlertOnError && error && showAlert(errorMessage ?
+      { errorMessage } : { error })
+  }, [error])
+
+  return { updateLeague: updateObject, isLoading, isSuccess, error }
 }

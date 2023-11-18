@@ -4,7 +4,7 @@ import isStrongPassword from 'validator/lib/isStrongPassword'
 
 type Props = {
   name: string,
-  form: UseFormReturn,
+  form: UseFormReturn<any>,
   disabled?: boolean,
   multiline?: boolean,
   validate?: ((value: string) => any) | null,

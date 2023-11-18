@@ -1,5 +1,5 @@
 import { GET as getLeagues, POST as postLeague } from '@/app/api/leagues/route'
-import { GET as getLeague } from '@/app/api/users/[id]/route'
+import { GET as getLeague, PUT as putLeague } from '@/app/api/leagues/[id]/route'
 import prisma from '@/lib/prisma'
 import { Sport } from '@prisma/client'
 import { createNextRequest } from '../utils'
@@ -40,5 +40,16 @@ describe('/api/leagues', () => {
     const req = createNextRequest()
     const res = await getLeague(req, { params: { id: league.id } })
     expect(res.status).toBe(200)
+  })
+
+  test('league can be updated', async () => {
+    const league = await prisma.league.create({ data: { ...getLeagueBody() } })
+    const name = `Updated League ${new Date().getTime()}`
+    const req = createNextRequest({ method: 'PUT', body: { name } })
+    const res = await putLeague(req, { params: { id: league.id } })
+    expect(res.status).toBe(200)
+
+    const data = await res.json()
+    expect(data).toEqual(expect.objectContaining({ name }))
   })
 })

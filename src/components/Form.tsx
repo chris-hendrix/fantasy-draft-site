@@ -3,7 +3,7 @@ import React from 'react'
 import { SubmitHandler, UseFormReturn } from 'react-hook-form'
 
 type FormProps = {
-  form: UseFormReturn;
+  form: UseFormReturn<any>;
   onSubmit: SubmitHandler<any>;
   onClose?: () => void;
   onCancel?: () => void;
