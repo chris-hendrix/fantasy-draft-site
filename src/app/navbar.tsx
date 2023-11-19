@@ -71,18 +71,14 @@ const LeagueDropdown: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const pathname = usePathname()
   const { id } = useParams()
-
-  const defaultLeague = commissionerLeagues?.[0]
-  const selectedLeague = pathname.startsWith('/leagues') && id
-    ? commissionerLeagues?.find((l) => l.id === id)
-    : defaultLeague
+  const selectedLeague = pathname.startsWith('/leagues') && id && commissionerLeagues?.find((l) => l.id === id)
 
   return (
     <>
       <Dropdown
         label={
           <div className="btn btn-ghost text-primary-content">
-            {selectedLeague ? selectedLeague.name : 'League'} 🔽
+            {selectedLeague ? selectedLeague.name : 'Select league'} 🔽
           </div>
         }
       >
