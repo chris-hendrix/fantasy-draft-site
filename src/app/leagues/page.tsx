@@ -11,7 +11,11 @@ const LeaguesPage: React.FC = () => {
   const [loadedUserCount, setLoadedUserCount] = useState(2 * LOAD_INCREMENT)
   const [visibleCount, setVisibleCount] = useState(LOAD_INCREMENT)
 
-  const { data: leagues } = useGetLeagues({ skip: 0, take: loadedUserCount })
+  const { data: leagues } = useGetLeagues({
+    skip: 0,
+    take: loadedUserCount,
+    include: { commissioners: { include: { user: true } } }
+  })
 
   useEffect(() => {
     // cache the next results and scroll to bottom

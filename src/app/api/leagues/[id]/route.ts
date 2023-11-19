@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { ApiError, routeWrapper } from '@/utils/api'
+import { withCommissioner } from '@/utils/permissions'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
@@ -18,6 +19,8 @@ export const PUT = routeWrapper(
     const { id } = params
 
     if (!id) throw new ApiError('League id required', 400)
+
+    withCommissioner(id)
 
     const updatedLeague = await prisma.league.update({
       where: { id },

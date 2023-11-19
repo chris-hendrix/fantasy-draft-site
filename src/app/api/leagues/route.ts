@@ -1,12 +1,10 @@
-import { parse } from 'qs'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { withSessionUser, routeWrapper } from '@/utils/api'
+import { withSessionUser, routeWrapper, getParsedParams } from '@/utils/api'
 
 export const GET = routeWrapper(
   async (req: NextRequest) => {
-    const searchParams: any = req.nextUrl.searchParams.toString()
-    const findManyParams: any = parse(searchParams)
+    const findManyParams: any = getParsedParams(req.nextUrl)
     const leagues = await prisma.league.findMany({ ...findManyParams })
     return NextResponse.json(leagues)
   }

@@ -107,5 +107,15 @@ export const useUserLeagues = (userId: string | null | undefined) => {
   const { data: commissionerLeagues } = useGetLeagues({
     where: { commissioners: { some: { userId: userId || '' } } }
   }, { skip: !userId })
-  return { commissionerLeagues }
+
+  const leagues = [...(commissionerLeagues || [])]
+
+  const isInLeague = (leagueId: string) => Boolean(
+    leagues.find((league) => league.id === leagueId)
+  )
+  const isCommissioner = (leagueId: string) => Boolean(
+    commissionerLeagues?.find((league) => league.id === leagueId)
+  )
+
+  return { leagues, commissionerLeagues, isInLeague, isCommissioner }
 }
