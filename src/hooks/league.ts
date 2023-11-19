@@ -129,9 +129,10 @@ export const useDeleteLeague = (options: Options = {}) => {
 export const useUserLeagues = (leagueId: string | null = null) => {
   const { user } = useSessionUser()
   const { id } = useParams()
+  const userId = user?.id
   const { data: commissionerLeagues, isLoading: isCommissionerLeaguesLoading } = useGetLeagues({
-    where: { commissioners: { some: { userId: user?.id || '' } } }
-  }, { skip: !user })
+    where: { commissioners: { some: { userId } } }
+  }, { skip: !userId })
 
   const isLoading = isCommissionerLeaguesLoading
   const leagues = [...(commissionerLeagues || [])]
