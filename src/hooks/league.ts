@@ -4,7 +4,8 @@ import {
   useGetObjectQuery,
   useGetObjectsQuery,
   useAddObjectMutation,
-  useUpdateObjectMutation
+  useUpdateObjectMutation,
+  useDeleteObjectMutation
 } from '@/store/league'
 import { Prisma } from '@prisma/client'
 import { useParams } from 'next/navigation'
@@ -103,6 +104,26 @@ export const useUpdateLeague = (options: Options = {}) => {
   }, [error])
 
   return { updateLeague: updateObject, isLoading, isSuccess, error }
+}
+
+export const useDeleteLeague = (options: Options = {}) => {
+  const [deleteObject, { isSuccess, error, isLoading }] = useDeleteObjectMutation()
+  const { showAlert } = useAlert()
+
+  const {
+    showAlertOnSuccess,
+    successMessage,
+    showAlertOnError,
+    errorMessage,
+  } = { ...defaultOptions, ...options }
+
+  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
+  useEffect(() => {
+    showAlertOnError && error && showAlert(errorMessage ?
+      { errorMessage } : { error })
+  }, [error])
+
+  return { deleteLeague: deleteObject, isLoading, isSuccess, error }
 }
 
 export const useUserLeagues = (leagueId: string | null = null) => {

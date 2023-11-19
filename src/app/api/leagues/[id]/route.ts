@@ -29,3 +29,16 @@ export const PUT = routeWrapper(
     return NextResponse.json(updatedLeague)
   }
 )
+
+export const DELETE = routeWrapper(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
+    const { id } = params
+
+    if (!id) throw new ApiError('League id required', 400)
+
+    await checkLeagueCommissioner(id) // must be commissioner of league
+
+    const deletedLeague = await prisma.league.delete({ where: { id } })
+    return NextResponse.json(deletedLeague)
+  }
+)

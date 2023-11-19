@@ -67,11 +67,11 @@ const UserDropdown: React.FC = () => {
 
 const LeagueDropdown: React.FC = () => {
   const { user } = useSessionUser()
-  const { commissionerLeagues } = useUserLeagues()
+  const { leagues } = useUserLeagues()
   const [modalOpen, setModalOpen] = useState(false)
   const pathname = usePathname()
   const { id } = useParams()
-  const selectedLeague = pathname.startsWith('/leagues') && id && commissionerLeagues?.find((l) => l.id === id)
+  const selectedLeague = pathname.startsWith('/leagues') && id && leagues?.find((league) => league.id === id)
 
   return (
     <>
@@ -82,12 +82,12 @@ const LeagueDropdown: React.FC = () => {
           </div>
         }
       >
-        {commissionerLeagues?.map((league) => (
+        {leagues?.map((league) => (
           <li key={league?.id}>
             <Link href={`/leagues/${league.id}`}>{league?.name}</Link>
           </li>
         ))}
-        <div className="divider" />
+        {leagues?.length ? <div className="divider" /> : null}
         <li><a onClick={() => setModalOpen(true)}>➕ Create league</a></li>
       </Dropdown>
       {modalOpen && user && <LeagueModal setOpen={setModalOpen} />}

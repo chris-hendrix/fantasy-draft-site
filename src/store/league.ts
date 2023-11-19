@@ -36,7 +36,14 @@ export const objectApi = createApi({
         body: { ...data, id: undefined },
       }),
       invalidatesTags: (league) => [{ type: url, id: league?.id }],
-    })
+    }),
+    deleteObject: build.mutation<void, string>({
+      query: (id) => ({
+        url: `${url}/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: url, id: 'LIST' }],
+    }),
   })
 })
 
@@ -44,5 +51,6 @@ export const {
   useGetObjectQuery,
   useGetObjectsQuery,
   useAddObjectMutation,
-  useUpdateObjectMutation
+  useUpdateObjectMutation,
+  useDeleteObjectMutation
 } = objectApi
