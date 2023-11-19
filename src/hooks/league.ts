@@ -7,7 +7,9 @@ import {
   useUpdateObjectMutation
 } from '@/store/league'
 import { Prisma } from '@prisma/client'
+import { useParams } from 'next/navigation'
 import { useAlert } from './app'
+import { useSessionUser } from './user'
 
 interface Options {
   skip?: boolean
@@ -103,19 +105,17 @@ export const useUpdateLeague = (options: Options = {}) => {
   return { updateLeague: updateObject, isLoading, isSuccess, error }
 }
 
-export const useUserLeagues = (userId: string | null | undefined) => {
+export const useUserLeagues = (leagueId: string | null = null) => {
+  const { user } = useSessionUser()
+  const { id } = useParams()
   const { data: commissionerLeagues } = useGetLeagues({
-    where: { commissioners: { some: { userId: userId || '' } } }
-  }, { skip: !userId })
+    where: { commissioners: { some: { userId: user.id || '' } } }
+  }, { skip: !user })
 
   const leagues = [...(commissionerLeagues || [])]
 
-  const isInLeague = (leagueId: string) => Boolean(
-    leagues.find((league) => league.id === leagueId)
-  )
-  const isCommissioner = (leagueId: string) => Boolean(
-    commissionerLeagues?.find((league) => league.id === leagueId)
-  )
+  const isCommissioner = commissionerLeagues?.find((league) => league.id === (leagueId || id))
+  const isMember = leagues?.find((league) => league.id === leagueId)
 
-  return { leagues, commissionerLeagues, isInLeague, isCommissioner }
+  return { leagues, commissionerLeagues, isCommissioner, isMember }
 }

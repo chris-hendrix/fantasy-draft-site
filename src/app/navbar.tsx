@@ -67,7 +67,7 @@ const UserDropdown: React.FC = () => {
 
 const LeagueDropdown: React.FC = () => {
   const { user } = useSessionUser()
-  const { commissionerLeagues } = useUserLeagues(user?.id)
+  const { commissionerLeagues } = useUserLeagues()
   const [modalOpen, setModalOpen] = useState(false)
   const pathname = usePathname()
   const { id } = useParams()

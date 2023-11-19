@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import { League } from '@prisma/client'
 import { formatDate } from '@/utils/date'
+import { useUserLeagues } from '@/hooks/league'
 import LeagueModal from '@/components/LeagueModal'
 
 interface LeagueCardProps {
   league: Partial<League>
-  canEdit?: boolean
 }
 
-const LeagueCard: React.FC<LeagueCardProps> = ({ league, canEdit }) => {
+const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
   const [modalOpen, setModalOpen] = useState(false)
+  const { isCommissioner } = useUserLeagues(league.id)
+
   return (
     <>
       <div className="flex items-center text-center md:text-left justify-between bg-base-200 rounded-box p-4 mt-4 w-full relative">
-        {canEdit && (
+        {isCommissioner && (
           <button
             className="absolute top-2 right-2 text-gray-500"
             onClick={() => setModalOpen(true)}
