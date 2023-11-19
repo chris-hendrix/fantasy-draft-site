@@ -1,6 +1,5 @@
 'use client'
 
-import { redirect } from 'next/navigation'
 import { useState } from 'react'
 import { League } from '@prisma/client'
 import { useDeleteLeague } from '@/hooks/league'
