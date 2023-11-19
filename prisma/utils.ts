@@ -1,6 +1,6 @@
 import { uniqueNamesGenerator, Config, names } from 'unique-names-generator'
 import { PrismaClient } from '@prisma/client'
-import { generateHash } from '../src/utils/hash'
+import { generateHash } from '../src/app/api/utils/hash'
 
 const SEED_EMAIL_DOMAIN = 'seed.com'
 

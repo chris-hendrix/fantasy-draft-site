@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { withSessionUser, routeWrapper, getParsedParams } from '@/utils/api'
+import { withSessionUser, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 
 export const GET = routeWrapper(
   async (req: NextRequest) => {

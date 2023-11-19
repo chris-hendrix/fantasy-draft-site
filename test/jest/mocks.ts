@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { generateUserBody } from '../utils'
-import { generateHash } from '../../src/utils/hash'
+import { generateHash } from '../../src/app/api/utils/hash'
 
 jest.mock('next-auth') // must be imported in test file as well
 

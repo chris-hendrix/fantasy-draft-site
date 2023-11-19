@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { League } from '@prisma/client'
-import { formatDate } from '@/lib/date'
+import { formatDate } from '@/utils/date'
 import LeagueModal from '@/components/LeagueModal'
 
 interface LeagueCardProps {

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { User } from '@prisma/client'
 import { useGetUsersQuery } from '@/store'
-import { formatDate } from '@/lib/date'
+import { formatDate } from '@/utils/date'
 import Avatar from '@/components/Avatar'
 
 const LOAD_INCREMENT = 5

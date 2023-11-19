@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import supabase from '@/lib/supabase'
 import { SUPABASE_BUCKET } from '@/config'
-import { ApiError, routeWrapper, withSessionUser } from '@/utils/api'
+import { ApiError, routeWrapper, withSessionUser } from '@/app/api/utils/api'
 
 export const POST = routeWrapper(async (req: NextRequest) => {
   if (!supabase) throw new ApiError('Supabase storage not setup')

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { ApiError, routeWrapper, checkUserMatchesSession } from '@/utils/api'
-import { generateHash, validatePassword } from '@/utils/hash'
+import { ApiError, routeWrapper, checkUserMatchesSession } from '@/app/api/utils/api'
+import { generateHash, validatePassword } from '@/app/api/utils/hash'
 import { checkUserBody, sanitizeUserSelect } from '../route'
 
 export const GET = routeWrapper(

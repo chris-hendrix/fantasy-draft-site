@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
-import { generateHash } from '@/utils/hash'
-import { ApiError, routeWrapper, getParsedParams } from '@/utils/api'
+import { generateHash } from '@/app/api/utils/hash'
+import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 
 export const sanitizeUserSelect = () => {
   const fields = Object.keys(Prisma.UserScalarFieldEnum)

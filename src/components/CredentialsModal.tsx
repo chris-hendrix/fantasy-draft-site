@@ -5,7 +5,7 @@ import { useSignIn } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
 import TextInput from '@/components/TextInput'
 import Modal from '@/components/Modal'
-import { getErrorMessage } from '@/lib/error'
+import { getErrorMessage } from '@/utils/error'
 
 interface Props {
   setOpen: (open: boolean) => void;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { User } from '@prisma/client'
-import { formatDate } from '@/lib/date'
+import { formatDate } from '@/utils/date'
 import Avatar from '@/components/Avatar'
 import EditProfileModal from '@/components/EditProfileModal'
 import Pencil from '@/icons/Pencil'

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { ApiError, routeWrapper } from '@/utils/api'
-import { checkLeagueCommissioner } from '@/utils/permissions'
+import { ApiError, routeWrapper } from '@/app/api/utils/api'
+import { checkLeagueCommissioner } from '@/app/api/utils/permissions'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
