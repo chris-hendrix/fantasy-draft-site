@@ -78,33 +78,22 @@ export const checkUserMatchesSession = async (userId: string | undefined) => {
   if (session?.user?.id !== userId) throw new ApiError('Unauthorized', 401)
 }
 
-export const getQueryParams = (nextUrl: NextURL) => {
-  const queryParams = Array.from(nextUrl.searchParams.entries()).reduce((acc, [key, value]) => {
-    const numericValue = !Number.isNaN(Number(value)) ? Number(value) : value
-    return { ...acc, [key]: numericValue }
-  }, {} as { [key: string]: string | number })
-
-  return queryParams
-}
-
-const convertValues = (obj: Record<string, any>): Record<string, any> => {
-  const result: Record<string, any> = {}
-  Object.entries(obj).forEach(([key, value]) => {
-    if (typeof value === 'string' && !Number.isNaN(Number(value))) {
-      result[key] = Number(value)
-    } else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
-      result[key] = value.toLowerCase() === 'true'
-    } else if (typeof value === 'object' && value !== null) {
-      // Recursively convert strings to numbers in nested objects
-      result[key] = convertValues(value)
-    } else {
-      result[key] = value
-    }
-  })
-  return result
-}
-
 export const getParsedParams = (nextUrl: NextURL) => {
+  const convertValues = (obj: Record<string, any>): Record<string, any> => {
+    const result: Record<string, any> = {}
+    Object.entries(obj).forEach(([key, value]) => {
+      if (typeof value === 'string' && !Number.isNaN(Number(value))) {
+        result[key] = Number(value)
+      } else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
+        result[key] = value.toLowerCase() === 'true'
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = convertValues(value) // recursively handle object
+      } else {
+        result[key] = value
+      }
+    })
+    return result
+  }
   const searchParams: any = nextUrl.searchParams.toString()
   const findManyParams: any = parse(searchParams)
   return convertValues(findManyParams)

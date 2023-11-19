@@ -42,8 +42,14 @@ describe('/api/leagues', () => {
     expect(res.status).toBe(200)
   })
 
-  test('league can be updated', async () => {
-    const league = await prisma.league.create({ data: { ...getLeagueBody() } })
+  test('commissioner can update league', async () => {
+    const user = await createGetServerSessionMock()
+    const league = await prisma.league.create({
+      data: {
+        ...getLeagueBody(),
+        commissioners: { create: [{ userId: user.id }] }
+      }
+    })
     const name = `Updated League ${new Date().getTime()}`
     const req = createNextRequest({ method: 'PUT', body: { name } })
     const res = await putLeague(req, { params: { id: league.id } })
@@ -51,5 +57,14 @@ describe('/api/leagues', () => {
 
     const data = await res.json()
     expect(data).toEqual(expect.objectContaining({ name }))
+  })
+
+  test('user can not update different league', async () => {
+    await createGetServerSessionMock()
+    const league = await prisma.league.create({ data: { ...getLeagueBody() } })
+    const name = `Updated League ${new Date().getTime()}`
+    const req = createNextRequest({ method: 'PUT', body: { name } })
+    const res = await putLeague(req, { params: { id: league.id } })
+    expect(res.status).toBe(401)
   })
 })

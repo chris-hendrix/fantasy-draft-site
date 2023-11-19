@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { generateHash } from '@/utils/hash'
-import { ApiError, routeWrapper, getQueryParams } from '@/utils/api'
+import { ApiError, routeWrapper, getParsedParams } from '@/utils/api'
 
 export const sanitizeUserSelect = () => {
   const fields = Object.keys(Prisma.UserScalarFieldEnum)
@@ -29,7 +29,7 @@ export const checkUserBody = async (body: any, id: string | null = null) => {
 
 export const GET = routeWrapper(
   async (req: NextRequest) => {
-    const queryParams = getQueryParams(req.nextUrl)
+    const queryParams = getParsedParams(req.nextUrl)
     const users = await prisma.user.findMany({
       ...queryParams,
       select: sanitizeUserSelect()
