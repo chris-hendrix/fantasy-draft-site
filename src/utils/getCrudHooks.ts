@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { stringify } from 'qs'
 import { useAlert } from '@/hooks/app'
 
-interface Options {
+interface CrudHookOptions {
   skip?: boolean
   showAlertOnSuccess?: boolean;
   successMessage?: string;
@@ -10,7 +10,33 @@ interface Options {
   errorMessage?: string | null;
 }
 
-const defaultOptions: Options = {
+interface UseAlertEffectOptions extends CrudHookOptions {
+  isSuccess: boolean;
+  error: any;
+}
+
+const useAlertEffect = (useAlertEffectOptions: UseAlertEffectOptions) => {
+  const {
+    isSuccess,
+    error,
+    showAlertOnSuccess,
+    successMessage,
+    showAlertOnError,
+    errorMessage,
+  } = { ...defaultCrudHookOptions, ...useAlertEffectOptions }
+
+  const { showAlert } = useAlert()
+
+  useEffect(() => {
+    showAlertOnSuccess && isSuccess && showAlert({ successMessage })
+  }, [isSuccess])
+
+  useEffect(() => {
+    showAlertOnError && error && showAlert(errorMessage ? { errorMessage } : { error })
+  }, [error])
+}
+
+const defaultCrudHookOptions: CrudHookOptions = {
   skip: false,
   showAlertOnSuccess: false,
   successMessage: 'Success',
@@ -18,9 +44,9 @@ const defaultOptions: Options = {
   errorMessage: null
 }
 
-type CrudOperationsArgs = {
-  useGetObjectQuery: (id: string, options: Options) => any,
-  useGetObjectsQuery: (args: any, options: Options) => any,
+interface CrudOperationsArgs {
+  useGetObjectQuery: (id: string, options: CrudHookOptions) => any,
+  useGetObjectsQuery: (args: any, options: CrudHookOptions) => any,
   useAddObjectMutation: () => any,
   useUpdateObjectMutation: () => any,
   useDeleteObjectMutation: () => any,
@@ -33,7 +59,7 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
   useUpdateObjectMutation,
   useDeleteObjectMutation,
 }: CrudOperationsArgs) => {
-  const useGetObject = (id: string, options: Options = {}) => {
+  const useGetObject = (id: string, options: CrudHookOptions = {}) => {
     const {
       data,
       isLoading,
@@ -46,27 +72,12 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
       error: any,
     } = useGetObjectQuery(id, { skip: options.skip })
 
-    const { showAlert } = useAlert()
-    const {
-      showAlertOnSuccess,
-      successMessage,
-      showAlertOnError,
-      errorMessage,
-    } = { ...defaultOptions, ...options }
-
-    useEffect(() => {
-      showAlertOnSuccess && isSuccess && showAlert({ successMessage })
-    }, [isSuccess])
-
-    useEffect(() => {
-      showAlertOnError && error && showAlert(errorMessage ?
-        { errorMessage } : { error })
-    }, [error])
+    useAlertEffect({ isSuccess, error, ...options })
 
     return { data, isLoading, isSuccess, error }
   }
 
-  const useGetObjects = (args: PrismaFindManyArgs, options: Options = {}) => {
+  const useGetObjects = (args: PrismaFindManyArgs, options: CrudHookOptions = {}) => {
     const {
       data,
       isLoading,
@@ -79,27 +90,12 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
       error: any,
     } = useGetObjectsQuery(stringify(args), { skip: options.skip })
 
-    const { showAlert } = useAlert()
-    const {
-      showAlertOnSuccess,
-      successMessage,
-      showAlertOnError,
-      errorMessage,
-    } = { ...defaultOptions, ...options }
-
-    useEffect(() => {
-      showAlertOnSuccess && isSuccess && showAlert({ successMessage })
-    }, [isSuccess])
-
-    useEffect(() => {
-      showAlertOnError && error && showAlert(errorMessage ?
-        { errorMessage } : { error })
-    }, [error])
+    useAlertEffect({ isSuccess, error, ...options })
 
     return { data, isLoading, isSuccess, error }
   }
 
-  const useAddObject = (options: Options = {}) => {
+  const useAddObject = (options: CrudHookOptions = {}) => {
     const [addObject, {
       isLoading,
       isSuccess,
@@ -110,27 +106,12 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
       error: any;
     }] = useAddObjectMutation()
 
-    const { showAlert } = useAlert()
-    const {
-      showAlertOnSuccess,
-      successMessage,
-      showAlertOnError,
-      errorMessage,
-    } = { ...defaultOptions, ...options }
-
-    useEffect(() => {
-      showAlertOnSuccess && isSuccess && showAlert({ successMessage })
-    }, [isSuccess])
-
-    useEffect(() => {
-      showAlertOnError && error && showAlert(errorMessage ?
-        { errorMessage } : { error })
-    }, [error])
+    useAlertEffect({ isSuccess, error, ...options })
 
     return { addObject, isLoading, isSuccess, error }
   }
 
-  const useUpdateObject = (options: Options = {}) => {
+  const useUpdateObject = (options: CrudHookOptions = {}) => {
     const [updateObject, {
       isLoading,
       isSuccess,
@@ -141,27 +122,12 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
       error: any;
     }] = useUpdateObjectMutation()
 
-    const { showAlert } = useAlert()
-    const {
-      showAlertOnSuccess,
-      successMessage,
-      showAlertOnError,
-      errorMessage,
-    } = { ...defaultOptions, ...options }
-
-    useEffect(() => {
-      showAlertOnSuccess && isSuccess && showAlert({ successMessage })
-    }, [isSuccess])
-
-    useEffect(() => {
-      showAlertOnError && error && showAlert(errorMessage ?
-        { errorMessage } : { error })
-    }, [error])
+    useAlertEffect({ isSuccess, error, ...options })
 
     return { updateObject, isLoading, isSuccess, error }
   }
 
-  const useDeleteObject = (options: Options = {}) => {
+  const useDeleteObject = (options: CrudHookOptions = {}) => {
     const [deleteObject, {
       isLoading,
       isSuccess,
@@ -172,22 +138,7 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
       error: any;
     }] = useDeleteObjectMutation()
 
-    const { showAlert } = useAlert()
-    const {
-      showAlertOnSuccess,
-      successMessage,
-      showAlertOnError,
-      errorMessage,
-    } = { ...defaultOptions, ...options }
-
-    useEffect(() => {
-      showAlertOnSuccess && isSuccess && showAlert({ successMessage })
-    }, [isSuccess])
-
-    useEffect(() => {
-      showAlertOnError && error && showAlert(errorMessage ?
-        { errorMessage } : { error })
-    }, [error])
+    useAlertEffect({ isSuccess, error, ...options })
 
     return { deleteObject, isLoading, isSuccess, error }
   }
