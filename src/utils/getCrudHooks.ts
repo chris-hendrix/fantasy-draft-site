@@ -166,7 +166,7 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
       isLoading,
       isSuccess,
       error
-    }]: [(obj: Partial<Object>) => Promise<Object>, {
+    }]: [(id: string) => Promise<Object>, {
       isLoading: boolean;
       isSuccess: boolean;
       error: any;
