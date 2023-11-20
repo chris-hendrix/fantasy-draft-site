@@ -1,130 +1,16 @@
-import { useEffect } from 'react'
-import { stringify } from 'qs'
-import {
-  useGetLeagueQuery,
-  useGetLeaguesQuery,
-  useAddLeagueMutation,
-  useUpdateLeagueMutation,
-  useDeleteLeagueMutation
-} from '@/store/league'
-import { Prisma } from '@prisma/client'
+import { leagueApi } from '@/store/league'
+import { Prisma, League } from '@prisma/client'
 import { useParams } from 'next/navigation'
-import { useAlert } from './app'
+import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useSessionUser } from './user'
 
-interface Options {
-  skip?: boolean
-  showAlertOnSuccess?: boolean;
-  successMessage?: string;
-  showAlertOnError?: boolean;
-  errorMessage?: string | null;
-}
-
-const defaultOptions: Options = {
-  skip: false,
-  showAlertOnSuccess: false,
-  successMessage: 'Success',
-  showAlertOnError: false,
-  errorMessage: null
-}
-
-export const useGetLeague = (id: string, options: Options = {}) => {
-  const { data, isLoading, isSuccess, error } = useGetLeagueQuery(id, { skip: options.skip })
-  const { showAlert } = useAlert()
-
-  const {
-    showAlertOnSuccess,
-    successMessage,
-    showAlertOnError,
-    errorMessage,
-  } = { ...defaultOptions, ...options }
-
-  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
-  useEffect(() => {
-    showAlertOnError && error && showAlert(errorMessage ?
-      { errorMessage } : { error })
-  }, [error])
-  return { data, isLoading, isSuccess, error }
-}
-
-export const useGetLeagues = (args: Prisma.LeagueFindManyArgs, options: Options = {}) => {
-  const { data, isLoading, isSuccess, error } = useGetLeaguesQuery(stringify(args))
-  const { showAlert } = useAlert()
-
-  const {
-    showAlertOnSuccess,
-    successMessage,
-    showAlertOnError,
-    errorMessage,
-  } = { ...defaultOptions, ...options }
-
-  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
-  useEffect(() => {
-    showAlertOnError && error && showAlert(errorMessage ?
-      { errorMessage } : { error })
-  }, [error])
-  return { data, isLoading, isSuccess, error }
-}
-
-export const useAddLeague = (options: Options = {}) => {
-  const [addObject, { isSuccess, error, isLoading }] = useAddLeagueMutation()
-  const { showAlert } = useAlert()
-
-  const {
-    showAlertOnSuccess,
-    successMessage,
-    showAlertOnError,
-    errorMessage,
-  } = { ...defaultOptions, ...options }
-
-  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
-  useEffect(() => {
-    showAlertOnError && error && showAlert(errorMessage ?
-      { errorMessage } : { error })
-  }, [error])
-
-  return { addLeague: addObject, isLoading, isSuccess, error }
-}
-
-export const useUpdateLeague = (options: Options = {}) => {
-  const [updateObject, { isSuccess, error, isLoading }] = useUpdateLeagueMutation()
-  const { showAlert } = useAlert()
-
-  const {
-    showAlertOnSuccess,
-    successMessage,
-    showAlertOnError,
-    errorMessage,
-  } = { ...defaultOptions, ...options }
-
-  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
-  useEffect(() => {
-    showAlertOnError && error && showAlert(errorMessage ?
-      { errorMessage } : { error })
-  }, [error])
-
-  return { updateLeague: updateObject, isLoading, isSuccess, error }
-}
-
-export const useDeleteLeague = (options: Options = {}) => {
-  const [deleteObject, { isSuccess, error, isLoading }] = useDeleteLeagueMutation()
-  const { showAlert } = useAlert()
-
-  const {
-    showAlertOnSuccess,
-    successMessage,
-    showAlertOnError,
-    errorMessage,
-  } = { ...defaultOptions, ...options }
-
-  useEffect(() => { showAlertOnSuccess && isSuccess && showAlert({ successMessage }) }, [isSuccess])
-  useEffect(() => {
-    showAlertOnError && error && showAlert(errorMessage ?
-      { errorMessage } : { error })
-  }, [error])
-
-  return { deleteLeague: deleteObject, isLoading, isSuccess, error }
-}
+export const {
+  useGetObject: useGetLeague,
+  useGetObjects: useGetLeagues,
+  useAddObject: useAddLeague,
+  useUpdateObject: useUpdateLeague,
+  useDeleteObject: useDeleteLeague
+} = getCrudHooks<League, Prisma.LeagueFindManyArgs>(leagueApi)
 
 export const useUserLeagues = (leagueId: string | null = null) => {
   const { user } = useSessionUser()

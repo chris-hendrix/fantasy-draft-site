@@ -19,8 +19,9 @@ interface FormProps {
 
 const LeagueModal: React.FC<FormProps> = ({ setOpen, league = null }) => {
   const { user } = useSessionUser()
-  const { addLeague, isLoading: isAdding } = useAddLeague(mutationOptions)
-  const { updateLeague, isLoading: isUpdating } = useUpdateLeague(mutationOptions)
+  const { addObject: addLeague, isLoading: isAdding } = useAddLeague(mutationOptions)
+  const { updateObject: updateLeague, isLoading: isUpdating } = useUpdateLeague(mutationOptions)
+
   const form = useForm({
     mode: 'onChange',
     defaultValues: { name: league?.name || '' },

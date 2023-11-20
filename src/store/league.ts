@@ -4,9 +4,9 @@ import { League } from '@prisma/client'
 export const leagueApi = createObjectApi<League>('leagues')
 
 export const {
-  useGetObjectQuery: useGetLeagueQuery,
-  useGetObjectsQuery: useGetLeaguesQuery,
-  useAddObjectMutation: useAddLeagueMutation,
-  useUpdateObjectMutation: useUpdateLeagueMutation,
-  useDeleteObjectMutation: useDeleteLeagueMutation,
+  useGetObjectQuery,
+  useGetObjectsQuery,
+  useAddObjectMutation,
+  useUpdateObjectMutation,
+  useDeleteObjectMutation
 } = leagueApi

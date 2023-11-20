@@ -10,7 +10,7 @@ interface Props {
 }
 
 const CommissionerTab: React.FC<Props> = ({ league }) => {
-  const { deleteLeague } = useDeleteLeague()
+  const { deleteObject: deleteLeague } = useDeleteLeague()
   const [modalOpen, setModalOpen] = useState(false)
   const handleDelete = async () => {
     const res = await deleteLeague(league.id as string)
