@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { stringify } from 'qs'
 import {
-  useGetObjectQuery,
-  useGetObjectsQuery,
-  useAddObjectMutation,
-  useUpdateObjectMutation,
-  useDeleteObjectMutation
+  useGetLeagueQuery,
+  useGetLeaguesQuery,
+  useAddLeagueMutation,
+  useUpdateLeagueMutation,
+  useDeleteLeagueMutation
 } from '@/store/league'
 import { Prisma } from '@prisma/client'
 import { useParams } from 'next/navigation'
@@ -29,7 +29,7 @@ const defaultOptions: Options = {
 }
 
 export const useGetLeague = (id: string, options: Options = {}) => {
-  const { data, isLoading, isSuccess, error } = useGetObjectQuery(id, { skip: options.skip })
+  const { data, isLoading, isSuccess, error } = useGetLeagueQuery(id, { skip: options.skip })
   const { showAlert } = useAlert()
 
   const {
@@ -48,7 +48,7 @@ export const useGetLeague = (id: string, options: Options = {}) => {
 }
 
 export const useGetLeagues = (args: Prisma.LeagueFindManyArgs, options: Options = {}) => {
-  const { data, isLoading, isSuccess, error } = useGetObjectsQuery(stringify(args))
+  const { data, isLoading, isSuccess, error } = useGetLeaguesQuery(stringify(args))
   const { showAlert } = useAlert()
 
   const {
@@ -67,7 +67,7 @@ export const useGetLeagues = (args: Prisma.LeagueFindManyArgs, options: Options 
 }
 
 export const useAddLeague = (options: Options = {}) => {
-  const [addObject, { isSuccess, error, isLoading }] = useAddObjectMutation()
+  const [addObject, { isSuccess, error, isLoading }] = useAddLeagueMutation()
   const { showAlert } = useAlert()
 
   const {
@@ -87,7 +87,7 @@ export const useAddLeague = (options: Options = {}) => {
 }
 
 export const useUpdateLeague = (options: Options = {}) => {
-  const [updateObject, { isSuccess, error, isLoading }] = useUpdateObjectMutation()
+  const [updateObject, { isSuccess, error, isLoading }] = useUpdateLeagueMutation()
   const { showAlert } = useAlert()
 
   const {
@@ -107,7 +107,7 @@ export const useUpdateLeague = (options: Options = {}) => {
 }
 
 export const useDeleteLeague = (options: Options = {}) => {
-  const [deleteObject, { isSuccess, error, isLoading }] = useDeleteObjectMutation()
+  const [deleteObject, { isSuccess, error, isLoading }] = useDeleteLeagueMutation()
   const { showAlert } = useAlert()
 
   const {
