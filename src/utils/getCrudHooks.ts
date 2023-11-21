@@ -60,51 +60,40 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
   useDeleteObjectMutation,
 }: CrudOperationsArgs) => {
   const useGetObject = (id: string, options: CrudHookOptions = {}) => {
-    const {
-      data,
-      isLoading,
-      isSuccess,
-      error
-    }: {
+    const { data, isLoading, isSuccess, error, refetch, }: {
       data: Object,
       isLoading: boolean,
       isSuccess: boolean,
       error: any,
+      refetch: () => void
     } = useGetObjectQuery(id, { skip: options.skip })
 
     useAlertEffect({ isSuccess, error, ...options })
 
-    return { data, isLoading, isSuccess, error }
+    return { data, isLoading, isSuccess, error, refetch }
   }
 
   const useGetObjects = (args: PrismaFindManyArgs, options: CrudHookOptions = {}) => {
-    const {
-      data,
-      isLoading,
-      isSuccess,
-      error
-    }: {
-      data: Object[],
-      isLoading: boolean,
-      isSuccess: boolean,
-      error: any,
+    const { data, isLoading, isSuccess, error, refetch }: {
+      data: Object[];
+      isLoading: boolean;
+      isSuccess: boolean;
+      error: any;
+      refetch: () => void;
     } = useGetObjectsQuery(stringify(args), { skip: options.skip })
 
     useAlertEffect({ isSuccess, error, ...options })
 
-    return { data, isLoading, isSuccess, error }
+    return { data, isLoading, isSuccess, error, refetch }
   }
 
   const useAddObject = (options: CrudHookOptions = {}) => {
-    const [addObject, {
-      isLoading,
-      isSuccess,
-      error
-    }]: [(obj: Partial<Object>) => Promise<Object>, {
-      isLoading: boolean;
-      isSuccess: boolean;
-      error: any;
-    }] = useAddObjectMutation()
+    const [addObject, { isLoading, isSuccess, error }]: [
+      (obj: Partial<Object>) => Promise<Object>, {
+        isLoading: boolean;
+        isSuccess: boolean;
+        error: any;
+      }] = useAddObjectMutation()
 
     useAlertEffect({ isSuccess, error, ...options })
 
@@ -112,15 +101,12 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
   }
 
   const useUpdateObject = (options: CrudHookOptions = {}) => {
-    const [updateObject, {
-      isLoading,
-      isSuccess,
-      error
-    }]: [(obj: Partial<Object>) => Promise<Object>, {
-      isLoading: boolean;
-      isSuccess: boolean;
-      error: any;
-    }] = useUpdateObjectMutation()
+    const [updateObject, { isLoading, isSuccess, error }]: [
+      (obj: Partial<Object>) => Promise<Object>, {
+        isLoading: boolean;
+        isSuccess: boolean;
+        error: any;
+      }] = useUpdateObjectMutation()
 
     useAlertEffect({ isSuccess, error, ...options })
 
@@ -128,15 +114,12 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
   }
 
   const useDeleteObject = (options: CrudHookOptions = {}) => {
-    const [deleteObject, {
-      isLoading,
-      isSuccess,
-      error
-    }]: [(id: string) => Promise<Object>, {
-      isLoading: boolean;
-      isSuccess: boolean;
-      error: any;
-    }] = useDeleteObjectMutation()
+    const [deleteObject, { isLoading, isSuccess, error }]: [
+      (id: string) => Promise<Object>, {
+        isLoading: boolean;
+        isSuccess: boolean;
+        error: any;
+      }] = useDeleteObjectMutation()
 
     useAlertEffect({ isSuccess, error, ...options })
 
