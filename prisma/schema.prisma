@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -53,6 +53,7 @@ model User {
   sessions      Session[]
   info          Json?
   commissioners Commissioner[]
+  teamUsers     TeamUser[]
 }
 
 model VerificationToken {
@@ -72,6 +73,7 @@ model League {
   sport         Sport          @default(baseball)
   url           String?
   commissioners Commissioner[]
+  teams         Team[]
 }
 
 model Commissioner {
@@ -84,6 +86,28 @@ model Commissioner {
   league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
 
   @@unique([userId, leagueId])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  leagueId  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  league    League     @relation(fields: [leagueId], references: [id])
+  teamUsers TeamUser[]
+}
+
+model TeamUser {
+  id             String   @id @default(cuid())
+  userId         String?
+  teamId         String
+  inviteEmail    String?
+  inviteAccepted Boolean? @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User?    @relation(fields: [userId], references: [id])
+  team           Team     @relation(fields: [teamId], references: [id])
 }
 
 enum Sport {
