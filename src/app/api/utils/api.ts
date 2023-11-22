@@ -4,10 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import authOptions from '@/lib/auth'
 import { NextURL } from 'next/dist/server/web/next-url'
+import { parse } from 'qs'
 
-/**
- * Custom error class representing API errors with a specific status code.
- */
 export class ApiError extends Error {
   public readonly statusCode: number
 
@@ -19,11 +17,6 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Sanitizes sensitive information from the request body for logging purposes.
- * @param consumedBody - The request body to be sanitized.
- * @returns Sanitized request body.
- */
 const sanitizeBody = (consumedBody: any) => {
   const sanitizedText = '*****'
   const sanitizedBody = { ...consumedBody }
@@ -33,10 +26,6 @@ const sanitizeBody = (consumedBody: any) => {
   return sanitizedBody
 }
 
-/**
- * Logs request details to the console for debugging purposes.
- * @param req - The incoming request object.
- */
 const logRequest = (req: NextRequest) => {
   if (process.env.NODE_ENV === 'test') return
   const { method, url, consumedBody } = req
@@ -47,21 +36,12 @@ const logRequest = (req: NextRequest) => {
   console.info('---')
 }
 
-/**
- * Logs error details to the console for debugging purposes.
- * @param error - The error object to be logged.
- */
 const logError = (error: any) => {
   if (process.env.NODE_ENV === 'test') return
   console.info(`Error:  ${JSON.stringify(error)}`)
   console.info('---')
 }
 
-/**
- * Wraps a route handler function with error handling and request logging.
- * @param routeHandler - The route handler function to be wrapped.
- * @returns Wrapped route handler function.
- */
 export const routeWrapper = (
   routeHandler: (
     req: NextRequest, context?: any) => Promise<NextResponse>
@@ -87,37 +67,34 @@ export const routeWrapper = (
   }
 }
 
-/**
- * Retrieves the user session information from the server session.
- * @returns User session information.
- * @throws ApiError if the user is not authenticated.
- */
 export const withSessionUser = async () => {
   const session = await getServerSession(authOptions)
   if (!session) throw new ApiError('Unauthorized', 401)
   return session?.user
 }
 
-/**
- * Checks if the provided user ID matches the user ID in the session.
- * @param userId - The user ID to be checked.
- * @throws ApiError if the user IDs do not match, indicating unauthorized access.
- */
 export const checkUserMatchesSession = async (userId: string | undefined) => {
   const session = await getServerSession(authOptions)
   if (session?.user?.id !== userId) throw new ApiError('Unauthorized', 401)
 }
 
-/**
- * Parses and extracts query parameters from a Next.js URL object.
- * @param nextUrl - Next.js URL object containing query parameters.
- * @returns Parsed query parameters as an object.
- */
-export const getQueryParams = (nextUrl: NextURL) => {
-  const queryParams = Array.from(nextUrl.searchParams.entries()).reduce((acc, [key, value]) => {
-    const numericValue = !Number.isNaN(Number(value)) ? Number(value) : value
-    return { ...acc, [key]: numericValue }
-  }, {} as { [key: string]: string | number })
-
-  return queryParams
+export const getParsedParams = (nextUrl: NextURL) => {
+  const convertValues = (obj: Record<string, any>): Record<string, any> => {
+    const result: Record<string, any> = {}
+    Object.entries(obj).forEach(([key, value]) => {
+      if (typeof value === 'string' && !Number.isNaN(Number(value))) {
+        result[key] = Number(value)
+      } else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
+        result[key] = value.toLowerCase() === 'true'
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = convertValues(value) // recursively handle object
+      } else {
+        result[key] = value
+      }
+    })
+    return result
+  }
+  const searchParams: any = nextUrl.searchParams.toString()
+  const findManyParams: any = parse(searchParams)
+  return convertValues(findManyParams)
 }

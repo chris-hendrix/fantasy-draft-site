@@ -3,7 +3,7 @@ import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import prisma from '@/lib/prisma'
-import { validatePassword } from '@/utils/hash'
+import { validatePassword } from '@/app/api/utils/hash'
 
 const authOptions: NextAuthOptions = {
   providers: [

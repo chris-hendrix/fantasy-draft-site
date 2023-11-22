@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { ApiError, routeWrapper, checkUserMatchesSession } from '@/utils/api'
-import { generateHash, validatePassword } from '@/utils/hash'
+import { ApiError, routeWrapper, checkUserMatchesSession } from '@/app/api/utils/api'
+import { generateHash, validatePassword } from '@/app/api/utils/hash'
 import { checkUserBody, sanitizeUserSelect } from '../route'
 
 export const GET = routeWrapper(
@@ -10,7 +10,10 @@ export const GET = routeWrapper(
 
     if (!id) throw new ApiError('User id required', 400)
 
-    const user = await prisma.user.findUnique({ where: { id }, select: sanitizeUserSelect() })
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { ...sanitizeUserSelect(), commissioners: { select: { league: true } } }
+    })
     return NextResponse.json(user)
   }
 )

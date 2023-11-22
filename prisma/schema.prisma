@@ -1,6 +1,6 @@
-
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -38,20 +38,21 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String?
-  username      String?   @unique
-  email         String    @unique
+  username      String?        @unique
+  email         String         @unique
   emailVerified DateTime?
-  password      String? 
+  password      String?
   image         String?
   bucketImage   String?
-  admin         Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  admin         Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   accounts      Account[]
   sessions      Session[]
   info          Json?
+  commissioners Commissioner[]
 }
 
 model VerificationToken {
@@ -61,4 +62,31 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model League {
+  id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  name          String         @unique
+  sport         Sport          @default(baseball)
+  url           String?
+  commissioners Commissioner[]
+}
+
+model Commissioner {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @map("user_id")
+  leagueId  String   @map("league_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leagueId])
+}
+
+enum Sport {
+  baseball
+  football
 }

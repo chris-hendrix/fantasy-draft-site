@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { showAlertAsync, AlertType } from '@/store/app'
 import { RootState, AppDispatch } from '@/store'
-import { getErrorMessage } from '@/lib/error'
+import { getErrorMessage } from '@/utils/error'
 
 interface ShowAlertOptions {
   message?: string | null

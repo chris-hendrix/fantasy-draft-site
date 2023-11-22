@@ -5,7 +5,7 @@ import { useSignIn } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
 import TextInput from '@/components/TextInput'
 import Modal from '@/components/Modal'
-import { getErrorMessage } from '@/lib/error'
+import { getErrorMessage } from '@/utils/error'
 
 interface Props {
   setOpen: (open: boolean) => void;
@@ -53,7 +53,6 @@ const CredentialsModal: React.FC<Props> = ({ setOpen, signUp = false }) => {
       </form>
       {errorMessage && <div className="mt-2 h-1 text-sm text-red-500">{errorMessage}</div>}
     </Modal>
-
   )
 }
 
