@@ -101,7 +101,7 @@ const Navbar: React.FC = () => {
   return (
     <div className="navbar bg-primary">
       <div className="navbar-start">
-        <Link href="/" className="btn btn-ghost text-xl text-primary-content">Drafter</Link>
+        <Link href="/" className="btn btn-ghost text-xl text-primary-content">⚾ Drafter 🏈</Link>
         {user && <LeagueDropdown />}
       </div>
       <div className="navbar-end">
