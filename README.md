@@ -1,7 +1,7 @@
-# Next.js Boilerplate
+# Fantasy Draft Site ⚾🏈
 
 ### Description
-A Typescript boilerplate web project using [Next.js](https://nextjs.org/) (App Router) and [Tailwind](https://tailwindcss.com/), and [Postgres](https://www.postgresql.org/). User authentication (username/password) has been set up using [NextAuth.js](https://next-auth.js.org/). 
+A Typescript fantasy baseball/football drafting site web project using [Next.js](https://nextjs.org/) (App Router) and [Tailwind](https://tailwindcss.com/), and [Postgres](https://www.postgresql.org/). User authentication (username/password) has been set up using [NextAuth.js](https://next-auth.js.org/). 
 
 This boilerplate contains:
 - 🔑 User auth and session management using [NextAuth.js](https://next-auth.js.org/)
@@ -11,8 +11,6 @@ This boilerplate contains:
 - ✅ CI/CD using [Github Actions](https://github.com/features/actions)
 - 💻 E2E testing using [Cypress](https://www.cypress.io/)
 - 🤡 Unit testing using [Jest](https://jestjs.io/)
-
-Note that [SSR](https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic-rendering) is not included in this boilerplate as it is not really applicable user authentication (which uses redux to update state). Feel free to add SSR to your own pages though!
 
 ### Installation
 1. Install [Node LTS](https://nodejs.org/en/)
