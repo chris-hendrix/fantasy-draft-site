@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { League } from '@prisma/client'
+import { LeagueWithRelationships } from '@/types'
 import { formatDate } from '@/utils/date'
 import { useUserLeagues } from '@/hooks/league'
 import LeagueModal from '@/components/LeagueModal'
 
 interface LeagueCardProps {
-  league: Partial<League>
+  league: Partial<LeagueWithRelationships>
 }
 
 const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
   const [modalOpen, setModalOpen] = useState(false)
   const { isCommissioner } = useUserLeagues(league.id)
+
+  const commissionerNames = league?.commissioners?.map((commissioner) => commissioner.user.email).join(', ') || ''
 
   return (
     <>
@@ -29,6 +31,7 @@ const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
           <div>
             <h3 className="text-2xl font-medium">{league?.name}</h3>
             <p className="text-gray-500">{`Sport: ${league.sport}`}</p>
+            <p className="text-gray-500">{`Commissioners: ${commissionerNames}`}</p>
             <p className="text-gray-500">{`Created on ${formatDate(String(league.createdAt))}`}</p>
           </div>
         </div>

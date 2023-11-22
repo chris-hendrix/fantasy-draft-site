@@ -11,14 +11,17 @@ interface LeaguePageProps {
 }
 
 const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
-  const { data: league, isLoading } = useGetLeague(params.id)
+  const { data: league, isLoading } = useGetLeague({
+    id: params.id,
+    queryParams: { include: { commissioners: { include: { user: true } } } }
+  })
   const { isCommissioner } = useUserLeagues(params.id)
 
   if (!league && !isLoading) return <NotFound />
   if (!league) return <></>
 
   const tabs = [
-    { hash: 'info', name: 'League info', component: <LeagueTab league={league} /> },
+    { hash: 'league', name: 'League', component: <LeagueTab league={league} /> },
     { hash: 'teams', name: 'Teams', component: <>Teams</> },
     { hash: 'keepers', name: 'Keepers', component: <>Keepers</> },
     { hash: 'draft', name: 'Draft', component: <>Draft</> },

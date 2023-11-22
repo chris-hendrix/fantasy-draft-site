@@ -17,7 +17,7 @@ const LeaguesPage: React.FC = () => {
     skip: 0,
     take: loadedUserCount,
     include: { commissioners: { include: { user: true } } },
-    ...(!search ? {} : { where: { name: { search } } })
+    ...(!search ? {} : { where: { name: { search: search.split(/\s+/).join(' & ') } } })
   })
 
   useEffect(() => {

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { ApiError, routeWrapper } from '@/app/api/utils/api'
+import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkLeagueCommissioner } from '@/app/api/utils/permissions'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
-
+    const queryParams: any = getParsedParams(req.nextUrl) || {}
     if (!id) throw new ApiError('League id required', 400)
 
-    const league = await prisma.league.findUnique({ where: { id } })
+    const league = await prisma.league.findUnique({ ...queryParams, where: { id } })
     return NextResponse.json(league)
   }
 )

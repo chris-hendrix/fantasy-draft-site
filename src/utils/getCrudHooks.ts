@@ -45,8 +45,8 @@ const defaultCrudHookOptions: CrudHookOptions = {
 }
 
 interface CrudOperationsArgs {
-  useGetObjectQuery: (id: string, options: CrudHookOptions) => any,
-  useGetObjectsQuery: (args: any, options: CrudHookOptions) => any,
+  useGetObjectQuery: (args: { id: string, queryParams: string }, options: CrudHookOptions) => any,
+  useGetObjectsQuery: (queryParams: string, options: CrudHookOptions) => any,
   useAddObjectMutation: () => any,
   useUpdateObjectMutation: () => any,
   useDeleteObjectMutation: () => any,
@@ -59,28 +59,31 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
   useUpdateObjectMutation,
   useDeleteObjectMutation,
 }: CrudOperationsArgs) => {
-  const useGetObject = (id: string, options: CrudHookOptions = {}) => {
+  const useGetObject = (
+    { id, queryParams }: { id: string, queryParams?: PrismaFindManyArgs },
+    options: CrudHookOptions = {}
+  ) => {
     const { data, isLoading, isSuccess, error, refetch, }: {
       data: Object,
       isLoading: boolean,
       isSuccess: boolean,
       error: any,
       refetch: () => void
-    } = useGetObjectQuery(id, { skip: options.skip })
+    } = useGetObjectQuery({ id, queryParams: stringify(queryParams) }, { skip: options.skip })
 
     useAlertEffect({ isSuccess, error, ...options })
 
     return { data, isLoading, isSuccess, error, refetch }
   }
 
-  const useGetObjects = (args: PrismaFindManyArgs, options: CrudHookOptions = {}) => {
+  const useGetObjects = (queryParams: PrismaFindManyArgs, options: CrudHookOptions = {}) => {
     const { data, isLoading, isSuccess, error, refetch }: {
       data: Object[];
       isLoading: boolean;
       isSuccess: boolean;
       error: any;
       refetch: () => void;
-    } = useGetObjectsQuery(stringify(args), { skip: options.skip })
+    } = useGetObjectsQuery(stringify(queryParams), { skip: options.skip })
 
     useAlertEffect({ isSuccess, error, ...options })
 

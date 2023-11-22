@@ -12,9 +12,9 @@ export function createObjectApi<Object extends BaseObject>(url: string) {
     baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
     tagTypes: [url],
     endpoints: (build) => ({
-      getObject: build.query<Object, string>({
-        query: (id) => `${url}/${id}`,
-        providesTags: (_result, _err, id) => [{ type: url, id }],
+      getObject: build.query<Object, { id: string, queryParams?: string }>({
+        query: (params) => `${url}/${params.id}?${params.queryParams}`,
+        providesTags: (_result, _err, params) => [{ type: url, id: params.id }],
       }),
       getObjects: build.query<Object[], string>({
         query: (searchParams) => `${url}/?${searchParams}`,

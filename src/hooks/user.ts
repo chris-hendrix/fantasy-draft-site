@@ -1,21 +1,13 @@
 import { useEffect } from 'react'
 import { useGetSessionQuery, useGetUserQuery, useUpdateUserMutation } from '@/store'
-import { User, Commissioner, League } from '@prisma/client'
+import { UserWithCommissioners } from '../types'
 import { useAlert } from './app'
-
-interface CommissionerWithRelationships extends Commissioner {
-  league: League
-}
-
-interface UserWithRelationships extends User {
-  commissioners: CommissionerWithRelationships[];
-}
 
 export const useSessionUser = () => {
   const { data: session, isLoading: isSessionLoading } = useGetSessionQuery()
   const userId = session?.user?.id
   const { data: user, isLoading } = useGetUserQuery(userId || '', { skip: isSessionLoading || !userId })
-  return { user: user as UserWithRelationships, isLoading }
+  return { user: user as UserWithCommissioners, isLoading }
 }
 
 export const useUpdateUser = () => {
