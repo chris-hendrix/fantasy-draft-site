@@ -5,7 +5,6 @@ import { withSessionUser, routeWrapper, getParsedParams } from '@/app/api/utils/
 export const GET = routeWrapper(
   async (req: NextRequest) => {
     const queryParams: any = getParsedParams(req.nextUrl)
-    console.log({ queryParams })
     const leagues = await prisma.league.findMany({ ...queryParams })
     return NextResponse.json(leagues)
   }
