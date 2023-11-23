@@ -17,10 +17,30 @@ export const PUT = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
     if (!id) throw new ApiError('Team id required', 400)
-    await checkTeamEdit(id)
+    const { user } = await checkTeamEdit(id)
+    const { acceptEmail, declineEmail, ...data }: any = req.consumedBody
+
+    // accepting invite
+    if (acceptEmail) {
+      const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: acceptEmail } })
+      teamUser && await prisma.teamUser.update({
+        where: { id: teamUser.id },
+        data: { inviteAcceptedAt: new Date(), userId: user.id }
+      })
+    }
+
+    // declining invite
+    if (declineEmail) {
+      const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: declineEmail } })
+      teamUser && await prisma.teamUser.update({
+        where: { id: teamUser.id },
+        data: { inviteDeclinedAt: new Date(), userId: user.id }
+      })
+    }
+
     const updatedTeam = await prisma.team.update({
       where: { id },
-      data: req.consumedBody,
+      data,
     })
     return NextResponse.json(updatedTeam)
   }

@@ -29,6 +29,7 @@ export const checkTeamEdit = async (teamId: string, commissionerOnly: boolean = 
     })
     if (!league) throw new ApiError('Unauthorized', 401)
   }
+  return { user: session.user, team }
 }
 
 export const checkLeagueCommissioner = async (leagueId: string) => {

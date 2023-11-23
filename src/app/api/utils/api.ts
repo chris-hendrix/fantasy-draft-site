@@ -82,7 +82,9 @@ export const getParsedParams = (nextUrl: NextURL) => {
   const convertValues = (obj: Record<string, any>): Record<string, any> => {
     const result: Record<string, any> = {}
     Object.entries(obj).forEach(([key, value]) => {
-      if (typeof value === 'string' && !Number.isNaN(Number(value))) {
+      if (typeof value === 'string' && ['null', ''].includes(value)) {
+        result[key] = null // Handle null values
+      } else if (typeof value === 'string' && !Number.isNaN(Number(value))) {
         result[key] = Number(value)
       } else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
         result[key] = value.toLowerCase() === 'true'
