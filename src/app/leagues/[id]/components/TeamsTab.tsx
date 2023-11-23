@@ -15,7 +15,12 @@ interface Props {
 const TeamsTab: React.FC<Props> = ({ league }) => {
   const { data: teams, refetch } = useGetTeams({
     where: { leagueId: league?.id },
-    include: { teamUsers: true }
+    include: {
+      teamUsers: {
+        where: { OR: [{ userId: { not: 'null' } }, { inviteDeclinedAt: { equals: 'null' } }] },
+        include: { user: true }
+      }
+    }
   }, { skip: !league?.id })
   const { deleteObject: deleteTeam } = useDeleteTeam()
   const { isCommissioner } = useUserLeagues(league.id)
@@ -23,10 +28,20 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
   const [editTeam, setEditTeam] = useState<TeamWithRelationships | null>(null)
 
   const columns: TableColumn<TeamWithRelationships>[] = [
-    { name: 'Name', value: ((team) => team.name) },
     {
-      name: 'Invites',
-      value: ((team) => team.teamUsers.map((tu) => tu.inviteEmail).join(','))
+      name: 'Name',
+      value: (team) => team.name
+    },
+    {
+      name: 'User(s)',
+      value: (team) => {
+        const userNames = team.teamUsers
+          .filter((tu) => Boolean(tu.user))
+          .map((tu) => tu.user.name || tu.user.email).join(',')
+        if (userNames) return userNames
+        const inviteEmails = team.teamUsers.map((tu) => tu.inviteEmail).join(',')
+        return `Invited: ${inviteEmails}`
+      }
     },
     {
       renderedValue: ((team) => <>

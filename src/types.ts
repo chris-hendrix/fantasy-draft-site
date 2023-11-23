@@ -14,7 +14,11 @@ export interface LeagueWithRelationships extends League {
   teams: Team[]
 }
 
+export interface TeamUserWithRelationships extends TeamUser {
+  user: User
+}
+
 export interface TeamWithRelationships extends Team {
-  teamUsers: TeamUser[]
+  teamUsers: TeamUserWithRelationships[]
   league: LeagueWithRelationships
 }
