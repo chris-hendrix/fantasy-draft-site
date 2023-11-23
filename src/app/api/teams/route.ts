@@ -12,7 +12,12 @@ export const GET = routeWrapper(
 
 export const POST = routeWrapper(async (req: NextRequest) => {
   await withSessionUser() // user must be logged in
-  const data: any = req.consumedBody
+  const { inviteEmail, ...data }: any = req.consumedBody
   const team = await prisma.team.create({ data })
+  if (inviteEmail) {
+    await prisma.teamUser.create({
+      data: { teamId: team.id, inviteEmail: inviteEmail as string }
+    })
+  }
   return NextResponse.json(team)
 })
