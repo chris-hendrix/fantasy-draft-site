@@ -55,7 +55,7 @@ const Profile: React.FC<Props> = ({ user, canEdit = false }) => {
         }
 
       </div>
-      {modalOpen && user && <EditProfileModal user={user} setOpen={setModalOpen} />}
+      {modalOpen && user && <EditProfileModal user={user} onClose={() => setModalOpen(false)} />}
     </ >
   )
 }

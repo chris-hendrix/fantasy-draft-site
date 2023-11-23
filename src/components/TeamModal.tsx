@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { League, Team } from '@prisma/client'
+import { LeagueWithRelationships, TeamWithRelationships } from '@/types'
 import { useSessionUser } from '@/hooks/user'
 import { useAddTeam, useUpdateTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
@@ -7,12 +7,12 @@ import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
 
 interface FormProps {
-  league: Partial<League>
-  setOpen: (open: boolean) => void;
-  team?: Partial<Team> | null | undefined
+  league: Partial<LeagueWithRelationships>
+  onClose: () => void;
+  team?: Partial<TeamWithRelationships> | null | undefined
 }
 
-const TeamModal: React.FC<FormProps> = ({ league, setOpen, team = null }) => {
+const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null }) => {
   const { user } = useSessionUser()
   const { addObject: addTeam, isLoading: isAdding } = useAddTeam()
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
@@ -35,17 +35,17 @@ const TeamModal: React.FC<FormProps> = ({ league, setOpen, team = null }) => {
       })
 
     if ('error' in res) return
-    setOpen(false)
+    onClose()
   }
 
   if (!user) return <></>
 
   return (
-    <Modal title={'Invite team'} setOpen={setOpen}>
+    <Modal title={'Invite team'} onClose={onClose}>
       <Form
         form={form}
         onSubmit={onSubmit}
-        onCancel={() => setOpen(false)}
+        onCancel={onClose}
         isSubmitting={isLoading}
       >
         <TextInput

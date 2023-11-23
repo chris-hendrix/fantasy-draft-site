@@ -8,11 +8,11 @@ import Modal from '@/components/Modal'
 import { getErrorMessage } from '@/utils/error'
 
 interface Props {
-  setOpen: (open: boolean) => void;
+  onClose: () => void;
   signUp?: boolean
 }
 
-const CredentialsModal: React.FC<Props> = ({ setOpen, signUp = false }) => {
+const CredentialsModal: React.FC<Props> = ({ onClose, signUp = false }) => {
   const form = useForm({ mode: 'onChange' })
   const [addUser, {
     error: addUserError,
@@ -31,7 +31,7 @@ const CredentialsModal: React.FC<Props> = ({ setOpen, signUp = false }) => {
 
   useEffect(() => {
     if (!signInSuccess) return
-    setOpen(false)
+    onClose()
     showAlert({ successMessage: 'Successfully signed in' })
   }, [signInSuccess])
 
@@ -42,7 +42,7 @@ const CredentialsModal: React.FC<Props> = ({ setOpen, signUp = false }) => {
   }
 
   return (
-    <Modal title={signUp ? 'Sign up' : 'Log in'} setOpen={setOpen}>
+    <Modal title={signUp ? 'Sign up' : 'Log in'} onClose={onClose}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <TextInput name="email" form={form} disabled={isLoading} />
         <TextInput name="password" form={form} disabled={isLoading} validate={!signUp ? () => true : null} />

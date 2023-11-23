@@ -12,11 +12,11 @@ import FileUploadWrapper from './FileUploadWrapper'
 type FormType = 'profile' | 'password'
 interface FormProps {
   user: Partial<User>;
-  setOpen?: (open: boolean) => void;
+  onClose?: () => void;
   setActiveForm: (formType: FormType) => void;
 }
 
-const EditProfileForm: React.FC<FormProps> = ({ user, setOpen, setActiveForm }) => {
+const EditProfileForm: React.FC<FormProps> = ({ user, onClose, setActiveForm }) => {
   const { updateUser, isLoading } = useUpdateUser()
   const { showAlert } = useAlert()
   const form = useForm({ mode: 'onChange' })
@@ -62,7 +62,7 @@ const EditProfileForm: React.FC<FormProps> = ({ user, setOpen, setActiveForm }) 
       <Form
         form={form}
         onSubmit={onSubmit}
-        onClose={() => setOpen && setOpen(false)}
+        onClose={() => onClose && onClose()}
         isSubmitting={isLoading}
       >
         <TextInput name="email" form={form} disabled={true} />
@@ -108,16 +108,20 @@ const EditPasswordForm: React.FC<FormProps> = ({ user, setActiveForm }) => {
 
 interface ModalProps {
   user: Partial<User>;
-  setOpen: (open: boolean) => void;
+  onClose: () => void;
 }
 
-const EditProfileModal: React.FC<ModalProps> = ({ user, setOpen }) => {
+const EditProfileModal: React.FC<ModalProps> = ({ user, onClose }) => {
   const [activeForm, setActiveForm] = useState<FormType>('profile')
 
   const forms = {
     profile: {
       title: 'Edit profile',
-      component: <EditProfileForm user={user} setOpen={setOpen} setActiveForm={setActiveForm} />
+      component: <EditProfileForm
+        user={user}
+        onClose={onClose}
+        setActiveForm={setActiveForm}
+      />
     },
     password: {
       title: 'Change password',
@@ -127,7 +131,7 @@ const EditProfileModal: React.FC<ModalProps> = ({ user, setOpen }) => {
 
   if (!user) return <></>
   return (
-    <Modal title={forms[activeForm].title} setOpen={setOpen}>
+    <Modal title={forms[activeForm].title} onClose={onClose}>
       {forms[activeForm].component}
     </Modal>
   )

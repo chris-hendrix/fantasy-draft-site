@@ -58,8 +58,8 @@ const UserDropdown: React.FC = () => {
           <li><Link href="/leagues">🏆 Leagues</Link></li>
         </Dropdown>
       </div>
-      {signupOpen && <CredentialsModal setOpen={setSignupOpen} signUp />}
-      {loginOpen && <CredentialsModal setOpen={setLoginOpen} />}
+      {signupOpen && <CredentialsModal onClose={() => setSignupOpen(false)} signUp />}
+      {loginOpen && <CredentialsModal onClose={() => setLoginOpen(false)} />}
     </>
 
   )
@@ -90,7 +90,7 @@ const LeagueDropdown: React.FC = () => {
         {leagues?.length ? <div className="divider" /> : null}
         <li><a onClick={() => setModalOpen(true)}>➕ Create league</a></li>
       </Dropdown>
-      {modalOpen && user && <LeagueModal setOpen={setModalOpen} />}
+      {modalOpen && user && <LeagueModal onClose={() => setModalOpen(false)} />}
     </>
 
   )

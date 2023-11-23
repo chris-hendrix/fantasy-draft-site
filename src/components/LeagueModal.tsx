@@ -7,11 +7,11 @@ import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
 
 interface FormProps {
-  setOpen: (open: boolean) => void;
+  onClose: () => void;
   league?: Partial<League> | null | undefined
 }
 
-const LeagueModal: React.FC<FormProps> = ({ setOpen, league = null }) => {
+const LeagueModal: React.FC<FormProps> = ({ onClose, league = null }) => {
   const { user } = useSessionUser()
   const { addObject: addLeague, isLoading: isAdding } = useAddLeague()
   const { updateObject: updateLeague, isLoading: isUpdating } = useUpdateLeague()
@@ -30,17 +30,17 @@ const LeagueModal: React.FC<FormProps> = ({ setOpen, league = null }) => {
       : await addLeague({ name: name as string, sport: 'baseball' }) // TODO add multi sport
 
     if ('error' in res) return
-    setOpen(false)
+    onClose()
   }
 
   if (!user) return <></>
 
   return (
-    <Modal title={'Create league'} setOpen={setOpen}>
+    <Modal title={'Create league'} onClose={onClose}>
       <Form
         form={form}
         onSubmit={onSubmit}
-        onCancel={() => setOpen(false)}
+        onCancel={onClose}
         isSubmitting={isLoading}
       >
         <TextInput

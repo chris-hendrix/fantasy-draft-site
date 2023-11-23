@@ -24,7 +24,7 @@ const CommissionerTab: React.FC<Props> = ({ league }) => {
         Delete league
       </button>
       {modalOpen &&
-        <Modal title="Are you sure?" size="xs" setOpen={setModalOpen}>
+        <Modal title="Are you sure?" size="xs" onClose={() => setModalOpen(false)}>
           <div>This cannot be undone.</div>
           <div className="flex justify-end mt-2">
             <button onClick={handleDelete} className="btn btn-error w-32 mr-2">Yes</button>
