@@ -96,6 +96,8 @@ model Team {
   updatedAt DateTime   @updatedAt
   league    League     @relation(fields: [leagueId], references: [id])
   teamUsers TeamUser[]
+
+  @@unique([leagueId, name])
 }
 
 model TeamUser {
@@ -107,7 +109,7 @@ model TeamUser {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   user             User?     @relation(fields: [userId], references: [id])
-  team             Team      @relation(fields: [teamId], references: [id])
+  team             Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
 
 enum Sport {

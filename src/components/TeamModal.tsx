@@ -10,9 +10,10 @@ interface FormProps {
   league: Partial<LeagueWithRelationships>
   onClose: () => void;
   team?: Partial<TeamWithRelationships> | null | undefined
+  invite?: boolean
 }
 
-const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null }) => {
+const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null, invite = false }) => {
   const { user } = useSessionUser()
   const { addObject: addTeam, isLoading: isAdding } = useAddTeam()
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
@@ -52,7 +53,7 @@ const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null }) => {
           name="name" form={form} disabled={isLoading}
           required validate={(value: string) => value.length > 4 || 'Too short'}
         />
-        <TextInput name="email" form={form} disabled={isLoading} labelOverride="Invite email" />
+        {invite && <TextInput name="email" form={form} disabled={isLoading} labelOverride="Invite email" />}
       </Form>
     </Modal>
   )

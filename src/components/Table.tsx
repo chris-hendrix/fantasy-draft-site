@@ -18,7 +18,7 @@ const Table = <T extends {}>({ columns, data }: Props<T>) => {
     return ''
   }
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto w-full">
       <table className="table">
         <thead>
           <tr>
