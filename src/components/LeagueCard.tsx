@@ -11,7 +11,8 @@ interface LeagueCardProps {
 
 const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
   const [modalOpen, setModalOpen] = useState(false)
-  const { isCommissioner, teamCount } = useUserLeagues(league.id)
+  const { isCommissioner } = useUserLeagues(league.id)
+  const teamCount = league.teams?.length
 
   const commissionerNames = league?.commissioners?.map((commissioner) => commissioner.user.email).join(', ') || ''
 
@@ -30,7 +31,7 @@ const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
         <p >{`Sport: ${league.sport}`}</p>
         <p >{`Commissioners: ${commissionerNames}`}</p>
         <p >{`Created on ${formatDate(String(league.createdAt))}`}</p>
-        <p >{`Teams: ${teamCount}`}</p>
+        {teamCount && <p >{`Teams: ${teamCount}`}</p>}
       </Card>
       {modalOpen && <LeagueModal league={league} onClose={() => setModalOpen(false)} />}
     </>

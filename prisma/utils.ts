@@ -17,15 +17,41 @@ const generateUser = async () => {
       name: `${firstName} ${lastName}`,
       username,
       email: `${username}@${SEED_EMAIL_DOMAIN}`,
-      password: await generateHash('Abc1234!')
+      password: await generateHash('Abcd1234!')
     }
   })
   return user
 }
 
-export const generateSeedData = async (userCount = 20) => {
-  const users = await Promise.all([...Array(userCount)].map(() => generateUser()))
-  return { users }
+export const generateSeedData = async () => {
+  const teamCount = 10
+  const adminEmail = `admin@${SEED_EMAIL_DOMAIN}`
+  const admin = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: { email: adminEmail },
+    create: {
+      email: adminEmail,
+      username: 'admin',
+      name: 'Admin',
+      password: await generateHash('Abcd1234!')
+    }
+  })
+  const users = await Promise.all([...Array(teamCount - 1)].map(() => generateUser()))
+
+  const league = await prisma.league.create({
+    data: {
+      name: `Seed League ${new Date().getTime()}`,
+      sport: 'baseball',
+      commissioners: { create: [{ userId: admin.id }] },
+      teams: {
+        create: [
+          { name: 'Admin Team', teamUsers: { create: [{ userId: admin.id }] } },
+          ...users.map((user) => ({ name: `${user.name} Team`, teamUsers: { create: [{ userId: user.id }] } }))
+        ]
+      }
+    }
+  })
+  return { league }
 }
 
 export const deleteSeedData = async () => prisma.user.deleteMany({
