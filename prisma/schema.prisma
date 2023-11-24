@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -24,7 +24,7 @@ model Account {
   oauth_token_secret String?
   oauth_token        String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -34,7 +34,7 @@ model Session {
   sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
 
 model User {
@@ -53,6 +53,7 @@ model User {
   sessions      Session[]
   info          Json?
   commissioners Commissioner[]
+  teamUsers     TeamUser[]
 }
 
 model VerificationToken {
@@ -72,6 +73,7 @@ model League {
   sport         Sport          @default(baseball)
   url           String?
   commissioners Commissioner[]
+  teams         Team[]
 }
 
 model Commissioner {
@@ -80,10 +82,35 @@ model Commissioner {
   updatedAt DateTime @updatedAt
   userId    String   @map("user_id")
   leagueId  String   @map("league_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  league    League   @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([userId, leagueId])
+}
+
+model Team {
+  id        String     @id @default(cuid())
+  leagueId  String
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  league    League     @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  teamUsers TeamUser[]
+
+  @@unique([leagueId, name])
+}
+
+model TeamUser {
+  id               String    @id @default(cuid())
+  userId           String?
+  teamId           String
+  inviteEmail      String?
+  inviteAcceptedAt DateTime?
+  inviteDeclinedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  user             User?     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team             Team      @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
 
 enum Sport {

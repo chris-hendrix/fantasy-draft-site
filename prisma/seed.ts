@@ -4,8 +4,8 @@
 import { generateSeedData, prisma } from './utils'
 
 generateSeedData()
-  .then(async ({ users }) => {
-    console.log({ users })
+  .then(async (res) => {
+    console.log(res)
     await prisma.$disconnect()
   })
   .catch(async (e) => {

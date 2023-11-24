@@ -1,4 +1,4 @@
-import { User, Commissioner, League } from '@prisma/client'
+import { User, Commissioner, League, Team, TeamUser } from '@prisma/client'
 
 export interface CommissionerWithRelationships extends Commissioner {
   league: League
@@ -11,4 +11,14 @@ export interface UserWithCommissioners extends User {
 
 export interface LeagueWithRelationships extends League {
   commissioners: CommissionerWithRelationships[]
+  teams: TeamWithRelationships[]
+}
+
+export interface TeamUserWithRelationships extends TeamUser {
+  user: User
+}
+
+export interface TeamWithRelationships extends Team {
+  teamUsers: TeamUserWithRelationships[]
+  league: LeagueWithRelationships
 }

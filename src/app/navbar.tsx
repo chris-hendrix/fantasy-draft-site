@@ -11,6 +11,8 @@ import LeagueModal from '@/components/LeagueModal'
 import CredentialsModal from '@/components/CredentialsModal'
 import { useSignOut } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
+import InviteModal from '@/components/InviteModal'
+import { useInviteTeams } from '@/hooks/team'
 
 import Menu from '@/icons/Menu'
 
@@ -58,19 +60,20 @@ const UserDropdown: React.FC = () => {
           <li><Link href="/leagues">🏆 Leagues</Link></li>
         </Dropdown>
       </div>
-      {signupOpen && <CredentialsModal setOpen={setSignupOpen} signUp />}
-      {loginOpen && <CredentialsModal setOpen={setLoginOpen} />}
+      {signupOpen && <CredentialsModal onClose={() => setSignupOpen(false)} signUp />}
+      {loginOpen && <CredentialsModal onClose={() => setLoginOpen(false)} />}
     </>
 
   )
 }
 
 const LeagueDropdown: React.FC = () => {
-  const { user } = useSessionUser()
-  const { leagues } = useUserLeagues()
-  const [modalOpen, setModalOpen] = useState(false)
-  const pathname = usePathname()
   const { id } = useParams()
+  const { leagues } = useUserLeagues()
+  const { inviteTeams } = useInviteTeams()
+  const [leagueModalOpen, setLeagueModalOpen] = useState(false)
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const pathname = usePathname()
   const selectedLeague = pathname.startsWith('/leagues') && id && leagues?.find((league) => league.id === id)
 
   return (
@@ -82,15 +85,22 @@ const LeagueDropdown: React.FC = () => {
           </div>
         }
       >
+        {leagues?.length > 0 && <h2 className="font-bold mb-1">Leagues</h2>}
         {leagues?.map((league) => (
           <li key={league?.id}>
-            <Link href={`/leagues/${league.id}`}>{league?.name}</Link>
+            <Link href={`/leagues/${league.id}`}>
+              {league.sport === 'baseball' ? '⚾' : '🏈'} {league?.name}
+            </Link>
           </li>
         ))}
         {leagues?.length ? <div className="divider" /> : null}
-        <li><a onClick={() => setModalOpen(true)}>➕ Create league</a></li>
+        <li><a onClick={() => setLeagueModalOpen(true)}>➕ Create league</a></li>
+        {inviteTeams?.length > 0 && <li><a onClick={() => setInviteModalOpen(true)}>
+          📨 League invites
+        </a></li>}
       </Dropdown>
-      {modalOpen && user && <LeagueModal setOpen={setModalOpen} />}
+      {leagueModalOpen && <LeagueModal onClose={() => setLeagueModalOpen(false)} />}
+      {inviteModalOpen && <InviteModal onClose={() => setInviteModalOpen(false)} />}
     </>
 
   )

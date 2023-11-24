@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server'
@@ -79,17 +80,25 @@ export const checkUserMatchesSession = async (userId: string | undefined) => {
 }
 
 export const getParsedParams = (nextUrl: NextURL) => {
-  const convertValues = (obj: Record<string, any>): Record<string, any> => {
-    const result: Record<string, any> = {}
-    Object.entries(obj).forEach(([key, value]) => {
-      if (typeof value === 'string' && !Number.isNaN(Number(value))) {
-        result[key] = Number(value)
-      } else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
-        result[key] = value.toLowerCase() === 'true'
+  const convertValues = (obj: any) => {
+    const result = { ...obj }
+    Object.entries(result).forEach(([key, value]) => {
+      const trimmedKey = key.replace(/^\[|\]$/g, '') // Remove start and end brackets from the key
+      if (Array.isArray(value)) {
+        result[trimmedKey] = value.map((item) => convertValues(item))
       } else if (typeof value === 'object' && value !== null) {
-        result[key] = convertValues(value) // recursively handle object
-      } else {
-        result[key] = value
+        result[trimmedKey] = convertValues(value)
+      } else if (typeof value === 'string') {
+        if (!Number.isNaN(Number(value))) {
+          result[trimmedKey] = parseFloat(value)
+        } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
+          result[trimmedKey] = value.toLowerCase() === 'true'
+        } else if (value === '') {
+          result[trimmedKey] = null
+        }
+      }
+      if (trimmedKey !== key) {
+        delete result[key]
       }
     })
     return result

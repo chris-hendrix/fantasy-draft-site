@@ -18,15 +18,32 @@ export const useUserLeagues = (leagueId: string | null = null) => {
   const { id } = useParams()
   const userId = user?.id
   const { data: commissionerLeagues, isLoading: isCommissionerLeaguesLoading } = useGetLeagues({
-    where: { commissioners: { some: { userId } } }
+    where: { commissioners: { some: { userId } } },
+    include: { teams: { include: { teamUsers: true } } }
   }, { skip: !userId })
 
-  const isLoading = isCommissionerLeaguesLoading
-  const leagues = [...(commissionerLeagues || [])]
+  const { data: teamLeagues, isLoading: isTeamLeaguesLoading } = useGetLeagues({
+    where: { teams: { some: { teamUsers: { some: { userId } } } } },
+    include: { teams: { include: { teamUsers: true } } }
+  }, { skip: !userId })
+
+  const isLoading = isCommissionerLeaguesLoading && isTeamLeaguesLoading
+  const leagues = [...(teamLeagues || []), ...(commissionerLeagues || [])]
   const defaultLeague = leagues?.[0] || null
 
   const isCommissioner = commissionerLeagues?.find((league) => league.id === (leagueId || id))
-  const isMember = leagues?.find((league) => league.id === leagueId)
+  const league = leagues?.find((lg) => lg.id === leagueId)
+  const isMember = Boolean(league)
+  const teamCount = league?.teams?.length
 
-  return { leagues, commissionerLeagues, isCommissioner, isMember, defaultLeague, isLoading }
+  return {
+    isLoading,
+    leagues,
+    commissionerLeagues,
+    isCommissioner,
+    isMember,
+    defaultLeague,
+    league,
+    teamCount
+  }
 }

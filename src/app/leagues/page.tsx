@@ -16,7 +16,7 @@ const LeaguesPage: React.FC = () => {
   const { data: leagues } = useGetLeagues({
     skip: 0,
     take: loadedUserCount,
-    include: { commissioners: { include: { user: true } } },
+    include: { teams: true, commissioners: { include: { user: true } } },
     ...(!search ? {} : { where: { name: { search: search.split(/\s+/).join(' & ') } } })
   })
 
