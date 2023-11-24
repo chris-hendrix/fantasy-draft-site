@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { League } from '@prisma/client'
 import { useGetTeams, useDeleteTeam, useUserTeam } from '@/hooks/team'
 import { useUserLeagues } from '@/hooks/league'
@@ -33,14 +34,22 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
     },
     {
       name: 'User(s)',
-      value: (team) => {
-        const userNames = team.teamUsers
+      renderedValue: (team) => {
+        const users = team.teamUsers
           .filter((tu) => Boolean(tu.user))
-          .map((tu) => `✅ ${tu.user.name || tu.user.email}`)
+          .map((tu) => tu.user)
         const inviteEmails = team.teamUsers
           .filter((tu) => !tu.inviteDeclinedAt && !tu.userId)
-          .map((tu) => `⚠️ ${tu.inviteEmail}`)
-        return [...userNames, ...inviteEmails].join(', ')
+          .map((tu) => tu.inviteEmail)
+        return <>
+          {users.map((u) => <div
+            key={u.id}
+            className="badge cursor-pointer"
+          >
+            ✅ <Link href={`/users/${u.id}`}>{u.name || u.email}</Link>
+          </div>)}
+          {inviteEmails.map((e) => <div key={e} className="badge">⚠️ {e}</div>)}
+        </>
       }
     },
     {
