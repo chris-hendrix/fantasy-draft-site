@@ -11,7 +11,7 @@ export interface UserWithCommissioners extends User {
 
 export interface LeagueWithRelationships extends League {
   commissioners: CommissionerWithRelationships[]
-  teams: Team[]
+  teams: TeamWithRelationships[]
 }
 
 export interface TeamUserWithRelationships extends TeamUser {

@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { League } from '@prisma/client'
 import { useGetTeams, useDeleteTeam } from '@/hooks/team'
 import { useUserLeagues } from '@/hooks/league'
 import TeamModal from '@/components/TeamModal'
 import Table, { TableColumn } from '@/components/Table'
+import Card from '@/components/Card'
 import { TeamWithRelationships } from '@/types'
+import { formatDate } from '@/utils/date'
 
 interface Props {
   league: Partial<League>;
@@ -15,15 +17,11 @@ interface Props {
 const TeamsTab: React.FC<Props> = ({ league }) => {
   const { data: teams, refetch } = useGetTeams({
     where: { leagueId: league?.id },
-    include: {
-      teamUsers: {
-        where: { OR: [{ userId: { not: 'null' } }, { inviteDeclinedAt: { equals: 'null' } }] },
-        include: { user: true }
-      }
-    }
+    include: { teamUsers: { include: { user: true } } },
+    orderBy: { name: 'asc' }
   }, { skip: !league?.id })
   const { deleteObject: deleteTeam } = useDeleteTeam()
-  const { isCommissioner } = useUserLeagues(league.id)
+  const { isCommissioner, team: userTeam } = useUserLeagues(league.id) // TODO userTeam
   const [modalOpen, setModalOpen] = useState(false)
   const [editTeam, setEditTeam] = useState<TeamWithRelationships | null>(null)
 
@@ -37,10 +35,11 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
       value: (team) => {
         const userNames = team.teamUsers
           .filter((tu) => Boolean(tu.user))
-          .map((tu) => tu.user.name || tu.user.email).join(',')
-        if (userNames) return userNames
-        const inviteEmails = team.teamUsers.map((tu) => tu.inviteEmail).join(',')
-        return `Invited: ${inviteEmails}`
+          .map((tu) => `✅ ${tu.user.name || tu.user.email}`)
+        const inviteEmails = team.teamUsers
+          .filter((tu) => !tu.inviteDeclinedAt && !tu.userId)
+          .map((tu) => `⚠️ ${tu.inviteEmail}`)
+        return [...userNames, ...inviteEmails].join(', ')
       }
     },
     {
@@ -53,6 +52,19 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
 
   return (
     <div className="flex flex-col items-start mt-8">
+      {userTeam && <>
+        <Card
+          header={userTeam.name}
+          buttons={<button
+            className="btn btn-square btn-sm"
+            onClick={() => setEditTeam(userTeam)}
+          >✏️
+          </button>}
+        >
+          <p >{`Created on ${formatDate(String(userTeam.createdAt))}`}</p>
+        </Card>
+        <div className="divider" />
+      </>}
       {isCommissioner && <button
         className="btn btn-sm mb-2"
         onClick={() => setModalOpen(true)}
