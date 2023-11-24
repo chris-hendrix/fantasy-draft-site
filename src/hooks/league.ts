@@ -29,8 +29,7 @@ export const useUserLeagues = (leagueId: string | null = null) => {
   const isCommissioner = commissionerLeagues?.find((league) => league.id === (leagueId || id))
   const league = leagues?.find((lg) => lg.id === leagueId)
   const isMember = Boolean(league)
-
-  const team = league?.teams?.find((t) => t.teamUsers.map((tu) => tu.userId).includes(user.id))
+  const teamCount = league?.teams?.length
 
   return {
     isLoading,
@@ -40,6 +39,6 @@ export const useUserLeagues = (leagueId: string | null = null) => {
     isMember,
     defaultLeague,
     league,
-    team
+    teamCount
   }
 }

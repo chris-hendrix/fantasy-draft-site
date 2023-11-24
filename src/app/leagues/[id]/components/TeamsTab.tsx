@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { League } from '@prisma/client'
-import { useGetTeams, useDeleteTeam } from '@/hooks/team'
+import { useGetTeams, useDeleteTeam, useUserTeam } from '@/hooks/team'
 import { useUserLeagues } from '@/hooks/league'
 import TeamModal from '@/components/TeamModal'
 import Table, { TableColumn } from '@/components/Table'
@@ -20,8 +20,9 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
     include: { teamUsers: { include: { user: true } } },
     orderBy: { name: 'asc' }
   }, { skip: !league?.id })
+  const { team: userTeam } = useUserTeam(league.id as string)
   const { deleteObject: deleteTeam } = useDeleteTeam()
-  const { isCommissioner, team: userTeam } = useUserLeagues(league.id) // TODO userTeam
+  const { isCommissioner } = useUserLeagues(league.id)
   const [modalOpen, setModalOpen] = useState(false)
   const [editTeam, setEditTeam] = useState<TeamWithRelationships | null>(null)
 
@@ -43,7 +44,7 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
       }
     },
     {
-      renderedValue: ((team) => <>
+      renderedValue: ((team) => isCommissioner && <>
         <button className="btn btn-ghost btn-square btn-sm" onClick={() => setEditTeam(team)}>✏️</button>
         <button className="btn btn-ghost btn-square btn-sm" onClick={() => deleteTeam(team.id)}>🗑️</button>
       </>)
