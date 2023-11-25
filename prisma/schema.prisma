@@ -120,11 +120,14 @@ model Draft {
   id             String           @id @default(cuid())
   leagueId       String           @map("league_id")
   year           Int
+  draftTime      DateTime?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   league         League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftOrderSlot DraftOrderSlot[]
   draftSlots     DraftSlot[]
+
+  @@unique([leagueId, year], name: "LeagueYearUniqueConstraint")
 }
 
 model DraftOrderSlot {
