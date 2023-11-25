@@ -3,13 +3,9 @@ import { GET as getTeam, PUT as putTeam, DELETE as deleteTeam } from '@/app/api/
 import prisma from '@/lib/prisma'
 import { createNextRequest } from '../utils'
 import { createGetServerSessionMock } from './mocks'
-import { createLeague, createTeam, createUser } from '../factories'
+import { createLeague, createTeam } from '../factories'
 
 jest.mock('next-auth')
-
-const getTeamBody: () => { name: string; } = () => ({
-  name: `Team ${new Date().getTime()}`,
-})
 
 describe('/api/teams', () => {
   afterAll(async () => {
@@ -19,7 +15,7 @@ describe('/api/teams', () => {
   test('user create team', async () => {
     await createGetServerSessionMock()
     const league = await createLeague()
-    const body = { ...getTeamBody(), leagueId: league.id }
+    const body = { name: `Team ${new Date().getTime()}`, leagueId: league.id }
     const req = createNextRequest({ method: 'POST', body })
     const res = await postTeam(req)
     expect(res.status).toBe(200)
@@ -44,7 +40,7 @@ describe('/api/teams', () => {
 
   test('team user can update team', async () => {
     const user = await createGetServerSessionMock()
-    const team = await createTeam({ userId: user.id })
+    const team = await createTeam({ teamUsers: { create: [{ userId: user.id }] } })
     const updatedName = `Updated Team ${new Date().getTime()}`
     const req = createNextRequest({ method: 'PUT', body: { name: updatedName } })
     const res = await putTeam(req, { params: { id: team.id } })
@@ -56,8 +52,7 @@ describe('/api/teams', () => {
 
   test('team user cannot update different team', async () => {
     await createGetServerSessionMock()
-    const otherUser = await createUser()
-    const otherTeam = await createTeam({ userId: otherUser.id })
+    const otherTeam = await createTeam()
     const updatedName = `Updated Team ${new Date().getTime()}`
     const req = createNextRequest({ method: 'PUT', body: { name: updatedName } })
     const res = await putTeam(req, { params: { id: otherTeam.id } })
@@ -66,12 +61,7 @@ describe('/api/teams', () => {
 
   test('commissioner can delete league', async () => {
     const user = await createGetServerSessionMock()
-    const league = await prisma.league.create({
-      data: {
-        ...getTeamBody(),
-        commissioners: { create: [{ userId: user.id }] }
-      }
-    })
+    const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
     const team = await createTeam({ leagueId: league.id })
     const req = await createNextRequest({ method: 'DELETE' })
     const res = await deleteTeam(req, { params: { id: team?.id as string } })

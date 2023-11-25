@@ -1,10 +1,10 @@
+/* eslint-disable max-classes-per-file */
 import prisma from '@/lib/prisma'
-import { LeagueWithRelationships, TeamWithRelationships, DraftWithRelationships } from '@/types'
 import { generateHash } from '@/app/api/utils/hash'
-import { Team, Prisma, Sport } from '@prisma/client'
+import { Prisma, Sport } from '@prisma/client'
 import { TEST_EMAIL_DOMAIN } from './utils'
 
-export const createUser = async (data: any = {}) => {
+export const createUser = async (data: Partial<Prisma.UserUncheckedCreateInput> = {}) => {
   const datetime = new Date().getTime()
   const user = await prisma.user.create({
     data: {
@@ -18,7 +18,7 @@ export const createUser = async (data: any = {}) => {
   return user
 }
 
-export const createLeague = async (data: any = {}) => {
+export const createLeague = async (data: Partial<Prisma.LeagueUncheckedCreateInput> = {}) => {
   const league = await prisma.league.create({
     data: {
       name: `League ${new Date().getTime()}`,
@@ -26,42 +26,30 @@ export const createLeague = async (data: any = {}) => {
       ...data
     }
   })
-  return league as LeagueWithRelationships
+  return league
 }
 
-export const createTeam = async ({ createInput, userId, leagueId }: {
-  createInput?: Prisma.XOR<Prisma.TeamCreateInput, Prisma.TeamUncheckedCreateInput>,
-  userId?: string,
-  leagueId?: string
-} = {}): Promise<Partial<Team>> => {
-  const league = leagueId
-    ? await prisma.league.findUnique({ where: { id: leagueId } })
-    : await createLeague()
-
+export const createTeam = async (data: Partial<Prisma.TeamUncheckedCreateInput> = {}) => {
   const team = await prisma.team.create({
     data: {
-      ...createInput,
       name: `Team ${new Date().getTime()}`,
-      leagueId: league?.id as any,
+      leagueId: data?.leagueId || (await createLeague()).id,
+      teamUsers: data.teamUsers || { create: [{ userId: (await createUser()).id }] },
+      ...data,
     }
   })
-  if (userId) {
-    await prisma.teamUser.create({ data: { userId, teamId: team.id } })
-  }
-  return team as TeamWithRelationships
+  return team
 }
 
-export const createDraft = async ({ commissionerId }: {
-  commissionerId?: string,
-} = {}) => {
-  const league = await createLeague({
-    commissioners:
-      { create: [{ userId: commissionerId || (await createUser()).id }] }
-  })
+export const createDraft = async (data: Partial<Prisma.DraftUncheckedCreateInput> = {}) => {
   const draft = await prisma.draft.create({
-    data: { leagueId: league.id, year: (new Date()).getFullYear() }
+    data: {
+      year: data.year || (new Date()).getFullYear(),
+      leagueId: data.leagueId || (await createLeague()).id,
+      ...data
+    }
   })
-  return draft as DraftWithRelationships
+  return draft
 }
 
 export const getLeagueBody: () => { name: string; sport: Sport } = () => ({

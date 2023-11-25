@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import { GET as getDraft, PUT as putDraft, DELETE as deleteDraft } from '@/app/api/drafts/[id]/route'
 import { createNextRequest } from '../utils'
 import { createGetServerSessionMock } from './mocks'
-import { getLeagueBody, getDraftBody } from '../factories'
+import { createDraft, createLeague } from '../factories'
 
 jest.mock('next-auth')
 
@@ -14,10 +14,8 @@ describe('/api/drafts', () => {
 
   test('commissioner can create draft', async () => {
     const user = await createGetServerSessionMock()
-    const league = await prisma.league.create({
-      data: { ...getLeagueBody(), commissioners: { create: [{ userId: user.id }] } }
-    })
-    const body = { leagueId: league.id, ...getDraftBody() }
+    const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
+    const body = { leagueId: league.id, year: 2010 }
     const req = createNextRequest({ method: 'POST', body })
     const res = await postDraft(req)
     expect(res.status).toBe(200)
@@ -28,7 +26,7 @@ describe('/api/drafts', () => {
 
   test('non-commissioner cannot create draft', async () => {
     await createGetServerSessionMock()
-    const league = await prisma.league.create({ data: { ...getLeagueBody() } })
+    const league = await createLeague()
     const body = { leagueId: league.id, year: 2024 }
     const req = createNextRequest({ method: 'POST', body })
     const res = await postDraft(req)
@@ -42,9 +40,7 @@ describe('/api/drafts', () => {
   })
 
   test('draft can be retrieved by id', async () => {
-    const draft = await prisma.draft.create({
-      data: { ...getDraftBody(), league: { create: { ...getLeagueBody() } } }
-    })
+    const draft = await createDraft()
     const req = createNextRequest()
     const res = await getDraft(req, { params: { id: draft.id } })
     expect(res.status).toBe(200)
@@ -52,12 +48,8 @@ describe('/api/drafts', () => {
 
   test('commissioner can update draft', async () => {
     const user = await createGetServerSessionMock()
-    const draft = await prisma.draft.create({
-      data: {
-        ...getDraftBody(),
-        league: { create: { ...getLeagueBody(), commissioners: { create: [{ userId: user.id }] } } }
-      }
-    })
+    const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
+    const draft = await createDraft({ leagueId: league.id })
     const updatedYear = 2010
     const req = createNextRequest({ method: 'PUT', body: { year: updatedYear } })
     const res = await putDraft(req, { params: { id: draft.id } })
@@ -69,12 +61,7 @@ describe('/api/drafts', () => {
 
   test('non-commissioner cannot update draft', async () => {
     await createGetServerSessionMock()
-    const draft = await prisma.draft.create({
-      data: {
-        ...getDraftBody(),
-        league: { create: { ...getLeagueBody() } }
-      }
-    })
+    const draft = await createDraft()
     const updatedYear = 2010
     const req = createNextRequest({ method: 'PUT', body: { year: updatedYear } })
     const res = await putDraft(req, { params: { id: draft.id } })
@@ -83,12 +70,8 @@ describe('/api/drafts', () => {
 
   test('commissioner can delete draft', async () => {
     const user = await createGetServerSessionMock()
-    const draft = await prisma.draft.create({
-      data: {
-        ...getDraftBody(),
-        league: { create: { ...getLeagueBody(), commissioners: { create: [{ userId: user.id }] } } }
-      }
-    })
+    const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
+    const draft = await createDraft({ leagueId: league.id })
     const req = createNextRequest({ method: 'DELETE' })
     const res = await deleteDraft(req, { params: { id: draft.id } })
     expect(res.status).toBe(200)
@@ -99,9 +82,7 @@ describe('/api/drafts', () => {
 
   test('non commissioner can not delete draft', async () => {
     await createGetServerSessionMock()
-    const draft = await prisma.draft.create({
-      data: { ...getDraftBody(), league: { create: { ...getLeagueBody() } } }
-    })
+    const draft = await createDraft()
     const req = createNextRequest({ method: 'DELETE' })
     const res = await deleteDraft(req, { params: { id: draft.id } })
     expect(res.status).toBe(401)
