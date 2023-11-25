@@ -1,18 +1,22 @@
 'use client'
 
 import React, { useState, ChangeEvent } from 'react'
-import { League } from '@prisma/client'
+import { LeagueWithRelationships } from '@/types'
 import { useAddDraft, useGetDrafts } from '@/hooks/draft'
 import Tabs from '@/components/Tabs'
 import Modal from '@/components/Modal'
 import DraftPage from './DraftPage'
 
 interface Props {
-  league: Partial<League>;
+  league: Partial<LeagueWithRelationships>;
 }
 
 const DraftTab: React.FC<Props> = ({ league }) => {
-  const { data: drafts, refetch } = useGetDrafts({ where: { leagueId: league.id }, orderBy: { year: 'asc' } })
+  const { data: drafts, refetch } = useGetDrafts({
+    where: { leagueId: league.id },
+    include: { league: { include: { teams: true } } },
+    orderBy: { year: 'asc' }
+  })
   const { addObject: addDraft } = useAddDraft()
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -25,7 +29,10 @@ const DraftTab: React.FC<Props> = ({ league }) => {
 
   const handleAddDraft = async () => {
     if (selectedYear !== null) {
-      await addDraft({ year: selectedYear, leagueId: league.id })
+      await addDraft({
+        year: selectedYear,
+        leagueId: league.id
+      })
       refetch()
       setModalOpen(false)
       setSelectedYear(null)

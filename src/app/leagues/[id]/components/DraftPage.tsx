@@ -5,6 +5,7 @@ import { Draft } from '@prisma/client'
 import { useDeleteDraft } from '@/hooks/draft'
 import { useUserLeagues } from '@/hooks/league'
 import Modal from '@/components/Modal'
+import DraftOrder from './DraftOrder'
 
 interface Props {
   draft: Partial<Draft>;
@@ -22,6 +23,7 @@ const DraftPage: React.FC<Props> = ({ draft }) => {
 
   return (
     <div className="flex flex-col items-center mt-8">
+      <DraftOrder draft={draft} />
       {isCommissioner && <button className="btn btn-error" onClick={() => setModalOpen(true)}>
         Delete draft
       </button>}

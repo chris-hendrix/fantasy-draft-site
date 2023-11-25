@@ -15,7 +15,12 @@ interface LeaguePageProps {
 const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
   const { data: league, isLoading } = useGetLeague({
     id: params.id,
-    queryParams: { include: { commissioners: { include: { user: true } } } }
+    queryParams: {
+      include: {
+        commissioners: { include: { user: true } },
+        teams: true
+      }
+    }
   })
   const { isCommissioner } = useUserLeagues(params.id)
 
