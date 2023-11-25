@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
-import { LeagueWithRelationships } from '@/types'
+import { LeagueWithRelationships, TeamWithRelationships, DraftWithRelationships } from '@/types'
 import { generateHash } from '@/app/api/utils/hash'
-import { Team, Prisma } from '@prisma/client'
+import { Team, Prisma, Sport } from '@prisma/client'
 import { TEST_EMAIL_DOMAIN } from './utils'
 
 export const createUser = async (data: any = {}) => {
@@ -18,7 +18,7 @@ export const createUser = async (data: any = {}) => {
   return user
 }
 
-export const createLeague = async (data: any = {}): Promise<Partial<LeagueWithRelationships>> => {
+export const createLeague = async (data: any = {}) => {
   const league = await prisma.league.create({
     data: {
       name: `League ${new Date().getTime()}`,
@@ -26,7 +26,7 @@ export const createLeague = async (data: any = {}): Promise<Partial<LeagueWithRe
       ...data
     }
   })
-  return league
+  return league as LeagueWithRelationships
 }
 
 export const createTeam = async ({ createInput, userId, leagueId }: {
@@ -46,8 +46,29 @@ export const createTeam = async ({ createInput, userId, leagueId }: {
     }
   })
   if (userId) {
-    // @ts-ignore
     await prisma.teamUser.create({ data: { userId, teamId: team.id } })
   }
-  return team
+  return team as TeamWithRelationships
 }
+
+export const createDraft = async ({ commissionerId }: {
+  commissionerId?: string,
+} = {}) => {
+  const league = await createLeague({
+    commissioners:
+      { create: [{ userId: commissionerId || (await createUser()).id }] }
+  })
+  const draft = await prisma.draft.create({
+    data: { leagueId: league.id, year: (new Date()).getFullYear() }
+  })
+  return draft as DraftWithRelationships
+}
+
+export const getLeagueBody: () => { name: string; sport: Sport } = () => ({
+  name: `League ${new Date().getTime()}`,
+  sport: 'baseball'
+})
+
+export const getDraftBody: () => { year: number; } = () => ({
+  year: (new Date()).getFullYear()
+})

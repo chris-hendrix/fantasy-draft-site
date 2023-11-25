@@ -38,7 +38,7 @@ const logRequest = (req: NextRequest) => {
 }
 
 const logError = (error: any) => {
-  if (process.env.NODE_ENV === 'test') return
+  if (process.env.NODE_ENV === 'test' && error?.statusCode !== 500) return
   console.info(`Error:  ${JSON.stringify(error)}`)
   console.info('---')
 }
@@ -61,10 +61,10 @@ export const routeWrapper = (
     const response = {
       ...(process.env.NODE_ENV !== 'production' && { stack: error.stack }),
       message: error?.message || 'Server failure',
-      statusCode: error.statusCode,
+      statusCode: error?.statusCode || 500,
     }
     logError(response)
-    return NextResponse.json(response, { status: error.statusCode || 500 })
+    return NextResponse.json(response, { status: error.statusCode })
   }
 }
 

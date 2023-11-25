@@ -12,7 +12,7 @@
     "up": "docker-compose -f docker-compose.yml up -d && docker-compose logs -f",
     "down": "docker-compose -f docker-compose.yml down",
     "devtest": "NODE_ENV=test && next dev",
-    "jest": "NODE_ENV=test jest --config=test/jest/jest.config.ts --runInBand --forceExit --verbose",
+    "jest": "NODE_ENV=test jest --config=test/jest/jest.config.ts --runInBand --forceExit --verbose --silent=false",
     "cypress:open": "cypress open --config-file test/cypress/cypress.config.ts",
     "cypress": "cypress run --config-file test/cypress/cypress.config.ts",
     "seed": "ts-node ./prisma/seed.ts",
