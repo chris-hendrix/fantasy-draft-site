@@ -9,4 +9,4 @@ export const {
   useAddObject: useAddDraft,
   useUpdateObject: useUpdateDraft,
   useDeleteObject: useDeleteDraft
-} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs, Prisma.DraftUpdateArgs>(draftApi)
+} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs, Prisma.DraftUpdateInput>(draftApi)

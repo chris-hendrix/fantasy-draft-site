@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DraftArgs, DraftOrderSlotArgs } from '@/types'
+import { useUpdateDraft } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 
@@ -11,6 +12,7 @@ interface Props {
 const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   const initialSlots = draft.draftOrderSlots || []
   const [slots, setSlots] = useState<Partial<DraftOrderSlotArgs>[]>(initialSlots)
+  const { updateObject: updateDraft } = useUpdateDraft()
 
   const handleMove = (slotId: string, direction: 'up' | 'down') => {
     const currentIndex = slots.findIndex((slot) => slot.id === slotId)
@@ -25,10 +27,18 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     }
   }
 
-  const handleSave = () => {
-    console.log(slots) // TODO: Save logic
+  const handleSave = async () => {
+    const slotData = slots.map((slot, i) => ({ teamId: String(slot.teamId), order: i }))
+    const res = await updateDraft({
+      id: draft.id,
+      draftOrderSlots: {
+        deleteMany: {},
+        createMany: { data: slotData }
+      }
+    })
+    if ('error' in res) return
+    onClose()
   }
-
   const columns: TableColumn<Partial<DraftOrderSlotArgs>>[] = [
     {
       name: 'Team name',
