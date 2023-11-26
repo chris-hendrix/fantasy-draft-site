@@ -93,6 +93,7 @@ model Team {
   id              String           @id @default(cuid())
   leagueId        String
   name            String
+  archived        Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
@@ -117,15 +118,15 @@ model TeamUser {
 }
 
 model Draft {
-  id             String           @id @default(cuid())
-  leagueId       String           @map("league_id")
-  year           Int
-  draftTime      DateTime?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  league         League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  draftOrderSlot DraftOrderSlot[]
-  draftSlots     DraftSlot[]
+  id              String           @id @default(cuid())
+  leagueId        String           @map("league_id")
+  year            Int
+  draftTime       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  draftOrderSlots DraftOrderSlot[]
+  draftSlots      DraftSlot[]
 
   @@unique([leagueId, year], name: "LeagueYearUniqueConstraint")
 }

@@ -8,7 +8,7 @@ import { useUserLeagues } from '@/hooks/league'
 import TeamModal from '@/components/TeamModal'
 import Table, { TableColumn } from '@/components/Table'
 import Card from '@/components/Card'
-import { TeamWithRelationships } from '@/types'
+import { TeamArgs } from '@/types'
 import { formatDate } from '@/utils/date'
 
 interface Props {
@@ -25,9 +25,9 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
   const { deleteObject: deleteTeam } = useDeleteTeam()
   const { isCommissioner } = useUserLeagues(league.id)
   const [modalOpen, setModalOpen] = useState(false)
-  const [editTeam, setEditTeam] = useState<TeamWithRelationships | null>(null)
+  const [editTeam, setEditTeam] = useState<TeamArgs | null>(null)
 
-  const columns: TableColumn<TeamWithRelationships>[] = [
+  const columns: TableColumn<TeamArgs>[] = [
     {
       name: 'Name',
       value: (team) => team.name

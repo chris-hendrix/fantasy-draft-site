@@ -1,5 +1,5 @@
 import { draftApi } from '@/store/draft'
-import { DraftWithRelationships } from '@/types'
+import { DraftArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 
@@ -9,4 +9,4 @@ export const {
   useAddObject: useAddDraft,
   useUpdateObject: useUpdateDraft,
   useDeleteObject: useDeleteDraft
-} = getCrudHooks<DraftWithRelationships, Prisma.DraftFindManyArgs>(draftApi)
+} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs>(draftApi)

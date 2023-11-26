@@ -1,6 +1,6 @@
 import { teamApi } from '@/store/team'
 import { Prisma } from '@prisma/client'
-import { TeamWithRelationships } from '@/types'
+import { TeamArgs } from '@/types'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useSessionUser } from './user'
 
@@ -10,7 +10,7 @@ export const {
   useAddObject: useAddTeam,
   useUpdateObject: useUpdateTeam,
   useDeleteObject: useDeleteTeam
-} = getCrudHooks<TeamWithRelationships & {
+} = getCrudHooks<TeamArgs & {
   inviteEmail?: string,
   acceptEmail?: string,
   declineEmail?: string

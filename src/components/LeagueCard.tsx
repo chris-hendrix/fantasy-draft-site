@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { LeagueWithRelationships } from '@/types'
+import { LeagueArgs } from '@/types'
 import { formatDate } from '@/utils/date'
 import { useUserLeagues } from '@/hooks/league'
 import LeagueModal from '@/components/LeagueModal'
 import Card from '@/components/Card'
 
 interface LeagueCardProps {
-  league: Partial<LeagueWithRelationships>
+  league: Partial<LeagueArgs>
 }
 
 const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {

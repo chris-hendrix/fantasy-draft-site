@@ -1,5 +1,5 @@
 import { leagueApi } from '@/store/league'
-import { LeagueWithRelationships } from '@/types'
+import { LeagueArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { useParams } from 'next/navigation'
 import { getCrudHooks } from '@/utils/getCrudHooks'
@@ -11,7 +11,7 @@ export const {
   useAddObject: useAddLeague,
   useUpdateObject: useUpdateLeague,
   useDeleteObject: useDeleteLeague
-} = getCrudHooks<LeagueWithRelationships, Prisma.LeagueFindManyArgs>(leagueApi)
+} = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs>(leagueApi)
 
 export const useUserLeagues = (leagueId: string | null = null) => {
   const { user } = useSessionUser()

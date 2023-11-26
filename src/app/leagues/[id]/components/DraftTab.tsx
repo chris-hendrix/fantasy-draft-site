@@ -1,20 +1,19 @@
 'use client'
 
 import React, { useState, ChangeEvent } from 'react'
-import { LeagueWithRelationships } from '@/types'
+import { LeagueArgs } from '@/types'
 import { useAddDraft, useGetDrafts } from '@/hooks/draft'
 import Tabs from '@/components/Tabs'
 import Modal from '@/components/Modal'
 import DraftPage from './DraftPage'
 
 interface Props {
-  league: Partial<LeagueWithRelationships>;
+  league: Partial<LeagueArgs>;
 }
 
 const DraftTab: React.FC<Props> = ({ league }) => {
   const { data: drafts, refetch } = useGetDrafts({
     where: { leagueId: league.id },
-    include: { league: { include: { teams: true } } },
     orderBy: { year: 'asc' }
   })
   const { addObject: addDraft } = useAddDraft()
@@ -41,7 +40,7 @@ const DraftTab: React.FC<Props> = ({ league }) => {
 
   const tabs = drafts?.map((d, i) => ({
     name: String(d.year),
-    component: <DraftPage draft={d} />,
+    component: <DraftPage draftId={d.id} />,
     default: i + 1 === drafts.length,
   })) || []
 

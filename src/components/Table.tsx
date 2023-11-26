@@ -3,7 +3,7 @@ import React from 'react'
 export interface TableColumn<T> {
   name?: string;
   renderedValue?: (rowData: T) => React.ReactNode;
-  value?: (rowData: T) => string | number | null;
+  value?: (rowData: T) => string | number | null | undefined;
 }
 
 interface Props<T> {

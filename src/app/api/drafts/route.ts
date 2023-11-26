@@ -15,6 +15,13 @@ export const POST = routeWrapper(async (req: NextRequest) => {
   const data: any = req.consumedBody
   if (!data.leagueId) throw new ApiError('Must have league id', 400)
   await checkLeagueCommissioner(data.leagueId)
-  const draft = await prisma.draft.create({ data })
+  const teams = await prisma.team.findMany({ where: { leagueId: data.leagueId, archived: false } })
+
+  const draft = await prisma.draft.create({
+    data: {
+      draftOrderSlots: { create: teams.map((t, i) => ({ teamId: t.id, order: i })) },
+      ...data
+    },
+  })
   return NextResponse.json(draft)
 })

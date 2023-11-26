@@ -1,28 +1,43 @@
-import { User, Commissioner, Draft, League, Team, TeamUser } from '@prisma/client'
+import {
+  User,
+  Commissioner,
+  Draft,
+  DraftOrderSlot,
+  League,
+  Team,
+  TeamUser
+} from '@prisma/client'
 
-export interface CommissionerWithRelationships extends Commissioner {
+export interface CommissionerArgs extends Commissioner {
   league: League
   user: User
 }
 
-export interface UserWithCommissioners extends User {
-  commissioners: CommissionerWithRelationships[];
+export interface UserArgs extends User {
+  commissioners: CommissionerArgs[];
 }
 
-export interface LeagueWithRelationships extends League {
-  commissioners: CommissionerWithRelationships[]
-  teams: TeamWithRelationships[]
+export interface LeagueArgs extends League {
+  commissioners: CommissionerArgs[]
+  teams: TeamArgs[]
 }
 
-export interface TeamUserWithRelationships extends TeamUser {
+export interface TeamUserArgs extends TeamUser {
   user: User
 }
 
-export interface TeamWithRelationships extends Team {
-  teamUsers: TeamUserWithRelationships[]
-  league: LeagueWithRelationships
+export interface TeamArgs extends Team {
+  teamUsers: TeamUserArgs[]
+  league: LeagueArgs
 }
 
-export interface DraftWithRelationships extends Draft {
-  league: LeagueWithRelationships
+export interface DraftArgs extends Draft {
+  league: LeagueArgs
+  draftOrderSlots: DraftOrderSlot[]
+}
+
+export interface DraftOrderSlotArgs extends DraftOrderSlot {
+  league: LeagueArgs
+  draftOrderSlots: DraftOrderSlot[]
+  team: TeamArgs
 }
