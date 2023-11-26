@@ -13,7 +13,9 @@ interface Props {
 const DraftPage: React.FC<Props> = ({ draftId }) => {
   const { data: draft } = useGetDraft({
     id: draftId,
-    queryParams: { include: { draftOrderSlots: { include: { team: true } } } }
+    queryParams: {
+      include: { draftOrderSlots: { include: { team: true }, orderBy: { order: 'asc' } } }
+    }
   })
   const { deleteObject: deleteLeague } = useDeleteDraft()
   const [modalOpen, setModalOpen] = useState(false)
