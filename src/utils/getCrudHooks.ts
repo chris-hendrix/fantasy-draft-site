@@ -63,7 +63,7 @@ interface CrudOperationsArgs {
   useDeleteObjectMutation: () => any,
 }
 
-export const getCrudHooks = <Object, PrismaFindManyArgs>({
+export const getCrudHooks = <Object, FindManyArgs, UpdateInput>({
   useGetObjectQuery,
   useGetObjectsQuery,
   useAddObjectMutation,
@@ -71,7 +71,7 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
   useDeleteObjectMutation,
 }: CrudOperationsArgs) => {
   const useGetObject = (
-    { id, queryParams }: { id: string, queryParams?: PrismaFindManyArgs },
+    { id, queryParams }: { id: string, queryParams?: FindManyArgs },
     options: CrudHookOptions = {}
   ) => {
     const { data, isLoading, isSuccess, error, refetch, }: {
@@ -87,7 +87,7 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
     return { data, isLoading, isSuccess, error, refetch }
   }
 
-  const useGetObjects = (queryParams: PrismaFindManyArgs, options: CrudHookOptions = {}) => {
+  const useGetObjects = (queryParams: FindManyArgs, options: CrudHookOptions = {}) => {
     const { data, isLoading, isSuccess, error, refetch }: {
       data: Object[];
       isLoading: boolean;
@@ -116,7 +116,7 @@ export const getCrudHooks = <Object, PrismaFindManyArgs>({
 
   const useUpdateObject = (options: CrudHookOptions = {}) => {
     const [updateObject, { isLoading, isSuccess, error }]: [
-      (obj: Partial<Object>) => Promise<Object>, {
+      (updateInput: UpdateInput) => Promise<Object>, {
         isLoading: boolean;
         isSuccess: boolean;
         error: any;

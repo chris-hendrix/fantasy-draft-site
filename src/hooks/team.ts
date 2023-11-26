@@ -14,7 +14,7 @@ export const {
   inviteEmail?: string,
   acceptEmail?: string,
   declineEmail?: string
-}, Prisma.TeamFindManyArgs>(teamApi)
+}, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput>(teamApi)
 
 export const useInviteTeams = () => {
   const { user } = useSessionUser()

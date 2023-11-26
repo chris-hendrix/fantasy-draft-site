@@ -11,7 +11,7 @@ export const {
   useAddObject: useAddLeague,
   useUpdateObject: useUpdateLeague,
   useDeleteObject: useDeleteLeague
-} = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs>(leagueApi)
+} = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs, Prisma.LeagueUpdateInput>(leagueApi)
 
 export const useUserLeagues = (leagueId: string | null = null) => {
   const { user } = useSessionUser()

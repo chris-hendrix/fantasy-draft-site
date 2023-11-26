@@ -4,7 +4,7 @@ interface BaseObject {
   id: string;
 }
 
-export function createObjectApi<Object extends BaseObject>(url: string) {
+export function createObjectApi<Object extends BaseObject, UpdateInput>(url: string) {
   const reducerPath = `${url}Api`
 
   return createApi({
@@ -31,7 +31,7 @@ export function createObjectApi<Object extends BaseObject>(url: string) {
         }),
         invalidatesTags: (item) => [{ type: url, id: item?.id }],
       }),
-      updateObject: build.mutation({
+      updateObject: build.mutation<Object, { id: string, updateInput: UpdateInput }>({
         query: (data) => ({
           url: `${url}/${data?.id}`,
           method: 'PUT',

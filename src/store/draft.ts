@@ -1,7 +1,7 @@
 import { createObjectApi } from '@/utils/createObjectApi'
-import { Draft } from '@prisma/client'
+import { Draft, Prisma } from '@prisma/client'
 
-export const draftApi = createObjectApi<Draft>('drafts')
+export const draftApi = createObjectApi<Draft, Prisma.DraftUpdateInput>('drafts')
 
 export const {
   useGetObjectQuery,
