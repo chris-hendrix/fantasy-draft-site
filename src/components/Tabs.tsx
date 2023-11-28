@@ -48,7 +48,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onAdd, width = 'full' }) => {
         ))}
         {onAdd && <a role="tab" className="tab" onClick={onAdd}>+</a>}
       </div>
-      {tabs[tabIndex].component}
+      {tabs[tabIndex]?.component}
     </div>
   )
 }

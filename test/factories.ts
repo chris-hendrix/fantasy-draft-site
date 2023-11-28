@@ -45,6 +45,7 @@ export const createDraft = async (data: Partial<Prisma.DraftUncheckedCreateInput
   const draft = await prisma.draft.create({
     data: {
       year: data.year || (new Date()).getFullYear(),
+      rounds: 22,
       leagueId: data.leagueId || (await createLeague()).id,
       ...data
     }

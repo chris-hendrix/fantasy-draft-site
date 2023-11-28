@@ -12,13 +12,17 @@ interface Props {
 }
 
 const DraftTab: React.FC<Props> = ({ league }) => {
+  const currentYear = new Date().getFullYear()
+  const defaultRounds = 22
+
   const { data: drafts, refetch } = useGetDrafts({
     where: { leagueId: league.id },
     orderBy: { year: 'asc' }
   })
   const { addObject: addDraft } = useAddDraft()
   const [modalOpen, setModalOpen] = useState(false)
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear)
+  const [rounds, setRounds] = useState<number>(defaultRounds)
 
   const yearsToExclude = drafts?.map((d) => d.year) || []
   const years = Array.from(
@@ -29,12 +33,14 @@ const DraftTab: React.FC<Props> = ({ league }) => {
   const handleAddDraft = async () => {
     if (selectedYear !== null) {
       await addDraft({
+        rounds,
         year: selectedYear,
         leagueId: league.id
       })
       refetch()
       setModalOpen(false)
-      setSelectedYear(null)
+      setSelectedYear(currentYear)
+      setRounds(defaultRounds)
     }
   }
 
@@ -46,9 +52,10 @@ const DraftTab: React.FC<Props> = ({ league }) => {
 
   return (
     <div className="flex flex-col items-center mt-3">
-      {tabs.length > 0 && <Tabs tabs={tabs} onAdd={() => setModalOpen(true)} width="full" />}
+      <Tabs tabs={tabs} onAdd={() => setModalOpen(true)} width="full" />
       {modalOpen && (
         <Modal title="Add draft" size="xs" onClose={() => setModalOpen(false)}>
+          <div>Year</div>
           <select
             className="select select-bordered w-full"
             value={selectedYear || ''}
@@ -65,6 +72,14 @@ const DraftTab: React.FC<Props> = ({ league }) => {
               </option>
             ))}
           </select>
+          <div className="mt-2">Rounds</div>
+          <input
+            type="number"
+            className="input input-bordered w-full"
+            placeholder="Rounds"
+            value={rounds}
+            onChange={(e) => setRounds(Number(e.target.value))}
+          />
           <div className="flex justify-end mt-2">
             <button onClick={handleAddDraft} className="btn btn-error w-32 mr-2">
               Yes

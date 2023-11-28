@@ -99,7 +99,7 @@ model Team {
   league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   teamUsers       TeamUser[]
   draftOrderSlots DraftOrderSlot[]
-  draftSlots      DraftSlot[]
+  draftPicks      DraftPick[]
 
   @@unique([leagueId, name])
 }
@@ -121,12 +121,13 @@ model Draft {
   id              String           @id @default(cuid())
   leagueId        String           @map("league_id")
   year            Int
+  rounds          Int
   draftTime       DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftOrderSlots DraftOrderSlot[]
-  draftSlots      DraftSlot[]
+  draftPicks      DraftPick[]
 
   @@unique([leagueId, year], name: "LeagueYearUniqueConstraint")
 }
@@ -142,7 +143,7 @@ model DraftOrderSlot {
   @@unique([draftId, teamId])
 }
 
-model DraftSlot {
+model DraftPick {
   id       String  @id @default(cuid())
   pick     Int
   draftId  String  @map("draft_id")
@@ -153,6 +154,7 @@ model DraftSlot {
   player   Player? @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
 
   @@unique([draftId, pick])
+  @@unique([draftId, playerId])
 }
 
 model Player {
@@ -160,8 +162,8 @@ model Player {
   slug       String
   name       String
   year       Int
-  data       Json
-  draftSlots DraftSlot[]
+  data       Json?
+  draftSlots DraftPick[]
 }
 
 enum Sport {

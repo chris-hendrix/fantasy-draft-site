@@ -14,6 +14,8 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   const [slots, setSlots] = useState<Partial<DraftOrderSlotArgs>[]>(initialSlots)
   const { updateObject: updateDraft } = useUpdateDraft()
 
+  const slotData = slots?.map((slot, i) => ({ teamId: String(slot.teamId), order: i }))
+
   const handleMove = (slotId: string, direction: 'up' | 'down') => {
     const currentIndex = slots.findIndex((slot) => slot.id === slotId)
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
@@ -28,7 +30,6 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   }
 
   const handleSave = async () => {
-    const slotData = slots.map((slot, i) => ({ teamId: String(slot.teamId), order: i }))
     const res = await updateDraft({
       id: draft.id,
       draftOrderSlots: {
@@ -39,6 +40,28 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     if ('error' in res) return
     onClose()
   }
+
+  const handleGenerate = async () => {
+    const rounds = draft?.rounds || 0
+    const pickData = Array.from(
+      { length: rounds },
+      () => slotData.map((s) => (s.teamId))
+    ).flat().map((teamId, i) => ({ teamId, pick: i + 1 }))
+    const res = await updateDraft({
+      id: draft.id,
+      draftOrderSlots: {
+        deleteMany: {},
+        createMany: { data: slotData }
+      },
+      draftPicks: {
+        deleteMany: {},
+        createMany: { data: pickData }
+      }
+    })
+    if ('error' in res) return
+    onClose()
+  }
+
   const columns: TableColumn<Partial<DraftOrderSlotArgs>>[] = [
     {
       name: 'Team name',
@@ -68,6 +91,9 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     <Modal title="Edit draft order" onClose={onClose}>
       <Table columns={columns} data={slots || []} />
       <div className="flex justify-end mt-2">
+        <button onClick={handleGenerate} className="btn btn-secondary w-32 mr-2">
+          Generate draft
+        </button>
         <button onClick={handleSave} className="btn btn-primary w-32 mr-2">
           Save
         </button>
