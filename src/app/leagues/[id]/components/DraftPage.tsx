@@ -5,6 +5,7 @@ import { useDeleteDraft, useGetDraft } from '@/hooks/draft'
 import { useUserLeagues } from '@/hooks/league'
 import Modal from '@/components/Modal'
 import DraftOrderModal from './DraftOrderModal'
+import DraftPickTable from './DraftPickTable'
 
 interface Props {
   draftId: string;
@@ -14,7 +15,11 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const { data: draft } = useGetDraft({
     id: draftId,
     queryParams: {
-      include: { draftOrderSlots: { include: { team: true }, orderBy: { order: 'asc' } } }
+      include: {
+        // league: { include: { teams: { where: { archived: false } } } },
+        draftOrderSlots: { include: { team: true }, orderBy: { order: 'asc' } },
+        draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } }
+      }
     }
   })
   const { deleteObject: deleteLeague } = useDeleteDraft()
@@ -35,13 +40,14 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             className="btn btn-sm mr-2"
             onClick={() => setDraftOrderModalOpen(true)}
           >
-            🔢 Draft order
+            🔄 Generate
           </button>
           <button className="btn btn-sm btn-error" onClick={() => setModalOpen(true)}>
             🗑️ Delete draft
           </button>
         </div>
       }
+      <DraftPickTable draft={draft} />
       {modalOpen &&
         <Modal title="Are you sure?" size="xs" onClose={() => setModalOpen(false)}>
           <div>This cannot be undone.</div>

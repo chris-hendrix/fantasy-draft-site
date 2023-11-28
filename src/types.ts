@@ -3,6 +3,7 @@ import {
   Commissioner,
   Draft,
   DraftOrderSlot,
+  DraftPick,
   League,
   Team,
   TeamUser
@@ -33,11 +34,16 @@ export interface TeamArgs extends Team {
 
 export interface DraftArgs extends Draft {
   league: LeagueArgs
-  draftOrderSlots: DraftOrderSlot[]
+  draftOrderSlots: DraftOrderSlotArgs[]
+  draftPicks: DraftPickArgs[]
 }
 
 export interface DraftOrderSlotArgs extends DraftOrderSlot {
   league: LeagueArgs
-  draftOrderSlots: DraftOrderSlot[]
+  team: TeamArgs
+}
+
+export interface DraftPickArgs extends DraftPick {
+  league: LeagueArgs
   team: TeamArgs
 }

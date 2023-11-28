@@ -3,6 +3,7 @@ import { DraftArgs, DraftOrderSlotArgs } from '@/types'
 import { useUpdateDraft } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface Props {
   draft: Partial<DraftArgs>;
@@ -13,6 +14,8 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   const initialSlots = draft.draftOrderSlots || []
   const [slots, setSlots] = useState<Partial<DraftOrderSlotArgs>[]>(initialSlots)
   const { updateObject: updateDraft } = useUpdateDraft()
+  const [confirmSave, setConfirmSave] = useState(false)
+  const [confirmGenerate, setConfirmGenerate] = useState(false)
 
   const slotData = slots?.map((slot, i) => ({ teamId: String(slot.teamId), order: i }))
 
@@ -35,6 +38,9 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
       draftOrderSlots: {
         deleteMany: {},
         createMany: { data: slotData }
+      },
+      draftPicks: {
+        deleteMany: {}
       }
     })
     if ('error' in res) return
@@ -46,7 +52,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     const pickData = Array.from(
       { length: rounds },
       () => slotData.map((s) => (s.teamId))
-    ).flat().map((teamId, i) => ({ teamId, pick: i + 1 }))
+    ).flat().map((teamId, i) => ({ teamId, overall: i + 1 }))
     const res = await updateDraft({
       id: draft.id,
       draftOrderSlots: {
@@ -87,14 +93,22 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     },
   ]
 
+  if (confirmSave || confirmGenerate) {
+    return <ConfirmModal
+      onConfirm={confirmSave ? handleSave : handleGenerate}
+      onClose={() => (confirmSave ? setConfirmSave : setConfirmGenerate)(false)}>
+      This will delete existing draft data. Continue?
+    </ConfirmModal>
+  }
+
   return (
     <Modal title="Edit draft order" onClose={onClose}>
       <Table columns={columns} data={slots || []} />
       <div className="flex justify-end mt-2">
-        <button onClick={handleGenerate} className="btn btn-secondary w-32 mr-2">
+        <button onClick={() => setConfirmGenerate(true)} className="btn btn-secondary w-32 mr-2">
           Generate draft
         </button>
-        <button onClick={handleSave} className="btn btn-primary w-32 mr-2">
+        <button onClick={() => setConfirmSave(true)} className="btn btn-primary w-32 mr-2">
           Save
         </button>
         <button onClick={onClose} className="btn w-32">

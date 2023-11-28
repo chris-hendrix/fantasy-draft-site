@@ -145,7 +145,7 @@ model DraftOrderSlot {
 
 model DraftPick {
   id       String  @id @default(cuid())
-  pick     Int
+  overall  Int
   draftId  String  @map("draft_id")
   teamId   String  @map("team_id")
   playerId String? @map("player_id")
@@ -153,7 +153,7 @@ model DraftPick {
   team     Team    @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   player   Player? @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
 
-  @@unique([draftId, pick])
+  @@unique([draftId, overall])
   @@unique([draftId, playerId])
 }
 

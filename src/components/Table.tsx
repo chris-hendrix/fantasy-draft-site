@@ -9,9 +9,10 @@ export interface TableColumn<T> {
 interface Props<T> {
   columns: TableColumn<T>[];
   data: T[];
+  xs?: boolean
 }
 
-const Table = <T extends {}>({ columns, data }: Props<T>) => {
+const Table = <T extends {}>({ columns, data, xs = false }: Props<T>) => {
   const renderColumn = (row: T, column: TableColumn<T>) => {
     if (column.renderedValue) return column.renderedValue(row)
     if (column.value) return column.value(row)
@@ -19,7 +20,7 @@ const Table = <T extends {}>({ columns, data }: Props<T>) => {
   }
   return (
     <div className="overflow-x-auto w-full">
-      <table className="table">
+      <table className={`table${xs ? ' table-xs' : ''}`}>
         <thead>
           <tr>
             {columns.map((column, index) => (
