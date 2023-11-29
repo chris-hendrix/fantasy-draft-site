@@ -4,6 +4,7 @@ import { useUpdateDraft } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
+import MoveButtons from './MoveButtons'
 
 interface Props {
   draft: Partial<DraftArgs>;
@@ -18,19 +19,6 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   const [confirmGenerate, setConfirmGenerate] = useState(false)
 
   const slotData = slots?.map((slot, i) => ({ teamId: String(slot.teamId), order: i }))
-
-  const handleMove = (slotId: string, direction: 'up' | 'down') => {
-    const currentIndex = slots.findIndex((slot) => slot.id === slotId)
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-
-    if (currentIndex >= 0 && newIndex >= 0 && newIndex < slots.length) {
-      const updatedSlots = [...slots];
-      [updatedSlots[currentIndex], updatedSlots[newIndex]] = [
-        updatedSlots[newIndex], updatedSlots[currentIndex]
-      ]
-      setSlots(updatedSlots)
-    }
-  }
 
   const handleSave = async () => {
     const res = await updateDraft({
@@ -74,16 +62,11 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
       value: (slot) => slot?.team?.name,
       renderedValue: (slot) => (
         <>
-          <button
-            onClick={() => handleMove(String(slot.id), 'up')}
-            className="btn btn-xs btn-ghost btn-square">
-            ⬆️
-          </button>
-          <button
-            onClick={() => handleMove(String(slot.id), 'down')}
-            className="btn btn-xs btn-ghost btn-square mr-1">
-            ⬇️
-          </button>
+          <MoveButtons
+            indexToMove={slots.findIndex((s) => s.id === slot.id)}
+            array={slots}
+            setArray={setSlots}
+          />
           {slot?.team?.name}
         </>)
     },
