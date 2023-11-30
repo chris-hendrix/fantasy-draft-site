@@ -39,7 +39,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
         <div className="flex mb-2">
           <button
             className="btn btn-sm mr-2 w-32"
-            onClick={() => setEdit(true)}
+            onClick={() => setEdit(!edit)}
           >
             📝 Edit
           </button>
