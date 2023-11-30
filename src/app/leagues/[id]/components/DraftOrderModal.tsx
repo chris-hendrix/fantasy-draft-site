@@ -32,7 +32,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
       }
     })
     if ('error' in res) return
-    onClose()
+    setConfirmSave(false)
   }
 
   const handleGenerate = async () => {

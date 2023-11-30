@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DraftArgs, DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import MoveButtons from './MoveButtons'
@@ -13,6 +13,8 @@ interface Props {
 const DraftPickTable: React.FC<Props> = ({ draft, edit = false }) => {
   const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
+
+  useEffect(() => { setDraftPicks(draft?.draftPicks || []) }, [draft?.draftPicks])
 
   const formatRoundPick = (pick: Partial<DraftPickArgs>) => {
     const getRound = () => 1 + Math.floor((pick?.overall || 0) / teamsCount)
