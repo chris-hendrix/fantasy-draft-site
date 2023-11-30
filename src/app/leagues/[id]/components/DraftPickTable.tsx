@@ -17,8 +17,9 @@ const DraftPickTable: React.FC<Props> = ({ draft, edit = false }) => {
   useEffect(() => { setDraftPicks(draft?.draftPicks || []) }, [draft?.draftPicks])
 
   const formatRoundPick = (pick: Partial<DraftPickArgs>) => {
-    const getRound = () => 1 + Math.floor((pick?.overall || 0) / teamsCount)
-    const getRoundPick = () => 1 + ((pick?.overall || 0) % teamsCount)
+    const overall = pick?.overall || 0
+    const getRound = () => Math.floor((overall - 1) / teamsCount) + 1
+    const getRoundPick = () => ((overall - 1) % teamsCount) + 1
     const round = String(getRound()).padStart(2, '0')
     const roundPick = String(getRoundPick()).padStart(2, '0')
     return `${round}:${roundPick}`
