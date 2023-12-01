@@ -7,14 +7,16 @@ import MoveButtons from './MoveButtons'
 
 interface Props {
   draft: Partial<DraftArgs>;
-  edit?: boolean
+  edit?: boolean;
+  draftPicksCallback?: (draftPicks: Partial<DraftPickArgs>[]) => void
 }
 
-const DraftPickTable: React.FC<Props> = ({ draft, edit = false }) => {
+const DraftPickTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallback }) => {
   const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
 
   useEffect(() => { setDraftPicks(draft?.draftPicks || []) }, [draft?.draftPicks])
+  useEffect(() => { draftPicksCallback && draftPicksCallback(draftPicks) }, [draftPicks])
 
   const formatRoundPick = (pick: Partial<DraftPickArgs>) => {
     const overall = pick?.overall || 0
