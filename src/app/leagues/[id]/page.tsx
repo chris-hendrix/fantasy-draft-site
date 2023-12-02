@@ -6,6 +6,7 @@ import NotFound from '@/app/not-found'
 import LeagueTab from './components/LeagueTab'
 import TeamsTab from './components/TeamsTab'
 import DraftTab from './components/DraftTab'
+import PlayerTab from './components/PlayerTab'
 import CommissionerTab from './components/CommissionerTab'
 
 interface LeaguePageProps {
@@ -33,6 +34,7 @@ const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
     { hash: 'draft', name: 'Draft', component: <DraftTab league={league} /> },
     { hash: 'keepers', name: 'Keepers', component: <>Keepers</> },
     { hash: 'history', name: 'History', component: <>History</> },
+    ...(isCommissioner ? [{ hash: 'players', name: 'Players', component: <PlayerTab league={league} /> }] : []),
     ...(isCommissioner ? [{ hash: 'commissioner', name: 'Commissioner', component: <CommissionerTab league={league} /> }] : []),
   ]
 

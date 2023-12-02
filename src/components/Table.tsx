@@ -31,7 +31,7 @@ const Table = <T extends {}>({ columns, data, xs = false }: Props<T>) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((row, rowIndex) => (
+          {data?.map((row, rowIndex) => (
             <tr key={rowIndex} className={'hover'}>
               {visibleColumns.map((column, colIndex) => (
                 <td key={colIndex}>{renderColumn(row, column)}</td>))}

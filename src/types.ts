@@ -5,6 +5,7 @@ import {
   DraftOrderSlot,
   DraftPick,
   League,
+  Player,
   Team,
   TeamUser
 } from '@prisma/client'
@@ -46,4 +47,8 @@ export interface DraftOrderSlotArgs extends DraftOrderSlot {
 export interface DraftPickArgs extends DraftPick {
   league: LeagueArgs
   team: TeamArgs
+}
+
+export interface PlayerArgs extends Player {
+  league: LeagueArgs
 }
