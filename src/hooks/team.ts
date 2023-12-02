@@ -10,8 +10,9 @@ export const {
   useAddObject: useAddTeam,
   useUpdateObject: useUpdateTeam,
   useDeleteObject: useDeleteTeam
-} = getCrudHooks<TeamArgs, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput & {
-  inviteEmail?: string,
+} = getCrudHooks<TeamArgs & {
+  inviteEmail?: string
+}, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput & {
   acceptEmail?: string,
   declineEmail?: string
 }>(teamApi)
