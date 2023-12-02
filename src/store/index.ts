@@ -6,6 +6,7 @@ import { sessionApi } from './session'
 import { storageApi } from './storage'
 import { leagueApi } from './league'
 import { teamApi } from './team'
+import { draftApi } from './draft'
 
 export const makeStore = () => configureStore({
   // @ts-ignore
@@ -15,7 +16,8 @@ export const makeStore = () => configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [storageApi.reducerPath]: storageApi.reducer,
     [leagueApi.reducerPath]: leagueApi.reducer,
-    [teamApi.reducerPath]: teamApi.reducer
+    [teamApi.reducerPath]: teamApi.reducer,
+    [draftApi.reducerPath]: draftApi.reducer
   },
   // @ts-ignore
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat([
@@ -23,7 +25,8 @@ export const makeStore = () => configureStore({
     userApi.middleware,
     storageApi.middleware,
     leagueApi.middleware,
-    teamApi.middleware
+    teamApi.middleware,
+    draftApi.middleware
   ]),
   devTools: process.env.NODE_ENV !== 'production'
 })

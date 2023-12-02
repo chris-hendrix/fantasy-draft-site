@@ -1,5 +1,5 @@
 import { leagueApi } from '@/store/league'
-import { LeagueWithRelationships } from '@/types'
+import { LeagueArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { useParams } from 'next/navigation'
 import { getCrudHooks } from '@/utils/getCrudHooks'
@@ -11,7 +11,7 @@ export const {
   useAddObject: useAddLeague,
   useUpdateObject: useUpdateLeague,
   useDeleteObject: useDeleteLeague
-} = getCrudHooks<LeagueWithRelationships, Prisma.LeagueFindManyArgs>(leagueApi)
+} = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs, Prisma.LeagueUpdateInput>(leagueApi)
 
 export const useUserLeagues = (leagueId: string | null = null) => {
   const { user } = useSessionUser()
@@ -23,16 +23,20 @@ export const useUserLeagues = (leagueId: string | null = null) => {
   }, { skip: !userId })
 
   const { data: teamLeagues, isLoading: isTeamLeaguesLoading } = useGetLeagues({
-    where: { teams: { some: { teamUsers: { some: { userId } } } } },
+    where: { commissioners: { none: {} }, teams: { some: { teamUsers: { some: { userId } } } } },
     include: { teams: { include: { teamUsers: true } } }
   }, { skip: !userId })
 
   const isLoading = isCommissionerLeaguesLoading && isTeamLeaguesLoading
-  const leagues = [...(teamLeagues || []), ...(commissionerLeagues || [])]
+  const leagues = Array.from(
+    new Map([...(teamLeagues || []), ...(commissionerLeagues || [])]
+      .map((league) => [league.id, league]))
+      .values()
+  )
   const defaultLeague = leagues?.[0] || null
 
   const isCommissioner = commissionerLeagues?.find((league) => league.id === (leagueId || id))
-  const league = leagues?.find((lg) => lg.id === leagueId)
+  const league = leagues?.find((lg) => lg?.id === leagueId)
   const isMember = Boolean(league)
   const teamCount = league?.teams?.length
 

@@ -1,7 +1,7 @@
 import { createObjectApi } from '@/utils/createObjectApi'
-import { League, Prisma } from '@prisma/client'
+import { Draft, Prisma } from '@prisma/client'
 
-export const leagueApi = createObjectApi<League, Prisma.LeagueUpdateInput>('leagues')
+export const draftApi = createObjectApi<Draft, Prisma.DraftUpdateInput>('drafts')
 
 export const {
   useGetObjectQuery,
@@ -9,4 +9,4 @@ export const {
   useAddObjectMutation,
   useUpdateObjectMutation,
   useDeleteObjectMutation
-} = leagueApi
+} = draftApi

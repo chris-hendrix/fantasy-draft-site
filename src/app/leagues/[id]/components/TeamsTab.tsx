@@ -6,9 +6,10 @@ import { League } from '@prisma/client'
 import { useGetTeams, useDeleteTeam, useUserTeam } from '@/hooks/team'
 import { useUserLeagues } from '@/hooks/league'
 import TeamModal from '@/components/TeamModal'
+import ConfirmModal from '@/components/ConfirmModal'
 import Table, { TableColumn } from '@/components/Table'
 import Card from '@/components/Card'
-import { TeamWithRelationships } from '@/types'
+import { TeamArgs } from '@/types'
 import { formatDate } from '@/utils/date'
 
 interface Props {
@@ -25,9 +26,10 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
   const { deleteObject: deleteTeam } = useDeleteTeam()
   const { isCommissioner } = useUserLeagues(league.id)
   const [modalOpen, setModalOpen] = useState(false)
-  const [editTeam, setEditTeam] = useState<TeamWithRelationships | null>(null)
+  const [teamToDelete, setTeamToDelete] = useState<TeamArgs | null>(null)
+  const [teamToEdit, setTeamToEdit] = useState<TeamArgs | null>(null)
 
-  const columns: TableColumn<TeamWithRelationships>[] = [
+  const columns: TableColumn<TeamArgs>[] = [
     {
       name: 'Name',
       value: (team) => team.name
@@ -54,8 +56,8 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
     },
     {
       renderedValue: ((team) => isCommissioner && <>
-        <button className="btn btn-ghost btn-square btn-sm" onClick={() => setEditTeam(team)}>✏️</button>
-        <button className="btn btn-ghost btn-square btn-sm" onClick={() => deleteTeam(team.id)}>🗑️</button>
+        <button className="btn btn-ghost btn-square btn-sm" onClick={() => setTeamToEdit(team)}>✏️</button>
+        <button className="btn btn-ghost btn-square btn-sm" onClick={() => setTeamToDelete(team)}>🗑️</button>
       </>)
     }
   ]
@@ -67,7 +69,7 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
           header={userTeam.name}
           buttons={<button
             className="btn btn-square btn-sm"
-            onClick={() => setEditTeam(userTeam)}
+            onClick={() => setTeamToEdit(userTeam)}
           >✏️
           </button>}
         >
@@ -88,13 +90,23 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
           setModalOpen(false)
           refetch()
         }} />}
-      {editTeam && <TeamModal
+      {teamToEdit && <TeamModal
         league={league}
-        team={editTeam}
+        team={teamToEdit}
         onClose={() => {
-          setEditTeam(null)
+          setTeamToEdit(null)
           refetch()
         }} />}
+      {teamToDelete && <ConfirmModal
+        onClose={() => setTeamToDelete(null)}
+        onConfirm={async () => {
+          const res = await deleteTeam(teamToDelete.id)
+          if ('error' in res) return
+          setTeamToDelete(null)
+        }}
+      >
+        Are you sure you want to delete this team? This cannot be undone.
+      </ConfirmModal>}
     </div>
   )
 }

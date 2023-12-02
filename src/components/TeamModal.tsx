@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { LeagueWithRelationships, TeamWithRelationships } from '@/types'
+import { LeagueArgs, TeamArgs } from '@/types'
 import { useSessionUser } from '@/hooks/user'
 import { useAddTeam, useUpdateTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
@@ -7,9 +7,9 @@ import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
 
 interface FormProps {
-  league: Partial<LeagueWithRelationships>
+  league: Partial<LeagueArgs>
   onClose: () => void;
-  team?: Partial<TeamWithRelationships> | null | undefined
+  team?: Partial<TeamArgs> | null | undefined
   invite?: boolean
 }
 

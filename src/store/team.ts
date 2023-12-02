@@ -1,7 +1,7 @@
 import { createObjectApi } from '@/utils/createObjectApi'
-import { Team } from '@prisma/client'
+import { Team, Prisma } from '@prisma/client'
 
-export const teamApi = createObjectApi<Team>('teams')
+export const teamApi = createObjectApi<Team, Prisma.TeamUpdateInput>('teams')
 
 export const {
   useGetObjectQuery,

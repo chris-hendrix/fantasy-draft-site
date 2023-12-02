@@ -1,7 +1,7 @@
 import { useInviteTeams, useUpdateTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
 import Table, { TableColumn } from '@/components/Table'
-import { TeamWithRelationships } from '@/types'
+import { TeamArgs } from '@/types'
 import { useSessionUser } from '@/hooks/user'
 
 interface FormProps {
@@ -13,7 +13,7 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
   const { inviteTeams } = useInviteTeams()
   const { updateObject: updateTeam } = useUpdateTeam()
 
-  const handleUpdate = async (team: TeamWithRelationships, decline = false) => {
+  const handleUpdate = async (team: TeamArgs, decline = false) => {
     if (decline) {
       await updateTeam({ id: team.id, declineEmail: user.email })
       return
@@ -21,7 +21,7 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
     await updateTeam({ id: team.id, acceptEmail: user.email })
   }
 
-  const columns: TableColumn<TeamWithRelationships>[] = [
+  const columns: TableColumn<TeamArgs>[] = [
     {
       name: 'League',
       value: ((team) => team.league.name)
