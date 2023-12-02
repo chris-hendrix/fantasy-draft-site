@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { League } from '@prisma/client'
 import { useGetPlayers, useAddPlayer } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs } from '@/types'
+import PlayerImportModal from './PlayerImportModal'
 
 interface Props {
   league: Partial<League>;
@@ -14,6 +16,7 @@ const PlayerTab: React.FC<Props> = ({ league }) => {
     { where: { leagueId: league.id } },
     { skip: !league?.id }
   )
+  const [importModalOpen, setImportModalOpen] = useState(false)
   const { addObject: addPlayer } = useAddPlayer()
 
   const handleAddPlayer = async () => {
@@ -45,7 +48,14 @@ const PlayerTab: React.FC<Props> = ({ league }) => {
       >
         ➕ Add player
       </button>
+      <button
+        className="btn btn-sm mb-2"
+        onClick={() => setImportModalOpen(true)}
+      >
+        📤 Import
+      </button>
       <Table columns={columns} data={players} />
+      {importModalOpen && <PlayerImportModal onClose={() => setImportModalOpen(false)} />}
     </div>
   )
 }
