@@ -75,6 +75,7 @@ model League {
   commissioners Commissioner[]
   teams         Team[]
   drafts        Draft[]
+  players       Player[]
 }
 
 model Commissioner {
@@ -159,11 +160,14 @@ model DraftPick {
 
 model Player {
   id         String      @id @default(cuid())
-  slug       String
+  leagueId   String      @map("league_id")
   name       String
   year       Int
   data       Json?
+  league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftSlots DraftPick[]
+
+  @@unique([leagueId, name, year])
 }
 
 enum Sport {
