@@ -15,7 +15,7 @@ describe('/api/drafts', () => {
   test('commissioner can create draft', async () => {
     const user = await createGetServerSessionMock()
     const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
-    const body = { leagueId: league.id, year: 2010 }
+    const body = { leagueId: league.id, year: 2010, rounds: 22 }
     const req = createNextRequest({ method: 'POST', body })
     const res = await postDraft(req)
     expect(res.status).toBe(200)
