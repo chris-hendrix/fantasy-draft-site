@@ -1,9 +1,9 @@
 import { useState } from 'react'
+import csv from 'csvtojson'
 import { PlayerArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
-import { csvToObjectArray } from '@/utils/csv'
 
 interface Props {
   onClose: () => void;
@@ -12,7 +12,7 @@ interface Props {
 const PlayerImportModal: React.FC<Props> = ({ onClose }) => {
   const [players, setPlayers] = useState<Partial<PlayerArgs>[]>([])
   const [confirmSave, setConfirmSave] = useState(false)
-  const [csv, setCsv] = useState('')
+  const [csvString, setCsvString] = useState('')
 
   const handleSave = async () => {
     // TODO
@@ -34,16 +34,13 @@ const PlayerImportModal: React.FC<Props> = ({ onClose }) => {
     },
   ]
 
-  const handleImport = () => {
-    const objects = csvToObjectArray(csv)
-    console.log(objects)
-
+  const handleImport = async () => {
+    const objects = await csv({ checkType: true }).fromString(csvString)
     const imported = objects.map((obj: any) => ({
       name: String(obj?.name || obj?.Name),
       year: 2023, // TODO,
-      data: String(obj)
+      data: obj
     }))
-
     setPlayers(imported)
   }
 
@@ -63,7 +60,7 @@ const PlayerImportModal: React.FC<Props> = ({ onClose }) => {
       </div>
       <textarea
         className="textarea textarea-bordered w-full textarea-sm mb-2"
-        onChange={(e) => setCsv(e.target.value)}
+        onChange={(e) => setCsvString(e.target.value)}
         placeholder="Paste csv values here"
       />
       <Table columns={columns} data={players} />

@@ -34,6 +34,7 @@
     "@typescript-eslint/parser": "^5.13.0",
     "autoprefixer": "^10.4.16",
     "bcrypt": "^5.1.1",
+    "csvtojson": "^2.0.10",
     "cypress": "^13.4.0",
     "daisyui": "^3.9.4",
     "eslint": "^8.53.0",
