@@ -58,7 +58,7 @@ const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: P
           />
         </div>
       )}
-      <table className={`table${xs ? ' table-xs' : ''}`}>
+      <table className={`table-zebra table${xs ? ' table-xs' : ''}`}>
         <thead>
           <tr>
             {visibleColumns.map((column, index) => (
