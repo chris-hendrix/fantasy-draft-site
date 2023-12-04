@@ -166,8 +166,6 @@ model Player {
   data       Json?
   league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftSlots DraftPick[]
-
-  @@unique([leagueId, name, year])
 }
 
 enum Sport {
