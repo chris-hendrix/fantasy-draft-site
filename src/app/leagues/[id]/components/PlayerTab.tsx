@@ -40,7 +40,7 @@ const PlayerTab: React.FC<Props> = ({ league }) => {
           <option disabled value="">
             Select year
           </option>
-          {years.map((y) => (
+          {years?.map((y) => (
             <option key={y} value={y}>
               {y}
             </option>
