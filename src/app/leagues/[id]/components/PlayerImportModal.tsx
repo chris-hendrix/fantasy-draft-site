@@ -56,8 +56,9 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
   if (confirmSave) {
     return <ConfirmModal
       onConfirm={handleSave}
-      onClose={() => setConfirmSave(false)}>
-      This will delete existing draft data. Continue?
+      onClose={() => setConfirmSave(false)}
+    >
+      {`This will delete all existing player data for ${selectedYear}. Continue?`}
     </ConfirmModal>
   }
 
@@ -90,10 +91,18 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
         placeholder="Paste csv values here"
       />
       <div className="flex justify-end mb-2">
-        <button onClick={handleImport} className="btn btn-secondary w-32 mr-2">
+        <button
+          onClick={handleImport}
+          className="btn btn-secondary w-32 mr-2"
+          disabled={!csvString.length}
+        >
           Import
         </button>
-        <button onClick={() => setConfirmSave(true)} className="btn btn-primary w-32 mr-2">
+        <button
+          onClick={() => setConfirmSave(true)}
+          className="btn btn-primary w-32 mr-2"
+          disabled={!players?.length}
+        >
           Save
         </button>
         <button onClick={onClose} className="btn w-32">
