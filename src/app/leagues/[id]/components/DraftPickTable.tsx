@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DraftArgs, DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
+import { formatRoundPick } from '@/utils/draft'
 import MoveButtons from './MoveButtons'
 
 interface Props {
@@ -18,14 +19,6 @@ const DraftPickTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallba
   useEffect(() => { setDraftPicks(draft?.draftPicks || []) }, [draft?.draftPicks])
   useEffect(() => { draftPicksCallback && draftPicksCallback(draftPicks) }, [draftPicks])
 
-  const formatRoundPick = (pick: Partial<DraftPickArgs>) => {
-    const overall = pick?.overall || 0
-    const getRound = () => Math.floor((overall - 1) / teamsCount) + 1
-    const getRoundPick = () => ((overall - 1) % teamsCount) + 1
-    const round = String(getRound()).padStart(2, '0')
-    const roundPick = String(getRoundPick()).padStart(2, '0')
-    return `${round}:${roundPick}`
-  }
   const columns: TableColumn<Partial<DraftPickArgs>>[] = [
     {
       name: '',
@@ -37,13 +30,11 @@ const DraftPickTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallba
       />
     },
     { name: 'Overall', value: (pick) => pick.overall },
-    { name: 'Pick', value: (pick) => formatRoundPick(pick) },
+    { name: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
     { name: 'Team', value: (pick) => pick.team?.name }
   ]
 
-  return (
-    <Table columns={columns} data={draftPicks} xs />
-  )
+  return <Table columns={columns} data={draftPicks} xs />
 }
 
 export default DraftPickTable
