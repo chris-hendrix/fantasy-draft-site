@@ -29,12 +29,11 @@ const DraftPickTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallba
         setArray={setDraftPicks}
       />
     },
-    { name: 'Overall', value: (pick) => pick.overall },
     { name: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
     { name: 'Team', value: (pick) => pick.team?.name }
   ]
 
-  return <Table columns={columns} data={draftPicks} xs />
+  return <Table columns={columns} data={draftPicks} xs maxItemsPerPage={300} />
 }
 
 export default DraftPickTable

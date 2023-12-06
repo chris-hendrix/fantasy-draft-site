@@ -10,9 +10,10 @@ import { formatRoundPick } from '@/utils/draft'
 interface Props {
   leagueId: string;
   year: number;
+  maxItemsPerPage?: number
 }
 
-const PlayerTable: React.FC<Props> = ({ leagueId, year }) => {
+const PlayerTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }) => {
   const { data: players } = useGetPlayers(
     { where: { leagueId, year } },
     { skip: !leagueId }
@@ -38,7 +39,7 @@ const PlayerTable: React.FC<Props> = ({ leagueId, year }) => {
     { name: 'Player', value: (player) => getPlayerData(player, 'PlayerInfo') },
     { name: 'Projections', value: (player) => getPlayerData(player, 'Projections') }
   ]
-  return <Table columns={columns} data={players} xs />
+  return <Table columns={columns} data={players} maxItemsPerPage={maxItemsPerPage} xs />
 }
 
 export default PlayerTable

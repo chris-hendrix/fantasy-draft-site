@@ -39,7 +39,7 @@ const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
   ]
 
   return (
-    <main className="w-full px-6 py-0 max-w-screen-lg">
+    <main className="w-full px-6 py-0 max-w-screen-xl">
       <div>
         <Tabs tabs={tabs} />
       </div>

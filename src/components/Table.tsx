@@ -12,7 +12,7 @@ interface Props<T> {
   columns: TableColumn<T>[];
   data: T[];
   xs?: boolean;
-  itemsPerPage?: number;
+  maxItemsPerPage?: number;
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -41,15 +41,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
   </div>
 )
 
-const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: Props<T>) => {
+const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50 }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
-  const [sortState, setSortState] = useState<{ column: number; direction: 'asc' | 'desc' | null }>(() => {
-    const defaultSortColumn = columns.findIndex((column) => !column.hidden && column.value)
-    return {
-      column: defaultSortColumn !== -1 ? defaultSortColumn : 0,
-      direction: 'asc',
-    }
+  const [sortState, setSortState] = useState<{ column: number; direction: 'asc' | 'desc' | null }>({
+    column: -1,
+    direction: 'asc',
   })
 
   const renderColumn = (row: T, column: TableColumn<T>) => {
@@ -68,7 +65,7 @@ const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: P
     return String(aValue).localeCompare(String(bValue))
   }
 
-  let sortedData = [...data]
+  let sortedData = data ? [...data] : []
   if (sortState.column !== -1) {
     const sortFunction = columns[sortState.column].sort || defaultSort
     sortedData = sortedData?.sort(sortFunction)
@@ -77,7 +74,8 @@ const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: P
     }
   }
 
-  const totalPages = data && Math.ceil(data.length / itemsPerPage)
+  const itemsPerPage = Math.min(maxItemsPerPage, data.length)
+  const totalPages = data && Math.ceil(data.length / Math.min(itemsPerPage, data.length))
   const visibleColumns = columns.filter((c) => !c.hidden)
   const start = (currentPage - 1) * itemsPerPage
   const end = start + itemsPerPage
@@ -85,31 +83,17 @@ const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: P
 
   const handleColumnClick = (index: number) => {
     if (sortState.column === index) {
-      // Same column clicked, toggle direction
-      setSortState({
-        column: index,
-        direction: sortState.direction === 'asc' ? 'desc' : 'asc',
-      })
+      // same column is clicked
+      if (sortState.direction === 'asc') setSortState({ column: index, direction: 'desc', })
+      if (sortState.direction === 'desc') setSortState({ column: -1, direction: null, })
     } else {
-      // Different column clicked, set direction to 'asc'
-      setSortState({
-        column: index,
-        direction: 'asc',
-      })
+      // different column is clicked
+      setSortState({ column: index, direction: 'asc', })
     }
   }
 
   return (
     <div className="overflow-x-auto w-full">
-      {visibleData && totalPages > 1 && (
-        <div className="flex justify-end mb-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-      )}
       <table className={`table-zebra table${xs ? ' table-xs' : ''}`}>
         <thead>
           <tr>
@@ -120,6 +104,11 @@ const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: P
                 style={{ cursor: 'pointer' }}
               >
                 {column.name}
+                {sortState.column === index && (
+                  <span>
+                    {sortState.direction === 'asc' ? '↑' : '↓'}
+                  </span>
+                )}
               </th>
             ))}
           </tr>
@@ -134,6 +123,15 @@ const Table = <T extends {}>({ columns, data, xs = false, itemsPerPage = 50 }: P
           ))}
         </tbody>
       </table>
+      {visibleData && totalPages > 1 && (
+        <div className="flex justify-end mt-2">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   )
 }

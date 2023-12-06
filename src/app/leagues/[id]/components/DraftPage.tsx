@@ -7,6 +7,7 @@ import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import DraftOrderModal from './DraftOrderModal'
 import DraftPickTable from './DraftPickTable'
+import PlayerTable from './PlayerTable'
 
 interface Props {
   draftId: string;
@@ -91,7 +92,16 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
 
         </div>
       }
-      <DraftPickTable draft={draft} edit={edit} draftPicksCallback={setDraftPicks} />
+      {draft && (
+        <div className="flex flex-row h-full w-full">
+          <div className="w-1/2 h-full max-h-screen overflow-y-auto flex flex-col flex-grow">
+            <DraftPickTable draft={draft} edit={edit} draftPicksCallback={setDraftPicks} />
+          </div>
+          <div className="w-1/2 max-h-screen overflow-y-auto">
+            <PlayerTable leagueId={draft.leagueId} year={draft.year} />
+          </div>
+        </div>
+      )}
       {!isLoading && !draft?.draftPicks?.length &&
         <div className="text-sm w-full display-flex text-center p-4">
           <a onClick={() => setDraftOrderModalOpen(true)} className="link">Generate</a>

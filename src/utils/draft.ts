@@ -1,9 +1,9 @@
-export const getRound = (overall: number, teamsCount: number) => (
-  Math.floor((overall - 1) / teamsCount) + 1
+export const getRound = (overall: number, teamsCount: number, noOverallValue: number = 99) => (
+  overall ? Math.floor((overall - 1) / teamsCount) + 1 : noOverallValue
 )
 
-export const getRoundPick = (overall: number, teamsCount: number) => (
-  ((overall - 1) % teamsCount) + 1
+export const getRoundPick = (overall: number, teamsCount: number, noOverallValue: number = 99) => (
+  overall ? ((overall - 1) % teamsCount) + 1 : noOverallValue
 )
 
 export const formatRoundPick = (overall: number, teamsCount: number) => {
