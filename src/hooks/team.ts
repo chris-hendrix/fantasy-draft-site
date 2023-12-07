@@ -43,10 +43,8 @@ export const useUserTeam = (leagueId: string) => {
 }
 
 export const useLeagueTeams = (leagueId: string) => {
-  const { user } = useSessionUser()
   const { data: teams, isLoading, isSuccess } = useGetTeams(
-    { where: { leagueId, teamUsers: { some: { inviteDeclinedAt: null } } }, },
-    { skip: !user }
+    { where: { leagueId, teamUsers: { some: { inviteDeclinedAt: null } } }, }
   )
   const teamsCount = teams?.length || 0
   return { teams, teamsCount, isLoading, isSuccess }

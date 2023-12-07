@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { League } from '@prisma/client'
 import { useGetPlayers } from '@/hooks/player'
-import PlayerTable from './PlayerTable'
+import PlayersTable from './PlayersTable'
 import PlayerImportModal from './PlayerImportModal'
 
 interface Props {
@@ -47,7 +47,7 @@ const PlayerTab: React.FC<Props> = ({ league }) => {
           ))}
         </select>
       </div>
-      <PlayerTable leagueId={league?.id as string} year={selectedYear} />
+      <PlayersTable leagueId={league?.id as string} year={selectedYear} />
       {importModalOpen && <PlayerImportModal
         leagueId={league.id as string}
         onClose={() => {

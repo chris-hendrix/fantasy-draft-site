@@ -12,7 +12,7 @@ interface Props {
   maxItemsPerPage?: number
 }
 
-const PlayerTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }) => {
+const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }) => {
   const { data: players } = useGetPlayers(
     { where: { leagueId, year } },
     { skip: !leagueId }
@@ -37,4 +37,4 @@ const PlayerTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 })
   return <Table columns={columns} data={players} maxItemsPerPage={maxItemsPerPage} xs />
 }
 
-export default PlayerTable
+export default PlayersTable

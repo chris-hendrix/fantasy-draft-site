@@ -7,7 +7,7 @@ import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import DraftOrderModal from './DraftOrderModal'
 import DraftPickTable from './DraftPickTable'
-import PlayerTable from './PlayerTable'
+import PlayersTable from './PlayersTable'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
@@ -108,7 +108,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             <DraftPickTable draft={draft} edit={edit} draftPicksCallback={setDraftPicks} />
           </div>
           <div className="w-1/2 max-h-screen overflow-y-auto">
-            <PlayerTable leagueId={draft.leagueId} year={draft.year} />
+            <PlayersTable leagueId={draft.leagueId} year={draft.year} />
           </div>
         </div>
       )}
