@@ -12,7 +12,7 @@ interface Props {
   draftPicksCallback?: (draftPicks: Partial<DraftPickArgs>[]) => void
 }
 
-const DraftPickTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallback }) => {
+const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallback }) => {
   const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
 
@@ -36,4 +36,4 @@ const DraftPickTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallba
   return <Table columns={columns} data={draftPicks} xs maxItemsPerPage={300} />
 }
 
-export default DraftPickTable
+export default DraftPicksTable

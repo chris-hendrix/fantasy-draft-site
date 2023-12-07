@@ -6,7 +6,7 @@ import { useUserLeagues } from '@/hooks/league'
 import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import DraftOrderModal from './DraftOrderModal'
-import DraftPickTable from './DraftPickTable'
+import DraftPicksTable from './DraftPicksTable'
 import PlayersTable from './PlayersTable'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -105,7 +105,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       {draft && (
         <div className="flex flex-row h-full w-full">
           <div className="w-1/2 h-full max-h-screen overflow-y-auto flex flex-col flex-grow">
-            <DraftPickTable draft={draft} edit={edit} draftPicksCallback={setDraftPicks} />
+            <DraftPicksTable draft={draft} edit={edit} draftPicksCallback={setDraftPicks} />
           </div>
           <div className="w-1/2 max-h-screen overflow-y-auto">
             <PlayersTable leagueId={draft.leagueId} year={draft.year} />
