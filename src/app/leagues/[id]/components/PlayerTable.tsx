@@ -4,8 +4,7 @@ import { useGetPlayers } from '@/hooks/player'
 import { useLeagueTeams } from '@/hooks/team'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs } from '@/types'
-import { JsonObject } from '@prisma/client/runtime/library'
-import { formatRoundPick } from '@/utils/draft'
+import { formatRoundPick, getPlayerData } from '@/utils/draft'
 
 interface Props {
   leagueId: string;
@@ -21,12 +20,6 @@ const PlayerTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 })
 
   const { teamsCount } = useLeagueTeams(leagueId)
 
-  const getPlayerData = (player: PlayerArgs, key: string) => {
-    const data = player?.data as JsonObject
-    if (key in data) return data[key] as any
-    return ''
-  }
-
   const columns: TableColumn<PlayerArgs>[] = [
     {
       name: 'Rank',
@@ -39,6 +32,8 @@ const PlayerTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 })
     { name: 'Player', value: (player) => getPlayerData(player, 'PlayerInfo') },
     { name: 'Projections', value: (player) => getPlayerData(player, 'Projections') }
   ]
+
+  if (!players) return <></>
   return <Table columns={columns} data={players} maxItemsPerPage={maxItemsPerPage} xs />
 }
 

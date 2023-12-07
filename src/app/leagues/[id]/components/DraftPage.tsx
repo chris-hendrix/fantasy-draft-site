@@ -8,6 +8,7 @@ import Modal from '@/components/Modal'
 import DraftOrderModal from './DraftOrderModal'
 import DraftPickTable from './DraftPickTable'
 import PlayerTable from './PlayerTable'
+import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
   draftId: string;
@@ -30,6 +31,10 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const [draftOrderModalOpen, setDraftOrderModalOpen] = useState(false)
   const { isCommissioner } = useUserLeagues(draft?.leagueId)
   const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
+
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+
+  console.log({ selectedPlayerId })
 
   const handleDelete = async () => {
     const res = await deleteLeague(draftId as string)
@@ -56,6 +61,11 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
 
   return (
     <div className="flex flex-col items-start mt-8">
+      {draft && <PlayerAutocomplete
+        leagueId={draft.leagueId}
+        year={draft.year}
+        onChange={setSelectedPlayerId}
+      />}
       {isCommissioner &&
         <div className="flex mb-2">
           {!edit && <>
