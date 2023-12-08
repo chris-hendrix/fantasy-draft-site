@@ -7,11 +7,11 @@ import Autocomplete from '@/components/Autocomplete'
 interface Props {
   leagueId: string;
   year: number;
-  onChange: (playerId: string) => void
+  onSelection: (playerId: string) => void
   size?: 'xs' | 'sm' | 'md' | 'lg'
 }
 
-const PlayerAutocomplete: React.FC<Props> = ({ leagueId, year, onChange, size = 'sm' }) => {
+const PlayerAutocomplete: React.FC<Props> = ({ leagueId, year, onSelection, size = 'sm' }) => {
   const { data: players } = useGetPlayers(
     { where: { leagueId, year } },
     { skip: !leagueId }
@@ -25,7 +25,7 @@ const PlayerAutocomplete: React.FC<Props> = ({ leagueId, year, onChange, size = 
   return (
     <Autocomplete
       options={options || []}
-      onSelection={(option) => onChange(option?.value as string)}
+      onSelection={(option) => onSelection(option?.value as string)}
       size={size}
     />
   )

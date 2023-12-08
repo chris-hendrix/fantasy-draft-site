@@ -47,6 +47,7 @@ export interface DraftOrderSlotArgs extends DraftOrderSlot {
 export interface DraftPickArgs extends DraftPick {
   league: LeagueArgs
   team: TeamArgs
+  player: PlayerArgs
 }
 
 export interface PlayerArgs extends Player {
