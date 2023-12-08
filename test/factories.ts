@@ -65,6 +65,21 @@ export const createPlayer = async (data: Partial<Prisma.PlayerUncheckedCreateInp
   return draft
 }
 
+export const createDraftPick = async (data: Partial<Prisma.DraftPickUncheckedCreateInput> = {}) => {
+  const draft = data.draftId
+    ? await prisma.draft.findUnique({ where: { id: data.draftId } })
+    : await createDraft()
+  if (!draft) return null
+  const draftPick = await prisma.draftPick.create({
+    data: {
+      draftId: draft.id,
+      teamId: data.teamId || (await createTeam({ leagueId: draft.leagueId })).id,
+      overall: data.overall || Math.floor(Math.random() * 500),
+      ...data
+    }
+  })
+  return draftPick
+}
 export const getLeagueBody: () => { name: string; sport: Sport } = () => ({
   name: `League ${new Date().getTime()}`,
   sport: 'baseball'
