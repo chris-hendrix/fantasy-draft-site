@@ -8,7 +8,7 @@ interface Props {
   leagueId: string;
   year: number;
   onSelection: (playerId: string) => void
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm'
 }
 
 const PlayerAutocomplete: React.FC<Props> = ({ leagueId, year, onSelection, size = 'sm' }) => {

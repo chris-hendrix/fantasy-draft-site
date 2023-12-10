@@ -6,6 +6,6 @@ import { getCrudHooks } from '@/utils/getCrudHooks'
 export const {
   useGetObjects: useGetDraftPicks,
   useUpdateObject: useUpdateDraftPick,
-} = getCrudHooks<DraftPickArgs, Prisma.DraftPickFindManyArgs, Prisma.DraftPickUpdateInput>(
+} = getCrudHooks<DraftPickArgs, Prisma.DraftPickFindManyArgs, Prisma.DraftPickUncheckedUpdateInput>(
   draftPickApi
 )

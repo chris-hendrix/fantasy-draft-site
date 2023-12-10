@@ -5,33 +5,50 @@ import { DraftArgs, DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName } from '@/utils/draft'
 import { useUserLeagues } from '@/hooks/league'
+import { useGetDraftPicks, useUpdateDraftPick } from '@/hooks/draft-pick'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
   draft: Partial<DraftArgs>;
   edit?: boolean;
-  draftPicksCallback?: (draftPicks: Partial<DraftPickArgs>[]) => void
+  draftPicksCallback: (draftPicks: Partial<DraftPickArgs>[]) => void
 }
 
 const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallback }) => {
   const { isCommissioner } = useUserLeagues(draft.leagueId)
-  const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
+  const { data: draftPicks } = useGetDraftPicks(
+    {
+      where: { draftId: draft.id },
+      include: { team: true, player: true },
+      orderBy: { overall: 'asc' }
+    },
+    { skip: !draft.id }
+  )
+  const { updateObject: updateDraftPick } = useUpdateDraftPick()
+  const [editPickId, setEditPickId] = useState<string | null>(null)
+
+  const [editedDraftPicks, setEditedDraftPicks] = useState<Partial<DraftPickArgs>[]>([])
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
 
-  useEffect(() => { setDraftPicks(draft?.draftPicks || []) }, [draft?.draftPicks])
-  useEffect(() => { draftPicksCallback && draftPicksCallback(draftPicks) }, [draftPicks])
+  useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
+  useEffect(() => { draftPicksCallback(editedDraftPicks) }, [editedDraftPicks])
 
-  const handleSelection = (pickId: string, playerId: string) => console.log({ pickId, playerId })
+  const handleSelection = async (pickId: string, playerId: string) => {
+    const res = await updateDraftPick({ id: pickId, playerId })
+    console.log({ res })
+  }
 
+  console.log({ draftPicks })
+  const picks = edit ? editedDraftPicks : draftPicks
   const columns: TableColumn<Partial<DraftPickArgs>>[] = [
     {
       name: '',
       hidden: !edit,
       renderedValue: (pick) => <MoveButtons
-        indexToMove={draftPicks.findIndex((p) => p.id === pick.id)}
-        array={draftPicks}
-        setArray={setDraftPicks}
+        indexToMove={editedDraftPicks.findIndex((p) => p.id === pick.id)}
+        array={editedDraftPicks}
+        setArray={setEditedDraftPicks}
       />
     },
     { name: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
@@ -41,7 +58,14 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
         if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
-        if (player) return <div className="input w-full cursor-pointer">{getPlayerName(player)}</div>
+        if (editPickId !== id) {
+          return <div
+            className="input input-xs input-bordered w-full cursor-pointer disabled"
+            onClick={() => setEditPickId(id || null)}
+          >
+            {player ? getPlayerName(player) : ''}
+          </div>
+        }
         return <PlayerAutocomplete
           leagueId={draft.leagueId as string}
           year={draft.year as number}
@@ -52,7 +76,11 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
     }
   ]
 
-  return <Table columns={columns} data={draftPicks} xs maxItemsPerPage={300} />
+  if (!picks) return null
+
+  console.log({ picks })
+
+  return <Table columns={columns} data={picks} xs maxItemsPerPage={300} />
 }
 
 export default DraftPicksTable

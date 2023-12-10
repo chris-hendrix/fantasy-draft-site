@@ -31,10 +31,6 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const { isCommissioner } = useUserLeagues(draft?.leagueId)
   const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
-
-  console.log({ selectedPlayerId })
-
   const handleDelete = async () => {
     const res = await deleteLeague(draftId as string)
     if ('error' in res) return

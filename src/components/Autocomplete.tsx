@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react'
 import { useCombobox } from 'downshift'
+import { inputSizes, textSizes } from '@/utils/cssClasses'
 
 interface Option {
   value: string;
@@ -10,7 +11,7 @@ interface AutocompleteProps {
   options: Option[];
   onSelection: (selectedOption: Option | null | undefined) => void;
   maxOptions?: number
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm'
 }
 
 const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions = 100, size = 'sm' }) => {
@@ -35,7 +36,7 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
   return (
     <div className="w-full dropdown">
       <label tabIndex={0}>
-        <input {...getInputProps()} className={`input input-${size} input-bordered w-full`} placeholder="Type here" />
+        <input {...getInputProps()} className={`input ${inputSizes[size]} input-bordered w-full`} placeholder="Type here" />
       </label>
       <ul {...getMenuProps()} className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full">
         {isOpen && filteredOptions?.length > 0 &&
@@ -44,7 +45,7 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
               key={item.value}
               {...getItemProps({ index, item })}
             >
-              <a className={`text-${size}`}>{item.label}</a>
+              <a className={`${textSizes[size]}`}>{item.label}</a>
             </li>
           ))}
       </ul>
