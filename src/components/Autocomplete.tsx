@@ -38,7 +38,8 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
 
   // Update input value when the initialValue prop changes
   useEffect(() => {
-    setInputValue(initialValue)
+    const initialOption = options.find((o) => o.value === initialValue)
+    selectItem(initialOption || null)
   }, [initialValue])
 
   return (

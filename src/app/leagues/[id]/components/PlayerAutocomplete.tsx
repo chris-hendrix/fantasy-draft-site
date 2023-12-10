@@ -22,7 +22,7 @@ const PlayerAutocomplete: React.FC<Props> = ({
   excludeIds = []
 }) => {
   const { data: players } = useGetPlayers(
-    { where: { leagueId, year, draftPicks: { every: { draft: { year: { not: year } } } } } },
+    { where: { leagueId, year } },
     { skip: !leagueId }
   )
 

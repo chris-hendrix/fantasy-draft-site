@@ -14,7 +14,7 @@ interface Props {
 
 const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }) => {
   const { data: players } = useGetPlayers(
-    { where: { leagueId, year } },
+    { where: { leagueId, year }, include: { draftPicks: { where: { draft: { year } } } } },
     { skip: !leagueId }
   )
 
@@ -30,7 +30,8 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
     },
     { name: 'Player', value: (player) => getPlayerData(player, 'PlayerInfo') },
-    { name: 'Projections', value: (player) => getPlayerData(player, 'Projections') }
+    // { name: 'Projections', value: (player) => getPlayerData(player, 'Projections') },
+    { name: 'Status', value: (player) => (player?.draftPicks?.length > 0 ? 'Drafted' : 'Free agent') }
   ]
 
   if (!players) return <></>

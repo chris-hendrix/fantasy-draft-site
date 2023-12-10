@@ -51,5 +51,6 @@ export interface DraftPickArgs extends DraftPick {
 }
 
 export interface PlayerArgs extends Player {
-  league: LeagueArgs
+  league: LeagueArgs,
+  draftPicks: DraftPickArgs[]
 }

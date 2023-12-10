@@ -70,7 +70,10 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
           onSelection={(playerId) => handleSelection(id as string, playerId)}
           size="xs"
           initialId={player?.id}
-          excludeIds={draftPicks?.map((dp) => dp.playerId || '') || []}
+          excludeIds={draftPicks
+            ?.filter((dp) => dp.playerId && dp.playerId !== player?.id)
+            ?.map((dp) => dp.playerId || '') || []
+          }
         />
       }
     }
