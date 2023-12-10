@@ -171,7 +171,7 @@ model Player {
   year       Int
   data       Json?
   league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  draftSlots DraftPick[]
+  draftPicks DraftPick[]
 }
 
 enum Sport {

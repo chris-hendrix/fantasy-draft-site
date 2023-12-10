@@ -9,15 +9,24 @@ interface Props {
   year: number;
   onSelection: (playerId: string) => void
   size?: 'xs' | 'sm'
+  initialId?: string
+  excludeIds?: string[]
 }
 
-const PlayerAutocomplete: React.FC<Props> = ({ leagueId, year, onSelection, size = 'sm' }) => {
+const PlayerAutocomplete: React.FC<Props> = ({
+  leagueId,
+  year,
+  onSelection,
+  size = 'sm',
+  initialId,
+  excludeIds = []
+}) => {
   const { data: players } = useGetPlayers(
-    { where: { leagueId, year } },
+    { where: { leagueId, year, draftPicks: { every: { draft: { year: { not: year } } } } } },
     { skip: !leagueId }
   )
 
-  const options = players?.map((player) => ({
+  const options = players?.filter((p) => !excludeIds.includes(p.id)).map((player) => ({
     label: getPlayerData(player, 'PlayerInfo'),
     value: player.id
   }))
@@ -27,6 +36,7 @@ const PlayerAutocomplete: React.FC<Props> = ({ leagueId, year, onSelection, size
       options={options || []}
       onSelection={(option) => onSelection(option?.value as string)}
       size={size}
+      initialValue={initialId}
     />
   )
 }

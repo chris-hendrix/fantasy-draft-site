@@ -35,11 +35,9 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
   useEffect(() => { draftPicksCallback(editedDraftPicks) }, [editedDraftPicks])
 
   const handleSelection = async (pickId: string, playerId: string) => {
-    const res = await updateDraftPick({ id: pickId, playerId })
-    console.log({ res })
+    await updateDraftPick({ id: pickId, playerId })
   }
 
-  console.log({ draftPicks })
   const picks = edit ? editedDraftPicks : draftPicks
   const columns: TableColumn<Partial<DraftPickArgs>>[] = [
     {
@@ -60,7 +58,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
         if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
         if (editPickId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer disabled"
+            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
             onClick={() => setEditPickId(id || null)}
           >
             {player ? getPlayerName(player) : ''}
@@ -71,14 +69,14 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
           year={draft.year as number}
           onSelection={(playerId) => handleSelection(id as string, playerId)}
           size="xs"
+          initialId={player?.id}
+          excludeIds={draftPicks?.map((dp) => dp.playerId || '') || []}
         />
       }
     }
   ]
 
   if (!picks) return null
-
-  console.log({ picks })
 
   return <Table columns={columns} data={picks} xs maxItemsPerPage={300} />
 }
