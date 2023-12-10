@@ -1,7 +1,7 @@
-import { draftPickApi } from '@/store/draft-pick'
 import { DraftPickArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
+import { draftPickApi } from '@/store/draftPick'
 
 export const {
   useGetObjects: useGetDraftPicks,

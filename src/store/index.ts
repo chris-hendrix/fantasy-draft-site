@@ -8,7 +8,7 @@ import { leagueApi } from './league'
 import { teamApi } from './team'
 import { draftApi } from './draft'
 import { playerApi } from './player'
-import { draftPickApi } from './draft-pick'
+import { draftPickApi } from './draftPick'
 
 export const makeStore = () => configureStore({
   // @ts-ignore

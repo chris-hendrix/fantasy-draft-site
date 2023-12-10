@@ -1,12 +1,12 @@
-import { GET as getDraftPicks, } from '@/app/api/draft-picks/route'
-import { PUT as putDraftPick } from '@/app/api/draft-picks/[id]/route'
+import { GET as getDraftPicks, } from '@/app/api/draftPicks/route'
+import { PUT as putDraftPick } from '@/app/api/draftPicks/[id]/route'
 import { createNextRequest } from '../utils'
 import { createGetServerSessionMock } from './mocks'
 import { createDraft, createDraftPick, createLeague, createPlayer } from '../factories'
 
 jest.mock('next-auth')
 
-describe('/api/draft-picks', () => {
+describe('/api/draftPicks', () => {
   afterAll(async () => {
     // await deleteTestUsers()
   })

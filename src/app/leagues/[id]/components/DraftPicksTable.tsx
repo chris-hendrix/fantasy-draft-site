@@ -5,17 +5,17 @@ import { DraftArgs, DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName } from '@/utils/draft'
 import { useUserLeagues } from '@/hooks/league'
-import { useGetDraftPicks, useUpdateDraftPick } from '@/hooks/draft-pick'
+import { useGetDraftPicks, useUpdateDraftPick } from '@/hooks/draftPick'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
   draft: Partial<DraftArgs>;
   edit?: boolean;
-  draftPicksCallback: (draftPicks: Partial<DraftPickArgs>[]) => void
+  onOrderChange: (draftPicks: Partial<DraftPickArgs>[]) => void
 }
 
-const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallback }) => {
+const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }) => {
   const { isCommissioner } = useUserLeagues(draft.leagueId)
   const { data: draftPicks } = useGetDraftPicks(
     {
@@ -32,9 +32,9 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
 
   useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
-  useEffect(() => { draftPicksCallback(editedDraftPicks) }, [editedDraftPicks])
+  useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
 
-  const handleSelection = async (pickId: string, playerId: string) => {
+  const handleSelection = async (pickId: string, playerId: string | null) => {
     await updateDraftPick({ id: pickId, playerId })
   }
 
@@ -67,7 +67,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, draftPicksCallb
         return <PlayerAutocomplete
           leagueId={draft.leagueId as string}
           year={draft.year as number}
-          onSelection={(playerId) => handleSelection(id as string, playerId)}
+          onSelection={(playerId) => handleSelection(id as string, playerId || null)}
           size="xs"
           initialId={player?.id}
           excludeIds={draftPicks
