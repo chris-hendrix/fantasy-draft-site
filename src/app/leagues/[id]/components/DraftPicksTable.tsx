@@ -6,6 +6,7 @@ import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName } from '@/utils/draft'
 import { useUserLeagues } from '@/hooks/league'
 import { useGetDraftPicks, useUpdateDraftPick } from '@/hooks/draftPick'
+import { useInvalidateTags } from '@/store'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -26,6 +27,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     { skip: !draft.id }
   )
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
+  const { invalidateTags } = useInvalidateTags()
   const [editPickId, setEditPickId] = useState<string | null>(null)
 
   const [editedDraftPicks, setEditedDraftPicks] = useState<Partial<DraftPickArgs>[]>([])
@@ -36,6 +38,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
 
   const handleSelection = async (pickId: string, playerId: string | null) => {
     await updateDraftPick({ id: pickId, playerId })
+    invalidateTags('players')
   }
 
   const picks = edit ? editedDraftPicks : draftPicks
