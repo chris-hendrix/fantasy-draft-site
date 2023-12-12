@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { useDispatch } from 'react-redux'
 
 interface BaseObject {
   id: string;
@@ -7,7 +8,7 @@ interface BaseObject {
 export const createObjectApi = <Object extends BaseObject, UpdateInput>(url: string) => {
   const reducerPath = `${url}Api`
 
-  return createApi({
+  const api = createApi({
     reducerPath,
     baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
     tagTypes: [url],
@@ -48,4 +49,22 @@ export const createObjectApi = <Object extends BaseObject, UpdateInput>(url: str
       }),
     }),
   })
+
+  const useInvalidateObject = () => {
+    const dispatch = useDispatch()
+    const invalidateObject = (id: string) => dispatch(
+      api.util.invalidateTags([{ type: url, id }])
+    )
+    return { invalidateObject }
+  }
+
+  const useInvalidateObjects = () => {
+    const dispatch = useDispatch()
+    const invalidateObjects = () => dispatch(
+      api.util.invalidateTags([url, { type: url, id: 'LIST' }])
+    )
+    return { invalidateObjects }
+  }
+
+  return { ...api, useInvalidateObject, useInvalidateObjects }
 }

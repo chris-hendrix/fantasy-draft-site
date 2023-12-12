@@ -8,5 +8,6 @@ export const {
   useGetObjectsQuery,
   useAddObjectMutation,
   useUpdateObjectMutation,
-  useDeleteObjectMutation
+  useDeleteObjectMutation,
+  useInvalidateObjects
 } = playerApi

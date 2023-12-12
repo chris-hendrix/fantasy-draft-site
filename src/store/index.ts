@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query/react'
-import { useDispatch } from 'react-redux'
 import { appSlice } from './app'
 import { userApi } from './user'
 import { sessionApi } from './session'
@@ -44,14 +43,6 @@ setupListeners(store.dispatch)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
-
-export const useInvalidateTags = () => {
-  const dispatch = useDispatch()
-  const invalidateTags = (tag: any) => dispatch(
-    playerApi.util.invalidateTags([tag, { type: tag, id: 'LIST' }])
-  )
-  return { invalidateTags }
-}
 
 export { showAlertAsync } from './app'
 export { useGetUserQuery, useGetUsersQuery, useAddUserMutation, useUpdateUserMutation } from './user'

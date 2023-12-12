@@ -5,8 +5,8 @@ import { DraftArgs, DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName } from '@/utils/draft'
 import { useUserLeagues } from '@/hooks/league'
+import { useInvalidatePlayer } from '@/hooks/player'
 import { useGetDraftPicks, useUpdateDraftPick } from '@/hooks/draftPick'
-import { useInvalidateTags } from '@/store'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -27,7 +27,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     { skip: !draft.id }
   )
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
-  const { invalidateTags } = useInvalidateTags()
+  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
 
   const [editedDraftPicks, setEditedDraftPicks] = useState<Partial<DraftPickArgs>[]>([])
@@ -36,9 +36,13 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
   useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
   useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
 
-  const handleSelection = async (pickId: string, playerId: string | null) => {
-    await updateDraftPick({ id: pickId, playerId })
-    invalidateTags('players')
+  const handleSelection = async (
+    pickId: string,
+    oldPlayerId: string,
+    newPlayerId: string | null
+  ) => {
+    await updateDraftPick({ id: pickId, playerId: newPlayerId })
+    invalidatePlayer(oldPlayerId)
   }
 
   const picks = edit ? editedDraftPicks : draftPicks
@@ -70,7 +74,9 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
         return <PlayerAutocomplete
           leagueId={draft.leagueId as string}
           year={draft.year as number}
-          onSelection={(playerId) => handleSelection(id as string, playerId || null)}
+          onSelection={(newPlayerId) => {
+            handleSelection(String(id), String(player?.id), newPlayerId)
+          }}
           size="xs"
           initialId={player?.id}
           excludeIds={draftPicks

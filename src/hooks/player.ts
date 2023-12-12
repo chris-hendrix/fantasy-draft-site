@@ -8,5 +8,7 @@ export const {
   useGetObjects: useGetPlayers,
   useAddObject: useAddPlayer,
   useUpdateObject: useUpdatePlayer,
-  useDeleteObject: useDeletePlayer
+  useDeleteObject: useDeletePlayer,
+  useInvalidateObject: useInvalidatePlayer,
+  useInvalidateObjects: useInvalidatePlayers
 } = getCrudHooks<PlayerArgs, Prisma.PlayerFindManyArgs, Prisma.PlayerUpdateInput>(playerApi)
