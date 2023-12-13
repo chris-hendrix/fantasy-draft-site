@@ -39,6 +39,8 @@ model Session {
 
 model User {
   id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   name          String?
   username      String?        @unique
   email         String         @unique
@@ -47,8 +49,6 @@ model User {
   image         String?
   bucketImage   String?
   admin         Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
   accounts      Account[]
   sessions      Session[]
   info          Json?
@@ -75,6 +75,7 @@ model League {
   commissioners Commissioner[]
   teams         Team[]
   drafts        Draft[]
+  players       Player[]
 }
 
 model Commissioner {
@@ -91,11 +92,11 @@ model Commissioner {
 
 model Team {
   id              String           @id @default(cuid())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   leagueId        String
   name            String
   archived        Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
   league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   teamUsers       TeamUser[]
   draftOrderSlots DraftOrderSlot[]
@@ -106,25 +107,25 @@ model Team {
 
 model TeamUser {
   id               String    @id @default(cuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
   userId           String?
   teamId           String
   inviteEmail      String?
   inviteAcceptedAt DateTime?
   inviteDeclinedAt DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
   user             User?     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   team             Team      @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
 
 model Draft {
   id              String           @id @default(cuid())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   leagueId        String           @map("league_id")
   year            Int
   rounds          Int
   draftTime       DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
   league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftOrderSlots DraftOrderSlot[]
   draftPicks      DraftPick[]
@@ -133,25 +134,29 @@ model Draft {
 }
 
 model DraftOrderSlot {
-  id      String @id @default(cuid())
-  draftId String @map("draft_id")
-  teamId  String @map("team_id")
-  order   Int
-  draft   Draft  @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  team    Team   @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  draftId   String   @map("draft_id")
+  teamId    String   @map("team_id")
+  order     Int
+  draft     Draft    @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([draftId, teamId])
 }
 
 model DraftPick {
-  id       String  @id @default(cuid())
-  overall  Int
-  draftId  String  @map("draft_id")
-  teamId   String  @map("team_id")
-  playerId String? @map("player_id")
-  draft    Draft   @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  team     Team    @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  player   Player? @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  overall   Int
+  draftId   String   @map("draft_id")
+  teamId    String   @map("team_id")
+  playerId  String?  @map("player_id")
+  draft     Draft    @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  player    Player?  @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
 
   @@unique([draftId, overall])
   @@unique([draftId, playerId])
@@ -159,11 +164,14 @@ model DraftPick {
 
 model Player {
   id         String      @id @default(cuid())
-  slug       String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  leagueId   String      @map("league_id")
   name       String
   year       Int
   data       Json?
-  draftSlots DraftPick[]
+  league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  draftPicks DraftPick[]
 }
 
 enum Sport {

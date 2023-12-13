@@ -51,3 +51,11 @@ export const useUserLeagues = (leagueId: string | null = null) => {
     teamCount
   }
 }
+
+export const useLeague = () => {
+  const { id } = useParams()
+  const leagueId = id as string
+  const { data: league, isLoading, isSuccess } = useGetLeague({ id: leagueId })
+
+  return { leagueId, league, isLoading, isSuccess }
+}

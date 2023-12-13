@@ -61,6 +61,8 @@ interface CrudOperationsArgs {
   useAddObjectMutation: () => any,
   useUpdateObjectMutation: () => any,
   useDeleteObjectMutation: () => any,
+  useInvalidateObject: () => { invalidateObject: (id: string) => any },
+  useInvalidateObjects: () => { invalidateObjects: () => any },
 }
 
 export const getCrudHooks = <Object, FindManyArgs, UpdateInput>({
@@ -69,6 +71,8 @@ export const getCrudHooks = <Object, FindManyArgs, UpdateInput>({
   useAddObjectMutation,
   useUpdateObjectMutation,
   useDeleteObjectMutation,
+  useInvalidateObject,
+  useInvalidateObjects
 }: CrudOperationsArgs) => {
   const useGetObject = (
     { id, queryParams }: { id: string, queryParams?: FindManyArgs },
@@ -140,5 +144,13 @@ export const getCrudHooks = <Object, FindManyArgs, UpdateInput>({
     return { deleteObject, isLoading, isSuccess, error }
   }
 
-  return { useGetObject, useGetObjects, useAddObject, useUpdateObject, useDeleteObject }
+  return {
+    useGetObject,
+    useGetObjects,
+    useAddObject,
+    useUpdateObject,
+    useDeleteObject,
+    useInvalidateObject,
+    useInvalidateObjects
+  }
 }

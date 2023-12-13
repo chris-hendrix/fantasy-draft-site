@@ -6,6 +6,8 @@ import { getServerSession } from 'next-auth'
 import authOptions from '@/lib/auth'
 import { NextURL } from 'next/dist/server/web/next-url'
 import { parse } from 'qs'
+// @ts-ignore
+import QueryTypes from 'query-types'
 
 export class ApiError extends Error {
   public readonly statusCode: number
@@ -80,30 +82,7 @@ export const checkUserMatchesSession = async (userId: string | undefined) => {
 }
 
 export const getParsedParams = (nextUrl: NextURL) => {
-  const convertValues = (obj: any) => {
-    const result = { ...obj }
-    Object.entries(result).forEach(([key, value]) => {
-      const trimmedKey = key.replace(/^\[|\]$/g, '') // Remove start and end brackets from the key
-      if (Array.isArray(value)) {
-        result[trimmedKey] = value.map((item) => convertValues(item))
-      } else if (typeof value === 'object' && value !== null) {
-        result[trimmedKey] = convertValues(value)
-      } else if (typeof value === 'string') {
-        if (!Number.isNaN(Number(value))) {
-          result[trimmedKey] = parseFloat(value)
-        } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
-          result[trimmedKey] = value.toLowerCase() === 'true'
-        } else if (value === '') {
-          result[trimmedKey] = null
-        }
-      }
-      if (trimmedKey !== key) {
-        delete result[key]
-      }
-    })
-    return result
-  }
   const searchParams: any = nextUrl.searchParams.toString()
-  const findManyParams: any = parse(searchParams)
-  return convertValues(findManyParams)
+  const paramObject: any = parse(searchParams)
+  return QueryTypes.parseObject(paramObject)
 }

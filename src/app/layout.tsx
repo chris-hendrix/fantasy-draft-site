@@ -14,7 +14,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <div className="flex-grow">
-            <main className="flex w-full flex-col items-center p-12 max-w-screen-lg mx-auto">
+            <main className="flex w-full flex-col items-center p-12 max-w-screen-2xl mx-auto">
               {children}
             </main>
           </div>
