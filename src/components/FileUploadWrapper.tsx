@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { useUploadFileMutation } from '@/store'
+import React from 'react'
+import { uploadFile } from '@/lib/supabase'
 
 interface ImageUploaderProps {
   children: React.ReactNode;
@@ -8,29 +8,21 @@ interface ImageUploaderProps {
   onError?: (error: any) => void;
 }
 
-const FileUploaWrapper: React.FC<ImageUploaderProps> = ({
+const FileUploadWrapper: React.FC<ImageUploaderProps> = ({
   children,
   bucketDirectory = '',
   onFileUpload,
   onError,
 }) => {
-  const [uploadFile, { error }] = useUploadFileMutation()
-
-  useEffect(() => {
-    onError && onError(error)
-  }, [error])
-
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target?.files?.[0]
-    if (!file) return
-    const data = new FormData()
-    data.append('directory', bucketDirectory)
-    data.append('file', file)
-    const res = await uploadFile(data)
-    const url = 'data' in res && res.data.publicUrl
-    url && onFileUpload && onFileUpload(url)
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target?.files?.[0]
+      if (!file) return
+      const url = await uploadFile(file, bucketDirectory)
+      url && onFileUpload && onFileUpload(url)
+    } catch (error) {
+      onError && onError(error)
+    }
   }
 
   return (
@@ -46,4 +38,4 @@ const FileUploaWrapper: React.FC<ImageUploaderProps> = ({
   )
 }
 
-export default FileUploaWrapper
+export default FileUploadWrapper
