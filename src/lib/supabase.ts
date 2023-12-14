@@ -1,10 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_BUCKET } from '@/config'
 
-const createSupabaseClient = () => {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-}
+const createSupabaseClient = () => createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const getSupabaseClient = () => {
   if (process.env.NODE_ENV === 'production') return createSupabaseClient()

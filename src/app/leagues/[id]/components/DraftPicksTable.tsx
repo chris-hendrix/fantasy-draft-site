@@ -6,7 +6,8 @@ import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName } from '@/utils/draft'
 import { useUserLeagues } from '@/hooks/league'
 import { useInvalidatePlayer } from '@/hooks/player'
-import { useGetDraftPicks, useUpdateDraftPick } from '@/hooks/draftPick'
+import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
+import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -27,22 +28,33 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     { skip: !draft.id }
   )
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
+  const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
 
   const [editedDraftPicks, setEditedDraftPicks] = useState<Partial<DraftPickArgs>[]>([])
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
 
+  const { send } = useSendBroadcast(draft.id as string, 'test')
+  const { latestPayload } = useReceiveBroadcast(draft.id as string, 'test')
+
   useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
   useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
+
+  useEffect(() => {
+    const { pickId, oldPlayerId } = latestPayload || {}
+    pickId && invalidateDraftPick(pickId)
+    oldPlayerId && invalidatePlayer(latestPayload?.oldPlayerId)
+  }, [latestPayload])
 
   const handleSelection = async (
     pickId: string,
     oldPlayerId: string,
     newPlayerId: string | null
   ) => {
-    await updateDraftPick({ id: pickId, playerId: newPlayerId })
-    invalidatePlayer(oldPlayerId)
+    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId })
+    if ('error' in res) return
+    await send({ pickId, oldPlayerId, newPlayerId })
   }
 
   const picks = edit ? editedDraftPicks : draftPicks
