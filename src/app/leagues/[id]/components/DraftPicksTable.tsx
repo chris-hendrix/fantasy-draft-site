@@ -8,6 +8,7 @@ import { useUserLeagues } from '@/hooks/league'
 import { useInvalidatePlayer } from '@/hooks/player'
 import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
 import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
+import { Multiselect } from '@/components/Multiselect'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -102,7 +103,16 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
 
   if (!picks) return null
 
-  return <Table columns={columns} data={picks} xs maxItemsPerPage={300} />
+  return <>
+    <Multiselect
+      items={Array.from({ length: draft?.rounds || 0 })
+        .map((_, i) => ({ value: i + 1, label: i + 1 }))
+      }
+      onSelection={(items) => console.log(items)}
+      label="Round"
+    />
+    <Table columns={columns} data={picks} xs maxItemsPerPage={300} />
+  </>
 }
 
 export default DraftPicksTable
