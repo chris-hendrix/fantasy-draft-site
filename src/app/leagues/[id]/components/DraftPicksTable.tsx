@@ -8,7 +8,7 @@ import { useUserLeagues } from '@/hooks/league'
 import { useInvalidatePlayer } from '@/hooks/player'
 import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
 import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
-import { Multiselect } from '@/components/Multiselect'
+import { ChipSelect } from '@/components/ChipSelect'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -104,13 +104,25 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
   if (!picks) return null
 
   return <>
-    <Multiselect
-      items={Array.from({ length: draft?.rounds || 0 })
-        .map((_, i) => ({ value: i + 1, label: i + 1 }))
-      }
-      onSelection={(items) => console.log(items)}
-      label="Round"
-    />
+    <div className="flex">
+      <div className="w-24">
+        <ChipSelect
+          items={Array.from({ length: draft?.rounds || 0 })
+            .map((_, i) => ({ value: i + 1, label: i + 1 }))
+          }
+          onSelection={(items) => console.log(items)}
+          label="Round"
+        />
+      </div>
+      <div className="w-60">
+        <ChipSelect
+          items={draftPicks.map((pick) => ({ label: pick.team.name, value: pick.id }))}
+          onSelection={(items) => console.log(items)}
+          label="Team"
+        />
+      </div>
+    </div>
+
     <Table columns={columns} data={picks} xs maxItemsPerPage={300} />
   </>
 }

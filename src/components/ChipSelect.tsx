@@ -1,25 +1,26 @@
 import React from 'react'
 import { useCombobox, useMultipleSelection } from 'downshift'
 
-interface MultiselectOption {
+interface ChipSelectOption {
   value: string | number;
   label: string | number;
 }
 // https://www.downshift-js.com/use-multiple-selection
 
 interface Props {
-  items: MultiselectOption[];
-  onSelection: (
-    selectedItems: MultiselectOption[],
-    selectedItem?: MultiselectOption | null
-  ) => void;
+  items: ChipSelectOption[];
+  onSelection: (selection: {
+    selectedItems?: ChipSelectOption[],
+    selectedItem?: ChipSelectOption | null,
+    selectedValues?: (string | number)[]
+  }) => void;
   label?: string
-  initialSelectedItems?: MultiselectOption[];
+  initialSelectedItems?: ChipSelectOption[];
 }
 
 const getFilteredOptions = (
-  items: MultiselectOption[],
-  selectedItems: MultiselectOption[],
+  items: ChipSelectOption[],
+  selectedItems: ChipSelectOption[],
   inputValue: string
 ) => {
   const lowerCasedInputValue = inputValue.toLowerCase()
@@ -30,14 +31,14 @@ const getFilteredOptions = (
   ))
 }
 
-export const Multiselect: React.FC<Props> = ({
+export const ChipSelect: React.FC<Props> = ({
   items,
   onSelection,
   label,
   initialSelectedItems,
 }) => {
   const [inputValue, setInputValue] = React.useState('')
-  const [selectedItems, setSelectedItems] = React.useState<MultiselectOption[]>(
+  const [selectedItems, setSelectedItems] = React.useState<ChipSelectOption[]>(
     initialSelectedItems || []
   )
 
@@ -72,7 +73,6 @@ export const Multiselect: React.FC<Props> = ({
     getLabelProps,
     getMenuProps,
     getInputProps,
-    highlightedIndex,
     getItemProps,
     selectedItem,
   } = useCombobox({
@@ -120,42 +120,47 @@ export const Multiselect: React.FC<Props> = ({
     },
   })
 
-  React.useEffect(() => { onSelection(selectedItems, selectedItem) }, [selectedItems, selectedItem])
+  React.useEffect(() => {
+    onSelection({
+      selectedItems,
+      selectedItem,
+      selectedValues: selectedItems.map((item) => item.value)
+    })
+  }, [selectedItems, selectedItem])
 
   return (
-    <div className="w-[592px]">
+    <div className="w-full h-full bg-base-200 dropdown border border-gray-200 p-1">
       <div className="flex flex-col gap-1">
-        <label className="w-fit" {...getLabelProps()}>
+        <label className="text-xs w-fit" {...getLabelProps()}>
           {label}
         </label>
-        <div className="shadow-sm bg-white inline-flex gap-2 items-center flex-wrap p-1.5">
+        <div className="inline-flex gap-1 items-center flex-wrap p-1">
           {selectedItems.map((
             selectedItemForRender,
             index
           ) => (
             <span
-              className="bg-gray-100 rounded-md px-1 focus:bg-red-400"
+              className="badge badge-primary badge-sm text-xs cursor-pointer"
               key={`selected-item-${index}`}
               {...getSelectedItemProps({
                 selectedItem: selectedItemForRender,
                 index,
               })}
             >
-              {selectedItemForRender.label}
               <span
-                className="px-1 cursor-pointer"
+                className="cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation()
                   removeSelectedItem(selectedItemForRender)
                 }}
               >
-                &#10005;
+                {selectedItemForRender.label}
               </span>
             </span>
           ))}
-          <div className="flex gap-0.5 grow">
+          <div className="text-xs flex gap-0.5 grow p-0.5">
             <input
-              placeholder={label}
+              placeholder={`${label}...`}
               className="w-full"
               {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             />
@@ -170,23 +175,18 @@ export const Multiselect: React.FC<Props> = ({
           </div>
         </div>
       </div>
-      <ul
-        className={`absolute w-inherit bg-white mt-1 shadow-md max-h-80 overflow-scroll p-0 z-10 ${!(isOpen && filteredItems.length) && 'hidden'}`}
+      {isOpen && <ul
+        className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full"
         {...getMenuProps()}
       >
-        {isOpen &&
-          filteredItems.map((item, index) => (
-            <li
-              className={`${highlightedIndex === index ? 'bg-blue-300' : ''} ${selectedItem === item ? 'font-bold' : ''} py-2 px-3 shadow-sm flex flex-col`}
-              key={`${item.value}${index}`}
-              {...getItemProps({ item, index })}
-            >
-              <span>{item.label}</span>
-            </li>
-          ))}
-      </ul>
+        {filteredItems.map((item, index) => (
+          <li key={`${item.value}${index}`} {...getItemProps({ item, index })} >
+            <span className="text-xs">{item.label}</span>
+          </li>
+        ))}
+      </ul>}
     </div>
   )
 }
 
-export default Multiselect
+export default ChipSelect
