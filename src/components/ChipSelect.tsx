@@ -35,7 +35,7 @@ export const ChipSelect: React.FC<Props> = ({
   items,
   onSelection,
   label,
-  initialSelectedItems,
+  initialSelectedItems = [],
 }) => {
   const [inputValue, setInputValue] = React.useState('')
   const [selectedItems, setSelectedItems] = React.useState<ChipSelectOption[]>(
@@ -177,7 +177,7 @@ export const ChipSelect: React.FC<Props> = ({
       </div>
       {isOpen && <ul
         className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full"
-        {...getMenuProps()}
+        {...getMenuProps({}, { suppressRefError: true })}
       >
         {filteredItems.map((item, index) => (
           <li key={`${item.value}${index}`} {...getItemProps({ item, index })} >

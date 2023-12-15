@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DraftArgs, DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
-import { formatRoundPick, getPlayerName } from '@/utils/draft'
+import { formatRoundPick, getPlayerName, getRound } from '@/utils/draft'
 import { useUserLeagues } from '@/hooks/league'
 import { useInvalidatePlayer } from '@/hooks/player'
 import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
@@ -17,6 +17,8 @@ interface Props {
   edit?: boolean;
   onOrderChange: (draftPicks: Partial<DraftPickArgs>[]) => void
 }
+
+type FilterOptions = { [key: string]: (pick: DraftPickArgs) => boolean }
 
 const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }) => {
   const { isCommissioner } = useUserLeagues(draft.leagueId)
@@ -32,8 +34,10 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
   const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
-
-  const [editedDraftPicks, setEditedDraftPicks] = useState<Partial<DraftPickArgs>[]>([])
+  const [editedDraftPicks, setEditedDraftPicks] = useState<DraftPickArgs[]>([])
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    round: () => true,
+  })
   const teamsCount = (draft?.draftOrderSlots?.length || 1)
 
   const { send } = useSendBroadcast(draft.id as string, 'test')
@@ -103,6 +107,10 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
 
   if (!picks) return null
 
+  const filteredPicks = draftPicks.filter((pick) => Object
+    .values(filterOptions)
+    .every((filter) => filter(pick)))
+
   return <>
     <div className="flex">
       <div className="w-24">
@@ -110,20 +118,29 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
           items={Array.from({ length: draft?.rounds || 0 })
             .map((_, i) => ({ value: i + 1, label: i + 1 }))
           }
-          onSelection={(items) => console.log(items)}
+          onSelection={({ selectedValues }) => {
+            if (!selectedValues?.length) {
+              setFilterOptions({ ...filterOptions, round: () => true })
+              return
+            }
+            setFilterOptions({
+              ...filterOptions,
+              round: (pick) => selectedValues.includes(getRound(pick.overall, teamsCount))
+            })
+          }}
           label="Round"
         />
       </div>
       <div className="w-60">
         <ChipSelect
-          items={draftPicks.map((pick) => ({ label: pick.team.name, value: pick.id }))}
+          items={filteredPicks.map((pick) => ({ label: pick.team.name, value: pick.id }))}
           onSelection={(items) => console.log(items)}
           label="Team"
         />
       </div>
     </div>
 
-    <Table columns={columns} data={picks} xs maxItemsPerPage={300} />
+    <Table columns={columns} data={filteredPicks} xs maxItemsPerPage={300} />
   </>
 }
 
