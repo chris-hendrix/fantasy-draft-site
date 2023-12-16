@@ -115,58 +115,61 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     .values(filterOptions)
     .every((filter) => filter(pick)))
 
-  return <>
-    <div className="flex gap-1">
-      <div className="w-24 card bg-base-200 p-1">
-        <ChipSelect
-          items={Array.from({ length: draft?.rounds || 0 })
-            .map((_, i) => ({ value: i + 1, label: i + 1 }))
-          }
-          onSelection={({ selectedValues }) => {
-            setFilterOptions({
-              ...filterOptions,
-              round: selectedValues?.length
-                ? (pick) => selectedValues.includes(getRound(pick.overall, teamsCount))
-                : () => true
-            })
-          }}
-          label="Round"
-        />
+  return (
+    <>
+      <div className="flex gap-1">
+        <div className="w-24 card bg-base-200 p-1">
+          <ChipSelect
+            items={Array.from({ length: draft?.rounds || 0 })
+              .map((_, i) => ({ value: i + 1, label: i + 1 }))
+            }
+            onSelection={({ selectedValues }) => {
+              setFilterOptions({
+                ...filterOptions,
+                round: selectedValues?.length
+                  ? (pick) => selectedValues.includes(getRound(pick.overall, teamsCount))
+                  : () => true
+              })
+            }}
+            label="Round"
+          />
+        </div>
+        <div className="w-60 card bg-base-200 p-1">
+          <ChipSelect
+            items={getUnique<DraftPickArgs>(
+              draftPicks,
+              (p) => p.teamId
+            ).map((p) => ({ value: p.teamId, label: p.team.name }))}
+            label="Team"
+            onSelection={({ selectedValues }) => {
+              setFilterOptions({
+                ...filterOptions,
+                team: selectedValues?.length
+                  ? (pick) => selectedValues.includes(pick.team.id)
+                  : () => true
+              })
+            }}
+          />
+        </div>
+        <div className="flex-grow card bg-base-200 p-1">
+          <SearchFilter
+            label="Player"
+            onSearch={(value) => {
+              setFilterOptions({
+                ...filterOptions,
+                playerSearch: value
+                  ? (pick) => getPlayerName(pick?.player)?.toLowerCase().includes(
+                    value.toLowerCase()
+                  )
+                  : () => true
+              })
+            }}
+          />
+        </div>
       </div>
-      <div className="w-60 card bg-base-200 p-1">
-        <ChipSelect
-          items={getUnique<DraftPickArgs>(
-            draftPicks,
-            (p) => p.teamId
-          ).map((p) => ({ value: p.teamId, label: p.team.name }))}
-          label="Team"
-          onSelection={({ selectedValues }) => {
-            setFilterOptions({
-              ...filterOptions,
-              team: selectedValues?.length
-                ? (pick) => selectedValues.includes(pick.team.id)
-                : () => true
-            })
-          }}
-        />
-      </div>
-      <div className="flex-grow card bg-base-200 p-1">
-        <SearchFilter
-          label="Player"
-          onSearch={(value) => {
-            setFilterOptions({
-              ...filterOptions,
-              playerSearch: value
-                ? (pick) => getPlayerName(pick?.player)?.toLowerCase().includes(value.toLowerCase())
-                : () => true
-            })
-          }}
-        />
-      </div>
-    </div>
-
-    <Table columns={columns} data={filteredPicks} xs maxItemsPerPage={300} />
-  </>
+      <Table columns={columns} data={filteredPicks} xs maxItemsPerPage={300} />
+    </>
+  )
 }
 
 export default DraftPicksTable
