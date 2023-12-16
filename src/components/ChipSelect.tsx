@@ -129,9 +129,9 @@ export const ChipSelect: React.FC<Props> = ({
   }, [selectedItems, selectedItem])
 
   return (
-    <div className="w-full h-full bg-base-200 dropdown border border-gray-200 p-1">
+    <div className="w-full h-full p-1">
       <div className="flex flex-col gap-1">
-        <label className="text-xs w-fit" {...getLabelProps()}>
+        <label className="text-xs w-fit p-0.5" {...getLabelProps()}>
           {label}
         </label>
         <div className="inline-flex gap-1 items-center flex-wrap p-1">
@@ -161,7 +161,7 @@ export const ChipSelect: React.FC<Props> = ({
           <div className="text-xs flex gap-0.5 grow p-0.5">
             <input
               placeholder={`${label}...`}
-              className="w-full"
+              className="w-full input input-xs"
               {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             />
             <button
@@ -175,16 +175,17 @@ export const ChipSelect: React.FC<Props> = ({
           </div>
         </div>
       </div>
-      {isOpen && <ul
-        className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full"
-        {...getMenuProps({}, { suppressRefError: true })}
-      >
-        {filteredItems.map((item, index) => (
-          <li key={`${item.value}${index}`} {...getItemProps({ item, index })} >
-            <span className="text-xs">{item.label}</span>
-          </li>
-        ))}
-      </ul>}
+      <div {...getMenuProps()}>
+        {isOpen && <ul
+          className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full"
+        >
+          {filteredItems.map((item, index) => (
+            <li key={`${item.value}${index}`} {...getItemProps({ item, index })} >
+              <span className="text-xs">{item.label}</span>
+            </li>
+          ))}
+        </ul>}
+      </div>
     </div>
   )
 }
