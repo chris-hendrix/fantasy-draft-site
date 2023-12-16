@@ -61,7 +61,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     oldPlayerId: string,
     newPlayerId: string | null
   ) => {
-    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId })
+    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
     if ('error' in res) return
     await send({ pickId, oldPlayerId, newPlayerId })
   }
