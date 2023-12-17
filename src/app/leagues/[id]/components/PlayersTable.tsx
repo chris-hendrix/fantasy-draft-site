@@ -5,7 +5,7 @@ import { useGetPlayers } from '@/hooks/player'
 import { useLeagueTeams } from '@/hooks/team'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs, TeamArgs } from '@/types'
-import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam } from '@/utils/draft'
+import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
 import ChipSelect from '@/components/ChipSelect'
 import SearchFilter from '@/components/SearchFilter'
@@ -36,6 +36,11 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
     return Math.min(round, MAX_ROUND_FILTER)
   }
 
+  const getPlayerPositions = (player: PlayerArgs) => {
+    const positions = String(getPlayerData(player, 'Positions'))
+    return positions.split(',')
+  }
+
   const getUniqueTeamOptions = () => {
     const teams = players
       .map((player) => getPlayerTeam(player))
@@ -50,6 +55,7 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     round: () => true,
     team: () => true,
+    position: () => true,
     playerSearch: () => true
   })
 
@@ -90,6 +96,22 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
                 ...filterOptions,
                 round: selectedValues?.length
                   ? (player) => selectedValues.includes(getPlayerRound(player))
+                  : () => true
+              })
+            }}
+          />
+        </div>
+        <div className="w-24 card bg-base-200 p-1">
+          <ChipSelect
+            label="Position"
+            items={POSITIONS.map((pos) => ({ value: pos, label: pos }))}
+            onSelection={({ selectedValues }) => {
+              setFilterOptions({
+                ...filterOptions,
+                position: selectedValues?.length
+                  ? (player) => selectedValues.some(
+                    (value) => getPlayerPositions(player)?.includes(String(value))
+                  )
                   : () => true
               })
             }}

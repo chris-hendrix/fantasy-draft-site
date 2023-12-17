@@ -31,7 +31,7 @@ const getFilteredOptions = (
   ))
 }
 
-export const ChipSelect: React.FC<Props> = ({
+const ChipSelect: React.FC<Props> = ({
   items,
   onSelection,
   label,

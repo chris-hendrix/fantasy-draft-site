@@ -3,6 +3,18 @@ import { JsonObject } from '@prisma/client/runtime/library'
 
 const NAME_KEY = 'PlayerInfo'
 
+export const POSITIONS = [
+  'C',
+  '1B',
+  '2B',
+  '3B',
+  'SS',
+  'OF',
+  'DH',
+  'SP',
+  'RP'
+]
+
 export const getRound = (overall: number, teamsCount: number, noOverallValue: number = 99) => (
   overall ? Math.floor((overall - 1) / teamsCount) + 1 : noOverallValue
 )
