@@ -88,7 +88,7 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
       value: (player) => getPlayerData(player, 'Projections'),
       renderedValue: (player) => (
         <div
-          className="cursor-pointer"
+          className="cursor-pointer w-40"
           onMouseEnter={() => setHoveredPlayerId(player.id)}
           onMouseLeave={() => setHoveredPlayerId(null)}
         >
