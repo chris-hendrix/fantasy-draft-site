@@ -28,6 +28,7 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
     },
     { skip: !leagueId }
   )
+  const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
 
   const { teamsCount } = useLeagueTeams(leagueId)
 
@@ -68,8 +69,38 @@ const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }
       name: 'ADP',
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
     },
-    { name: 'Player', value: (player) => getPlayerData(player, 'PlayerInfo') },
-    { name: 'Projections', value: (player) => getPlayerData(player, 'Projections') },
+    {
+      name: 'Player',
+      value: (player) => getPlayerData(player, 'PlayerInfo'),
+      renderedValue: (player) => (
+        <a
+          className="link"
+          href={getPlayerData(player, 'Link')}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {getPlayerData(player, 'PlayerInfo')}
+        </a>
+      ),
+    },
+    {
+      name: 'Projections',
+      value: (player) => getPlayerData(player, 'Projections'),
+      renderedValue: (player) => (
+        <div
+          className="cursor-pointer"
+          onMouseEnter={() => setHoveredPlayerId(player.id)}
+          onMouseLeave={() => setHoveredPlayerId(null)}
+        >
+          {hoveredPlayerId === player.id && (
+            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-200 text-xs">
+              {getPlayerData(player, 'Notes')}
+            </div>
+          )}
+          {getPlayerData(player, 'Projections')}
+        </div>
+      ),
+    },
     { name: 'Team', value: (player) => getPlayerTeam(player)?.name || '' }
   ]
 
