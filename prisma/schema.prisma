@@ -75,7 +75,6 @@ model League {
   commissioners Commissioner[]
   teams         Team[]
   drafts        Draft[]
-  players       Player[]
 }
 
 model Commissioner {
@@ -127,6 +126,7 @@ model Draft {
   rounds          Int
   draftTime       DateTime?
   league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  players         Player[]
   draftOrderSlots DraftOrderSlot[]
   draftPicks      DraftPick[]
 
@@ -166,11 +166,10 @@ model Player {
   id         String      @id @default(cuid())
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-  leagueId   String      @map("league_id")
+  draftId    String      @map("draft_id")
   name       String
-  year       Int
   data       Json?
-  league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  draft      Draft       @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftPicks DraftPick[]
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { routeWrapper, getParsedParams, ApiError } from '@/app/api/utils/api'
-import { checkLeagueCommissioner } from '../utils/permissions'
+import { checkDraftCommissioner } from '../utils/permissions'
 
 export const GET = routeWrapper(
   async (req: NextRequest) => {
@@ -13,8 +13,8 @@ export const GET = routeWrapper(
 
 export const POST = routeWrapper(async (req: NextRequest) => {
   const data: any = req.consumedBody
-  if (!data.leagueId) throw new ApiError('Must have league id', 400)
-  await checkLeagueCommissioner(data.leagueId)
+  if (!data.draftId) throw new ApiError('Must have draft id', 400)
+  await checkDraftCommissioner(data.draftId)
   const player = await prisma.player.create({ data })
   return NextResponse.json(player)
 })

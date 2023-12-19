@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useGetPlayers } from '@/hooks/player'
-import { useLeagueTeams } from '@/hooks/team'
+import { useDraftTeams } from '@/hooks/team'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs, TeamArgs } from '@/types'
 import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
@@ -13,24 +13,23 @@ import SearchFilter from '@/components/SearchFilter'
 const MAX_ROUND_FILTER = 30
 
 interface Props {
-  leagueId: string;
-  year: number;
+  draftId: string;
   maxItemsPerPage?: number
 }
 
 type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
 
-const PlayersTable: React.FC<Props> = ({ leagueId, year, maxItemsPerPage = 100 }) => {
+const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
   const { data: players } = useGetPlayers(
     {
-      where: { leagueId, year },
-      include: { draftPicks: { include: { team: true }, where: { draft: { year } } } }
+      where: { draftId },
+      include: { draftPicks: { include: { team: true }, where: { draftId } } }
     },
-    { skip: !leagueId }
+    { skip: !draftId }
   )
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
 
-  const { teamsCount } = useLeagueTeams(leagueId)
+  const { teamsCount } = useDraftTeams(draftId)
 
   const getPlayerRound = (player: PlayerArgs) => {
     const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)

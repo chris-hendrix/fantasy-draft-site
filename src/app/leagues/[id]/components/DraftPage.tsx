@@ -98,7 +98,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             <DraftPicksTable draft={draft} edit={edit} onOrderChange={setDraftPicks} />
           </div>
           <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
-            <PlayersTable leagueId={draft.leagueId} year={draft.year} />
+            <PlayersTable draftId={draft.id} />
           </div>
         </div>
       )}
