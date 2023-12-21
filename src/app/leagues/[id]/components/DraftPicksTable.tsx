@@ -15,7 +15,7 @@ import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
-  draft: Partial<DraftArgs>;
+  draft: DraftArgs;
   edit?: boolean;
   onOrderChange: (draftPicks: Partial<DraftPickArgs>[]) => void
 }
@@ -92,9 +92,8 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
             {player ? getPlayerName(player) : ''}
           </div>
         }
-        return <PlayerAutocomplete
-          leagueId={draft.leagueId as string}
-          year={draft.year as number}
+        return draft?.id && <PlayerAutocomplete
+          draftId={draft.id}
           onSelection={(newPlayerId) => {
             handleSelection(String(id), String(player?.id), newPlayerId)
           }}
