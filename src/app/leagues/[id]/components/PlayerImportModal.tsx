@@ -27,7 +27,6 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
 
   const handleSave = async () => {
     if (!selectedDraftId) return
-    console.log({ selectedDraftId, players })
     const res = await updateDraft({
       id: selectedDraftId,
       players: {
