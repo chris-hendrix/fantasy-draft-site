@@ -9,6 +9,7 @@
     "lint": "next lint",
     "migrate": "npx prisma migrate dev --skip-seed",
     "syncdb": "npx prisma format && npx prisma generate && npx prisma db push",
+    "resetdb": "npx prisma migrate reset && npm run syncdb",
     "up": "docker-compose -f docker-compose.yml up -d && docker-compose logs -f",
     "down": "docker-compose -f docker-compose.yml down",
     "devtest": "NODE_ENV=test && next dev",

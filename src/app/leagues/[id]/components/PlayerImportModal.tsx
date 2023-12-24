@@ -71,7 +71,7 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       <div>Year</div>
       <select
         className="select select-bordered w-200"
-        value={selectedDraftYear || ''}
+        value={selectedDraftId || ''}
         onChange={(e: ChangeEvent<HTMLSelectElement>) => (
           setSelectedDraftId(e.target.value || null)
         )}

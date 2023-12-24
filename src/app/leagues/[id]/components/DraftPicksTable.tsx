@@ -24,7 +24,7 @@ type FilterOptions = { [key: string]: (pick: DraftPickArgs) => boolean }
 
 const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }) => {
   const { isCommissioner } = useUserLeagues(draft.leagueId)
-  const { data: draftPicks } = useGetDraftPicks(
+  const { data: draftPicks, refetch } = useGetDraftPicks(
     {
       where: { draftId: draft.id },
       include: { team: true, player: true },
@@ -49,6 +49,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
 
   useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
   useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
+  useEffect(() => { refetch() }, [draft?.draftPicks])
 
   useEffect(() => {
     const { pickId, oldPlayerId } = latestPayload || {}

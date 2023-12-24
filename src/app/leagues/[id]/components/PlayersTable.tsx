@@ -23,7 +23,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
   const { data: players } = useGetPlayers(
     {
       where: { draftId },
-      include: { draftPicks: { include: { team: true }, where: { draftId } } }
+      include: { draftPicks: { include: { team: true } } }
     },
     { skip: !draftId }
   )

@@ -42,3 +42,7 @@ export const getPlayerTeam = (player: PlayerArgs) => {
   const teams = player.draftPicks.map((dp) => dp.team)
   return teams?.[0]
 }
+
+export const createDraftTeamIds = (teamIds: string[], rounds: number) => Array
+  .from({ length: rounds }, () => teamIds)
+  .flat()
