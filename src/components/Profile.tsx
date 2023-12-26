@@ -33,11 +33,9 @@ const Profile: React.FC<Props> = ({ user, canEdit = false }) => {
           )}
         </div>
         {canEdit &&
-          <div className="tooltip" data-tip="Edit profile">
-            <button id="edit-profile" className="btn btn-square btn-sm" onClick={() => setModalOpen(true)}>
-              ✏️
-            </button>
-          </div>
+          <button id="edit-profile" className="btn btn-square btn-sm" onClick={() => setModalOpen(true)}>
+            ✏️
+          </button>
         }
       </div>
       <div className="p-4">
