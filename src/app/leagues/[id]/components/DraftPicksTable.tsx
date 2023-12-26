@@ -42,7 +42,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     team: () => true,
     playerSearch: () => true
   })
-  const teamsCount = (draft?.draftOrderSlots?.length || 1)
+  const teamsCount = (draft?.draftTeams?.length || 1)
 
   const { send } = useSendBroadcast(draft.id as string, 'test')
   const { latestPayload } = useReceiveBroadcast(draft.id as string, 'test')

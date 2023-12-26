@@ -90,16 +90,16 @@ model Commissioner {
 }
 
 model Team {
-  id              String           @id @default(cuid())
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  leagueId        String
-  name            String
-  archived        Boolean          @default(false)
-  league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  teamUsers       TeamUser[]
-  draftOrderSlots DraftOrderSlot[]
-  draftPicks      DraftPick[]
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  leagueId   String
+  name       String
+  archived   Boolean     @default(false)
+  league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  teamUsers  TeamUser[]
+  draftTeams DraftTeam[]
+  draftPicks DraftPick[]
 
   @@unique([leagueId, name])
 }
@@ -118,22 +118,22 @@ model TeamUser {
 }
 
 model Draft {
-  id              String           @id @default(cuid())
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  leagueId        String           @map("league_id")
-  year            Int
-  rounds          Int
-  draftTime       DateTime?
-  league          League           @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  players         Player[]
-  draftOrderSlots DraftOrderSlot[]
-  draftPicks      DraftPick[]
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  leagueId   String      @map("league_id")
+  year       Int
+  rounds     Int
+  draftTime  DateTime?
+  league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  players    Player[]
+  draftTeams DraftTeam[]
+  draftPicks DraftPick[]
 
   @@unique([leagueId, year], name: "LeagueYearUniqueConstraint")
 }
 
-model DraftOrderSlot {
+model DraftTeam {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

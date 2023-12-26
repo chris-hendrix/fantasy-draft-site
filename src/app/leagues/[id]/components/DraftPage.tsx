@@ -18,7 +18,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
     id: draftId,
     queryParams: {
       include: {
-        draftOrderSlots: { include: { team: true }, orderBy: { order: 'asc' } },
+        draftTeams: { include: { team: true }, orderBy: { order: 'asc' } },
         draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } }
       }
     }
