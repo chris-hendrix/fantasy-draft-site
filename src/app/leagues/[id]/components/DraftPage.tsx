@@ -94,11 +94,11 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       }
       {draft && (
         <div className="flex flex-row h-full w-full">
-          <div className="w-1/2 h-full max-h-screen overflow-y-auto flex flex-col flex-grow">
+          <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
             <DraftPicksTable draft={draft} edit={edit} onOrderChange={setDraftPicks} />
           </div>
-          <div className="w-1/2 max-h-screen overflow-y-auto">
-            <PlayersTable leagueId={draft.leagueId} year={draft.year} />
+          <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
+            <PlayersTable draftId={draft.id} />
           </div>
         </div>
       )}

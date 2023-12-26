@@ -13,7 +13,7 @@ interface Props {
 
 const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   const initialSlots = draft.draftOrderSlots || []
-  const [slots, setSlots] = useState<Partial<DraftOrderSlotArgs>[]>(initialSlots)
+  const [slots, setSlots] = useState<DraftOrderSlotArgs[]>(initialSlots)
   const { updateObject: updateDraft } = useUpdateDraft()
   const [confirmSave, setConfirmSave] = useState(false)
   const [confirmGenerate, setConfirmGenerate] = useState(false)
@@ -56,7 +56,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     onClose()
   }
 
-  const columns: TableColumn<Partial<DraftOrderSlotArgs>>[] = [
+  const columns: TableColumn<DraftOrderSlotArgs>[] = [
     {
       name: 'Team name',
       value: (slot) => slot?.team?.name,

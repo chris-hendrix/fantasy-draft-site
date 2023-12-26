@@ -3,7 +3,6 @@ import { setupListeners } from '@reduxjs/toolkit/query/react'
 import { appSlice } from './app'
 import { userApi } from './user'
 import { sessionApi } from './session'
-import { storageApi } from './storage'
 import { leagueApi } from './league'
 import { teamApi } from './team'
 import { draftApi } from './draft'
@@ -16,7 +15,6 @@ export const makeStore = () => configureStore({
     [appSlice.name]: appSlice.reducer,
     [sessionApi.reducerPath]: sessionApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
-    [storageApi.reducerPath]: storageApi.reducer,
     [leagueApi.reducerPath]: leagueApi.reducer,
     [teamApi.reducerPath]: teamApi.reducer,
     [draftApi.reducerPath]: draftApi.reducer,
@@ -27,7 +25,6 @@ export const makeStore = () => configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat([
     sessionApi.middleware,
     userApi.middleware,
-    storageApi.middleware,
     leagueApi.middleware,
     teamApi.middleware,
     draftApi.middleware,
@@ -47,4 +44,3 @@ export type AppDispatch = typeof store.dispatch
 export { showAlertAsync } from './app'
 export { useGetUserQuery, useGetUsersQuery, useAddUserMutation, useUpdateUserMutation } from './user'
 export { useGetSessionQuery, useSignInMutation, useSignOutMutation } from './session'
-export { useUploadFileMutation } from './storage'

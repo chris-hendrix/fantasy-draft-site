@@ -1,16 +1,8 @@
 'use client'
 
-import { redirect } from 'next/navigation'
-import { useEffect } from 'react'
 import Image from 'next/image'
-import { useUserLeagues } from '@/hooks/league'
 
-const Home = () => {
-  const { defaultLeague } = useUserLeagues()
-
-  useEffect(() => { defaultLeague && redirect(`leagues/${defaultLeague.id}`) }, [defaultLeague])
-
-  return (
+const Home = () => (
   <main className="">
     <div className="flex flex-col items-center mt-16">
       <h1 className="text-5xl font-bold">Hello!</h1>
@@ -26,7 +18,6 @@ const Home = () => {
       </div>
     </div>
   </main>
-  )
-}
+)
 
 export default Home

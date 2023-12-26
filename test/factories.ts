@@ -54,15 +54,14 @@ export const createDraft = async (data: Partial<Prisma.DraftUncheckedCreateInput
 }
 
 export const createPlayer = async (data: Partial<Prisma.PlayerUncheckedCreateInput> = {}) => {
-  const draft = await prisma.player.create({
+  const player = await prisma.player.create({
     data: {
       name: `Player ${new Date().getTime()}`,
-      year: data.year || (new Date()).getFullYear(),
-      leagueId: data.leagueId || (await createLeague()).id,
+      draftId: data.draftId || (await createDraft()).id,
       ...data
     }
   })
-  return draft
+  return player
 }
 
 export const createDraftPick = async (data: Partial<Prisma.DraftPickUncheckedCreateInput> = {}) => {

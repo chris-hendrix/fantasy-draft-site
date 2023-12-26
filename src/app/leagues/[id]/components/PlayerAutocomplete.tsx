@@ -5,8 +5,7 @@ import { getPlayerData } from '@/utils/draft'
 import Autocomplete from '@/components/Autocomplete'
 
 interface Props {
-  leagueId: string;
-  year: number;
+  draftId: string;
   onSelection: (playerId: string) => void
   size?: 'xs' | 'sm'
   initialId?: string
@@ -14,16 +13,15 @@ interface Props {
 }
 
 const PlayerAutocomplete: React.FC<Props> = ({
-  leagueId,
-  year,
+  draftId,
   onSelection,
   size = 'sm',
   initialId,
   excludeIds = []
 }) => {
   const { data: players } = useGetPlayers(
-    { where: { leagueId, year } },
-    { skip: !leagueId }
+    { where: { draftId } },
+    { skip: !draftId }
   )
 
   const options = players?.filter((p) => !excludeIds.includes(p.id)).map((player) => ({

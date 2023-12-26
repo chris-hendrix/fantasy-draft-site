@@ -34,6 +34,7 @@ module.exports = {
       { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_', 'caughtErrorsIgnorePattern': '^_' },
     ],
     '@typescript-eslint/no-use-before-define': 'off', // allows functions calls before definition
+    'consistent-return': 'off', // allows no return for an arrow function
     'import/prefer-default-export': 'off', // prevents needing a default export
     'jsx-quotes': ['error', 'prefer-double'], // force double quotes for jsx props
     'object-curly-newline': 'off', // allows objects on one line

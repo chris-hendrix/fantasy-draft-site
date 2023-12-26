@@ -15,12 +15,15 @@ jobs:
       POSTGRES_DB: postgres
       POSTGRES_HOSTNAME: postgres
       POSTGRES_PORT: 5432
-      # next-auth
-      SECRET:  nextAuthSecret
       # host
       PROTOCOL: http
       HOSTNAME: localhost
       PORT: 3000
+      # next-auth
+      SECRET:  nextAuthSecret
+      # supabase
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
     services:
       postgres:

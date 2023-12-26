@@ -93,7 +93,7 @@ const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50 }
   }
 
   return (
-    <div className="overflow-x-auto w-full">
+    <div className="overflow-x-auto w-full min-h-[600px]">
       <table className={`table-zebra table${xs ? ' table-xs' : ''}`}>
         <thead>
           <tr>

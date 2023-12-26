@@ -1,7 +1,6 @@
 import { ChangeEvent, useState } from 'react'
 import csv from 'csvtojson'
-import { PlayerArgs } from '@/types'
-import { useUpdateLeague } from '@/hooks/league'
+import { useGetDrafts, useUpdateDraft } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -11,25 +10,27 @@ interface Props {
   onClose: () => void;
 }
 
-type Player = { name: string, year: number, data: any }
+type Player = { name: string, data: any }
 
 const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
+  const { data: drafts } = useGetDrafts({
+    where: { leagueId },
+    orderBy: { year: 'asc' }
+  })
   const [players, setPlayers] = useState<Player[]>([])
   const [confirmSave, setConfirmSave] = useState(false)
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
-  const { updateObject: updateLeague } = useUpdateLeague()
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const { updateObject: updateDraft } = useUpdateDraft()
   const [csvString, setCsvString] = useState('')
 
-  const years = Array.from(
-    { length: 10 },
-    (_, index) => new Date().getFullYear() - index + 1
-  )
+  const selectedDraftYear = drafts?.find((d) => d.id === selectedDraftId)?.year
 
   const handleSave = async () => {
-    const res = await updateLeague({
-      id: leagueId,
+    if (!selectedDraftId) return
+    const res = await updateDraft({
+      id: selectedDraftId,
       players: {
-        deleteMany: { year: selectedYear },
+        deleteMany: {},
         createMany: { data: players }
       }
     })
@@ -37,17 +38,16 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     onClose()
   }
 
-  const columns: TableColumn<Partial<PlayerArgs>>[] = [
+  const columns: TableColumn<Player>[] = [
     { name: 'Name', value: (player) => player.name },
-    { name: 'Year', value: (player) => player.year },
     { name: 'Data', value: (player) => JSON.stringify(player?.data || '') },
   ]
 
   const handleImport = async () => {
+    if (!selectedDraftId) return
     const objects = await csv({ checkType: true }).fromString(csvString)
     const imported = objects.map((obj: any) => ({
       name: String(obj?.name || obj?.Name),
-      year: selectedYear,
       data: obj
     }))
     setPlayers(imported)
@@ -58,7 +58,7 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       onConfirm={handleSave}
       onClose={() => setConfirmSave(false)}
     >
-      {`This will delete all existing player data for ${selectedYear}. Continue?`}
+      {`This will delete all existing player data for ${selectedDraftYear}. Continue?`}
     </ConfirmModal>
   }
 
@@ -71,17 +71,17 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       <div>Year</div>
       <select
         className="select select-bordered w-200"
-        value={selectedYear || ''}
+        value={selectedDraftId || ''}
         onChange={(e: ChangeEvent<HTMLSelectElement>) => (
-          setSelectedYear(parseInt(e.target.value, 10))
+          setSelectedDraftId(e.target.value || null)
         )}
       >
         <option disabled value="">
           Select year
         </option>
-        {years.map((y) => (
-          <option key={y} value={y}>
-            {y}
+        {drafts.map((d) => (
+          <option key={d.id} value={d.id}>
+            {d.year}
           </option>
         ))}
       </select>

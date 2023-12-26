@@ -1,25 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { League } from '@prisma/client'
-import { useGetPlayers } from '@/hooks/player'
+import { LeagueArgs } from '@/types'
+import { useGetDrafts } from '@/hooks/draft'
 import PlayersTable from './PlayersTable'
 import PlayerImportModal from './PlayerImportModal'
 
 interface Props {
-  league: Partial<League>;
+  league: LeagueArgs;
 }
 
 const PlayerTab: React.FC<Props> = ({ league }) => {
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
   const [importModalOpen, setImportModalOpen] = useState(false)
 
-  const { data: players } = useGetPlayers(
-    { where: { leagueId: league.id }, distinct: ['year'] },
-    { skip: !league.id }
-  )
-
-  const years = players?.map((p) => p.year)
+  const { data: drafts } = useGetDrafts({
+    where: { leagueId: league.id },
+    orderBy: { year: 'asc' }
+  })
 
   return (
     <div className="flex flex-col items-start mt-8">
@@ -32,22 +30,22 @@ const PlayerTab: React.FC<Props> = ({ league }) => {
       </button>
         <select
           className="select select-bordered w-24 btn-sm"
-          value={selectedYear || ''}
+          value={selectedDraftId || ''}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => (
-            setSelectedYear(parseInt(e.target.value, 10))
+            setSelectedDraftId(e.target.value)
           )}
         >
           <option disabled value="">
             Select year
           </option>
-          {years?.map((y) => (
-            <option key={y} value={y}>
-              {y}
+          {drafts?.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.year}
             </option>
           ))}
         </select>
       </div>
-      <PlayersTable leagueId={league?.id as string} year={selectedYear} />
+      {selectedDraftId && <PlayersTable draftId={selectedDraftId} />}
       {importModalOpen && <PlayerImportModal
         leagueId={league.id as string}
         onClose={() => {

@@ -1,7 +1,19 @@
 import { PlayerArgs } from '@/types'
 import { JsonObject } from '@prisma/client/runtime/library'
 
-const PLAYER_NAME_KEY = 'PlayerInfo'
+const NAME_KEY = 'PlayerInfo'
+
+export const POSITIONS = [
+  'C',
+  '1B',
+  '2B',
+  '3B',
+  'SS',
+  'OF',
+  'DH',
+  'SP',
+  'RP'
+]
 
 export const getRound = (overall: number, teamsCount: number, noOverallValue: number = 99) => (
   overall ? Math.floor((overall - 1) / teamsCount) + 1 : noOverallValue
@@ -24,4 +36,13 @@ export const getPlayerData = (player: PlayerArgs, key: string) => {
   return data[key] as any
 }
 
-export const getPlayerName = (player: PlayerArgs) => getPlayerData(player, PLAYER_NAME_KEY)
+export const getPlayerName = (player: PlayerArgs) => String(getPlayerData(player, NAME_KEY))
+
+export const getPlayerTeam = (player: PlayerArgs) => {
+  const teams = player.draftPicks.map((dp) => dp.team)
+  return teams?.[0]
+}
+
+export const createDraftTeamIds = (teamIds: string[], rounds: number) => Array
+  .from({ length: rounds }, () => teamIds)
+  .flat()
