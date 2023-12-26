@@ -51,6 +51,6 @@ describe('User tests', () => {
     cy.get('input[name="password"]').type('Abcd1234!!')
     cy.get('input[name="confirmPassword"]').type('Abcd1234!!')
     cy.contains('button', 'Save').click()
-    cy.contains('div', 'saved')
+    cy.contains('Edit profile')
   })
 })

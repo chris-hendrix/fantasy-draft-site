@@ -68,7 +68,7 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
         <Card
           header={userTeam.name}
           buttons={<button
-            className="btn btn-square btn-sm"
+            className="btn btn-square btn-sm btn-ghost"
             onClick={() => setTeamToEdit(userTeam)}
           >✏️
           </button>}

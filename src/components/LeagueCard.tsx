@@ -21,7 +21,7 @@ const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
       <Card
         header={league.name}
         buttons={isCommissioner && <button
-          className="btn btn-square btn-sm"
+          className="btn btn-square btn-sm btn-ghost"
           onClick={() => setModalOpen(true)}
         >
           ✏️

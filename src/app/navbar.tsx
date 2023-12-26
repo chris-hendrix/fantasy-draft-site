@@ -25,20 +25,6 @@ const UserDropdown: React.FC = () => {
 
   useEffect(() => { isSignOutSuccess && showAlert({ successMessage: 'Successfully logged out' }) }, [isSignOutSuccess])
 
-  const renderUserLinks = () => {
-    if (isLoading) return null
-    if (user) {
-      return <>
-        <li><Link href="/profile">👤 Profile</Link></li>
-        <li><a onClick={() => signOut()}>⬅️ Log out</a></li>
-      </>
-    }
-    return <>
-      <li><a onClick={() => setLoginOpen(true)}>Log in</a></li>
-      <li><a onClick={() => setSignupOpen(true)} >Sign up</a></li>
-    </>
-  }
-
   return (
     <>
       <div id="dropdown" className="relative group inline-block">
@@ -53,7 +39,18 @@ const UserDropdown: React.FC = () => {
               <Avatar user={user} />
             </button>
           }>
-          {renderUserLinks()}
+          {!isLoading && user && (
+            <div>
+              <li><Link href="/profile">👤 Profile</Link></li>
+              <li><a onClick={() => signOut()}>⬅️ Log out</a></li>
+            </div>
+          )}
+          {!isLoading && !user && (
+            <div>
+              <li><a onClick={() => setLoginOpen(true)}>Log in</a></li>
+              <li><a onClick={() => setSignupOpen(true)} >Sign up</a></li>
+            </div>
+          )}
           <div className="divider" />
           <li><Link href="/">🏠 Home</Link></li>
           <li><Link href="/users">👥 Users</Link></li>
