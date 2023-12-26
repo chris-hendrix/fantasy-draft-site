@@ -17,7 +17,7 @@ const DraftTab: React.FC<Props> = ({ league }) => {
 
   const { data: drafts, refetch } = useGetDrafts({
     where: { leagueId: league.id },
-    orderBy: { year: 'asc' }
+    orderBy: { year: 'desc' }
   })
   const { addObject: addDraft } = useAddDraft()
   const [modalOpen, setModalOpen] = useState(false)
