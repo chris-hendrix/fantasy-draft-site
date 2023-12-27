@@ -32,7 +32,7 @@ const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
   const tabs = [
     { hash: 'league', name: 'League', component: <LeagueTab league={league} /> },
     { hash: 'teams', name: 'Teams', component: <TeamsTab league={league} /> },
-    { hash: 'draft', name: 'Draft', component: <DraftTab league={league} /> },
+    { hash: 'draft', name: 'Draft', component: <DraftTab leagueId={league.id} /> },
     { hash: 'keepers', name: 'Keepers', component: <KeeperTab leagueId={league.id} /> },
     { hash: 'history', name: 'History', component: <>Coming Soon!</> },
     ...(isCommissioner ? [{ hash: 'players', name: 'Players', component: <PlayerTab leagueId={league.id} /> }] : []),

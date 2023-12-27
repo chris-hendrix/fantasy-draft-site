@@ -1,22 +1,21 @@
 'use client'
 
 import React, { useState, ChangeEvent } from 'react'
-import { LeagueArgs } from '@/types'
 import { useAddDraft, useGetDrafts } from '@/hooks/draft'
 import Tabs from '@/components/Tabs'
 import Modal from '@/components/Modal'
 import DraftPage from './DraftPage'
 
 interface Props {
-  league: Partial<LeagueArgs>;
+  leagueId: string;
 }
 
-const DraftTab: React.FC<Props> = ({ league }) => {
+const DraftTab: React.FC<Props> = ({ leagueId }) => {
   const currentYear = new Date().getFullYear()
-  const defaultRounds = 22
+  const defaultRounds = 22 // TODO add to league model
 
   const { data: drafts, refetch } = useGetDrafts({
-    where: { leagueId: league.id },
+    where: { leagueId },
     orderBy: { year: 'desc' }
   })
   const { addObject: addDraft } = useAddDraft()
@@ -35,7 +34,7 @@ const DraftTab: React.FC<Props> = ({ league }) => {
       await addDraft({
         rounds,
         year: selectedYear,
-        leagueId: league.id
+        leagueId
       })
       refetch()
       setModalOpen(false)
@@ -80,6 +79,7 @@ const DraftTab: React.FC<Props> = ({ league }) => {
             value={rounds}
             onChange={(e) => setRounds(Number(e.target.value))}
           />
+          <div className="mt-2">Rounds</div>
           <div className="flex justify-end mt-2">
             <button onClick={handleAddDraft} className="btn btn-error w-32 mr-2">
               Yes

@@ -100,6 +100,7 @@ model Team {
   teamUsers  TeamUser[]
   draftTeams DraftTeam[]
   draftPicks DraftPick[]
+  keeper     Keeper[]
 
   @@unique([leagueId, name])
 }
@@ -124,24 +125,27 @@ model Draft {
   leagueId   String      @map("league_id")
   year       Int
   rounds     Int
+  dues       Float       @default(0)
   draftTime  DateTime?
   league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   players    Player[]
   draftTeams DraftTeam[]
   draftPicks DraftPick[]
+  keepers    Keeper[]
 
   @@unique([leagueId, year], name: "LeagueYearUniqueConstraint")
 }
 
 model DraftTeam {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  draftId   String   @map("draft_id")
-  teamId    String   @map("team_id")
-  order     Int
-  draft     Draft    @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  team      Team     @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  draftId    String    @map("draft_id")
+  teamId     String    @map("team_id")
+  order      Int
+  duesPaidAt DateTime?
+  draft      Draft     @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team       Team      @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([draftId, teamId])
 }
@@ -171,6 +175,19 @@ model Player {
   data       Json?
   draft      Draft       @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   draftPicks DraftPick[]
+  keeper     Keeper[]
+}
+
+model Keeper {
+  id       String  @id @default(cuid())
+  draftId  String  @map("draft_id")
+  teamId   String  @map("team_id")
+  playerId String? @map("player_id")
+  draft    Draft   @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team     Team    @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  player   Player? @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  @@unique([draftId, playerId])
 }
 
 enum Sport {

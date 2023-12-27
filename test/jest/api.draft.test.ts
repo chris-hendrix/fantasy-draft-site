@@ -51,7 +51,7 @@ describe('/api/drafts', () => {
     const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
     const draft = await createDraft({ leagueId: league.id })
     const updatedYear = 2010
-    const req = createNextRequest({ method: 'PUT', body: { year: updatedYear } })
+    const req = createNextRequest({ method: 'PUT', body: { year: updatedYear, keeperCount: 5 } })
     const res = await putDraft(req, { params: { id: draft.id } })
     expect(res.status).toBe(200)
 

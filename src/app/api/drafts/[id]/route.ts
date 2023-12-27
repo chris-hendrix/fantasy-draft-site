@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkDraftCommissioner } from '@/app/api/utils/permissions'
+import { createTeamIdArray } from '@/utils/draft'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
@@ -18,8 +19,21 @@ export const PUT = routeWrapper(
     const { id } = params
     if (!id) throw new ApiError('Draft id required', 400)
     await checkDraftCommissioner(id)
-    const data: any = req.consumedBody
-    const updatedDraft = await prisma.draft.update({ where: { id }, data })
+    const { keeperCount, ...data }: any = req.consumedBody
+    const draft = await prisma.draft.findUnique({ where: { id }, include: { draftTeams: true } })
+    if (!draft) throw new ApiError('Draft not found', 400)
+
+    const teamIds = createTeamIdArray(draft.draftTeams.map((dt) => dt.teamId), keeperCount || 0)
+    const updatedDraft = await prisma.draft.update({
+      where: { id },
+      data: {
+        ...data,
+        keepers: {
+          deleteMany: {},
+          createMany: { data: teamIds.map((teamId) => ({ teamId })) }
+        }
+      }
+    })
     return NextResponse.json(updatedDraft)
   }
 )

@@ -10,7 +10,9 @@ export const {
   useAddObject: useAddDraft,
   useUpdateObject: useUpdateDraft,
   useDeleteObject: useDeleteDraft
-} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs, Prisma.DraftUpdateInput>(draftApi)
+} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs, Prisma.DraftUpdateInput & {
+  keeperCount?: number
+}>(draftApi)
 
 export const useUserDraft = (draftId: string) => {
   const { data: draft, isLoading: isDraftLoading } = useGetDraft({ id: draftId })

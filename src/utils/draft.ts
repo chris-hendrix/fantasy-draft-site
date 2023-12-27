@@ -43,6 +43,6 @@ export const getPlayerTeam = (player: PlayerArgs) => {
   return teams?.[0]
 }
 
-export const createDraftTeamIds = (teamIds: string[], rounds: number) => Array
-  .from({ length: rounds }, () => teamIds)
+export const createTeamIdArray = (teamIds: string[], repeats: number) => Array
+  .from({ length: repeats }, () => teamIds)
   .flat()

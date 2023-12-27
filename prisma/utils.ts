@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import csv from 'csvtojson'
-import { createDraftTeamIds } from '../src/utils/draft'
+import { createTeamIdArray } from '../src/utils/draft'
 import { generateHash } from '../src/app/api/utils/hash'
 
 const PLAYER_DATA = 'player-data-raw-seed.csv'
@@ -104,7 +104,7 @@ export const generateSeedData = async () => {
   })))
 
   Promise.all(
-    createDraftTeamIds(draftTeamData.map((s) => s.teamId), rounds)
+    createTeamIdArray(draftTeamData.map((s) => s.teamId), rounds)
       .map((teamId, i) => (prisma.draftPick.create({
         data: {
           draftId: draft.id,
