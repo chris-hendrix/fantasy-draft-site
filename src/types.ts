@@ -4,10 +4,11 @@ import {
   Draft,
   DraftTeam,
   DraftPick,
+  Keeper,
   League,
   Player,
   Team,
-  TeamUser
+  TeamUser,
 } from '@prisma/client'
 
 export interface CommissionerArgs extends Commissioner {
@@ -45,7 +46,7 @@ export interface DraftTeamArgs extends DraftTeam {
 }
 
 export interface DraftPickArgs extends DraftPick {
-  league: LeagueArgs
+  draft: DraftArgs
   team: TeamArgs
   player: PlayerArgs
 }
@@ -53,4 +54,10 @@ export interface DraftPickArgs extends DraftPick {
 export interface PlayerArgs extends Player {
   league: LeagueArgs,
   draftPicks: DraftPickArgs[]
+}
+
+export interface KeeperArgs extends Keeper {
+  draft: DraftArgs
+  team: TeamArgs
+  player: PlayerArgs
 }

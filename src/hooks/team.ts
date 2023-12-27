@@ -52,7 +52,9 @@ export const useLeagueTeams = (leagueId: string) => {
 }
 
 export const useDraftTeams = (draftId: string) => {
-  const { data: draft } = useGetDraft({ id: draftId })
-  const data = useLeagueTeams(draft?.leagueId)
-  return data
+  const result = useGetDraft({
+    id: draftId,
+    queryParams: { include: { draftTeams: true } }
+  })
+  return { ...result, teamsCount: result.data?.draftTeams?.length }
 }

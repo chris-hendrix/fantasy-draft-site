@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
 import DraftYearTabs from './DraftYearTabs'
+import KeepersTable from './KeepersTable'
 
 interface Props {
   leagueId: string;
@@ -44,6 +45,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       <div className="flex flex-col items-center mt-8 mb-2">
         <DraftYearTabs leagueId={leagueId} onSelect={setDraftId} />
       </div>
+      {draftId && <KeepersTable draftId={draftId} />}
       <button
         className="btn btn-sm w-32"
         onClick={() => setModalOpen(true)}
