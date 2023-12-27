@@ -38,6 +38,7 @@ export interface DraftArgs extends Draft {
   league: LeagueArgs
   draftTeams: DraftTeamArgs[]
   draftPicks: DraftPickArgs[]
+  keepers: KeeperArgs[]
 }
 
 export interface DraftTeamArgs extends DraftTeam {

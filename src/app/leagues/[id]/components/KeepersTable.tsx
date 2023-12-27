@@ -4,9 +4,8 @@ import { useState, ChangeEvent } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName, getPlayerData, formatRoundPick } from '@/utils/draft'
-import { useDraftTeams } from '@/hooks/team'
-import { useGetKeepers, useUpdateKeeper } from '@/hooks/keeper'
-import { useUserDraft } from '@/hooks/draft'
+import { useDraftData, useUserDraft } from '@/hooks/draft'
+import { useGetKeepers, useUpdateKeeper, useCalculateKeeperRound } from '@/hooks/keeper'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
@@ -15,7 +14,7 @@ interface Props {
 
 const KeepersTable: React.FC<Props> = ({ draftId }) => {
   const { isCommissioner } = useUserDraft(draftId)
-  const { teamsCount, rounds } = useDraftTeams(draftId)
+  const { teamsCount, rounds } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
     {
       where: { draftId },
@@ -25,6 +24,7 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
     { skip: !draftId }
   )
   const { updateObject: updateKeeper } = useUpdateKeeper()
+  const { calculateKeeperRound } = useCalculateKeeperRound(draftId)
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
 
   const handlePlayerSelection = async (
@@ -102,6 +102,14 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
           </select>
         )
       }
+    },
+    {
+      name: 'Calculated round',
+      value: ({ player }) => (
+        player
+          ? calculateKeeperRound(player.name)
+          : ''
+      )
     },
     {
       name: 'ADP',

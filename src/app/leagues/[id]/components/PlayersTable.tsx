@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useGetPlayers } from '@/hooks/player'
-import { useDraftTeams } from '@/hooks/team'
+import { useDraftData } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs, TeamArgs } from '@/types'
 import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
@@ -29,7 +29,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
   )
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
 
-  const { teamsCount } = useDraftTeams(draftId)
+  const { teamsCount } = useDraftData(draftId)
 
   const getPlayerRound = (player: PlayerArgs) => {
     const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)
