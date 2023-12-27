@@ -23,11 +23,15 @@ export const checkTeamEdit = async (teamId: string, commissionerOnly: boolean = 
     where: { id: teamId, teamUsers: { every: { userId: String(userId) } } }
   })
 
+  // check for commissioner
   if (!team) {
-    const league = commissionerOnly && await prisma.league.findFirst({
+    const league = await prisma.league.findFirst({
       where: { teams: { some: { id: teamId } } }
     })
-    if (!league) throw new ApiError('Unauthorized', 401)
+    const commissioner = league && await prisma.commissioner.findFirst({
+      where: { userId, leagueId: league.id }
+    })
+    if (!commissioner) throw new ApiError('Unauthorized', 401)
   }
   return { user: session.user, team }
 }
