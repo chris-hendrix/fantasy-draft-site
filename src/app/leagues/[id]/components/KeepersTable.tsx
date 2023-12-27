@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, ChangeEvent } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName, getPlayerData, formatRoundPick } from '@/utils/draft'
@@ -15,23 +15,30 @@ interface Props {
 
 const KeepersTable: React.FC<Props> = ({ draftId }) => {
   const { isCommissioner } = useUserDraft(draftId)
-  const { teamsCount } = useDraftTeams(draftId)
+  const { teamsCount, rounds } = useDraftTeams(draftId)
   const { data: keepers } = useGetKeepers(
     {
       where: { draftId },
       include: { team: true, player: true },
-      orderBy: { team: { name: 'asc' } }
+      orderBy: [{ team: { name: 'asc' } }, { id: 'asc' }]
     },
     { skip: !draftId }
   )
   const { updateObject: updateKeeper } = useUpdateKeeper()
-  const [editPickId, setEditPickId] = useState<string | null>(null)
+  const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
 
-  const handleSelection = async (
+  const handlePlayerSelection = async (
     keeperId: string,
     newPlayerId: string | null
   ) => {
     await updateKeeper({ id: keeperId, playerId: newPlayerId || null })
+  }
+
+  const handleRoundSelection = async (
+    keeperId: string,
+    newRound: number | null
+  ) => {
+    await updateKeeper({ id: keeperId, round: newRound || null })
   }
 
   const columns: TableColumn<KeeperArgs>[] = [
@@ -41,10 +48,10 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
         if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
-        if (editPickId !== id) {
+        if (editKeeperId !== id) {
           return <div
             className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
-            onClick={() => setEditPickId(id || null)}
+            onClick={() => setEditKeeperId(id || null)}
           >
             {player ? getPlayerName(player) : ''}
           </div>
@@ -52,7 +59,7 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
         return draftId && <PlayerAutocomplete
           draftId={draftId}
           onSelection={(newPlayerId) => {
-            handleSelection(String(id), newPlayerId)
+            handlePlayerSelection(String(id), newPlayerId)
           }}
           size="xs"
           initialId={player?.id}
@@ -64,6 +71,39 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
       },
     },
     {
+      name: 'Round',
+      value: ({ round }) => round,
+      renderedValue: ({ id, round }) => {
+        if (!isCommissioner) return <>{round}</>
+        if (editKeeperId !== id) {
+          return <div
+            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+            onClick={() => setEditKeeperId(id || null)}
+          >
+            {round || ''}
+          </div>
+        }
+        return (
+          <select
+            className="select select-bordered select-xs w-full"
+            value={round || ''}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => (
+              handleRoundSelection(id, parseInt(e.target.value, 10))
+            )}
+          >
+            <option disabled value="">
+              Round
+            </option>
+            {Array.from({ length: rounds }).map((_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {i + 1}
+              </option>
+            ))}
+          </select>
+        )
+      }
+    },
+    {
       name: 'ADP',
       value: ({ player }) => (
         player
@@ -73,7 +113,7 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
     },
   ]
 
-  if (!keepers?.length) return null
+  if (!keepers?.length || !rounds) return null
 
   return (
     <>

@@ -79,7 +79,6 @@ const DraftTab: React.FC<Props> = ({ leagueId }) => {
             value={rounds}
             onChange={(e) => setRounds(Number(e.target.value))}
           />
-          <div className="mt-2">Rounds</div>
           <div className="flex justify-end mt-2">
             <button onClick={handleAddDraft} className="btn btn-error w-32 mr-2">
               Yes

@@ -6,7 +6,7 @@ import { keeperApi } from '@/store/keeper'
 export const {
   useGetObjects: useGetKeepers,
   useUpdateObject: useUpdateKeeper,
-  useInvalidateObject: useInvalidateKeeper
+  useInvalidateObjects: useInvalidateKeepers
 } = getCrudHooks<KeeperArgs, Prisma.KeeperFindManyArgs, Prisma.KeeperUncheckedUpdateInput>(
   keeperApi
 )

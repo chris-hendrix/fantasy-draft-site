@@ -62,6 +62,8 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     </ConfirmModal>
   }
 
+  if (!drafts) return null
+
   return (
     <Modal title="Import players" size="lg" onClose={onClose}>
       <div className="mb-2">

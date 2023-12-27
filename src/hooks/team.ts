@@ -56,5 +56,9 @@ export const useDraftTeams = (draftId: string) => {
     id: draftId,
     queryParams: { include: { draftTeams: true } }
   })
-  return { ...result, teamsCount: result.data?.draftTeams?.length }
+  return {
+    ...result,
+    teamsCount: result.data?.draftTeams?.length,
+    rounds: result.data?.rounds
+  }
 }
