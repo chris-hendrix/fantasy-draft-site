@@ -45,11 +45,11 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
   return (
     <div className="w-full dropdown">
       <label tabIndex={0} className="relative">
-        <div className={`w-full flex flex-col gap-1 input  ${inputSizes[size]}`}>
+        <div className={`w-full flex flex-col gap-1 input ${inputSizes[size]}`}>
           <div className="flex bg-transparent gap-0.5">
             <input
               {...getInputProps()}
-              className={`input ${inputSizes[size]} w-full`}
+              className={'w-full'}
               placeholder="Type here"
             />
             <button

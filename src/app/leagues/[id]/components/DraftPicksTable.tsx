@@ -70,7 +70,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
   const picks = edit ? editedDraftPicks : draftPicks
   const columns: TableColumn<Partial<DraftPickArgs>>[] = [
     {
-      name: '',
+      header: '',
       hidden: !edit,
       renderedValue: (pick) => <MoveButtons
         indexToMove={editedDraftPicks.findIndex((p) => p.id === pick.id)}
@@ -78,10 +78,10 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
         setArray={setEditedDraftPicks}
       />
     },
-    { name: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
-    { name: 'Team', value: (pick) => pick.team?.name },
+    { header: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
+    { header: 'Team', value: (pick) => pick.team?.name },
     {
-      name: 'Player',
+      header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
         if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>

@@ -10,14 +10,15 @@ import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
   draftId: string;
+  teamId?: string;
 }
 
-const KeepersTable: React.FC<Props> = ({ draftId }) => {
+const KeepersTable: React.FC<Props> = ({ draftId, teamId }) => {
   const { isCommissioner } = useUserDraft(draftId)
   const { teamsCount, rounds } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
     {
-      where: { draftId },
+      where: { draftId, ...(teamId ? { teamId } : {}) },
       include: { team: true, player: true },
       orderBy: [{ team: { name: 'asc' } }, { id: 'asc' }]
     },
@@ -42,9 +43,9 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
   }
 
   const columns: TableColumn<KeeperArgs>[] = [
-    { name: 'Team', value: ({ team }) => team?.name },
+    { header: 'Team', value: ({ team }) => team?.name },
     {
-      name: 'Player',
+      header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
         if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
@@ -71,8 +72,9 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
       },
     },
     {
-      name: 'Round',
+      header: 'Round',
       value: ({ round }) => round,
+      hidden: Boolean(teamId),
       renderedValue: ({ id, round }) => {
         if (!isCommissioner) return <>{round}</>
         if (editKeeperId !== id) {
@@ -104,7 +106,18 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
       }
     },
     {
-      name: 'Calculated round',
+      header: (
+        <>
+          <span>Calculated round</span>
+          <div
+            className="tooltip tooltip-bottom text-xs"
+            data-tip="Calculated based on previous draft, not guaranteed to be accurate"
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="indicator-item badge badge-xs badge-primary ml-1">i</span>
+          </div>
+        </>
+      ),
       value: ({ player }) => (
         player
           ? calculateKeeperRound(player.name)
@@ -112,7 +125,7 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
       )
     },
     {
-      name: 'ADP',
+      header: 'ADP',
       value: ({ player }) => (
         player
           ? formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
@@ -125,7 +138,7 @@ const KeepersTable: React.FC<Props> = ({ draftId }) => {
 
   return (
     <>
-      <Table columns={columns} data={keepers} xs maxItemsPerPage={300} />
+      <Table columns={columns} data={keepers} xs maxItemsPerPage={300} minHeight="100px" />
     </>
   )
 }

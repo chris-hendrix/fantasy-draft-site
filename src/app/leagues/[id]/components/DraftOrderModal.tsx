@@ -58,7 +58,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
 
   const columns: TableColumn<DraftTeamArgs>[] = [
     {
-      name: 'Team name',
+      header: 'Team name',
       value: (slot) => slot?.team?.name,
       renderedValue: (slot) => (
         <>
@@ -71,7 +71,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
         </>)
     },
     {
-      name: 'Order',
+      header: 'Order',
       value: (slot) => 1 + slots.findIndex((s) => s.id === slot.id),
     },
   ]

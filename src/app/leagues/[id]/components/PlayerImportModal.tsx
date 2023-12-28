@@ -42,8 +42,8 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
   }
 
   const columns: TableColumn<Player>[] = [
-    { name: 'Name', value: (player) => player.name },
-    { name: 'Data', value: (player) => JSON.stringify(player?.data || '') },
+    { header: 'Name', value: (player) => player.name },
+    { header: 'Data', value: (player) => JSON.stringify(player?.data || '') },
   ]
 
   const handleImport = async () => {

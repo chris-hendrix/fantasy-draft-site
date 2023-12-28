@@ -1,4 +1,4 @@
-import { useUpdateDraft } from '@/hooks/draft'
+import { useUpdateDraft, useDraftData } from '@/hooks/draft'
 import { useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -18,6 +18,9 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const [confirmGenerate, setConfirmGenerate] = useState(false)
   const [draftId, setDraftId] = useState<string | null>(null)
   const [keeperCount, setKeeperCount] = useState(defaultKeeperCount)
+  const { sessionTeamId } = useDraftData(draftId as string, !draftId)
+
+  console.log({ sessionTeamId })
 
   const handleClose = () => {
     setModalOpen(false)
@@ -48,13 +51,20 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       <div className="flex flex-col items-center mt-8 mb-2">
         <DraftYearTabs leagueId={leagueId} onSelect={setDraftId} />
       </div>
-      {draftId && <KeepersTable draftId={draftId} />}
+      {draftId && sessionTeamId && (
+        <>
+          <h2 className="text-md font-bold mt-6">Keeper entry</h2>
+          <KeepersTable draftId={draftId} teamId={sessionTeamId} />
+        </>
+      )}
+      <h2 className="text-md font-bold mt-6">All keepers</h2>
       <button
-        className="btn btn-sm w-32"
+        className="btn btn-sm w-32 my-4"
         onClick={() => setModalOpen(true)}
       >
         🔄 Generate
       </button>
+      {draftId && <KeepersTable draftId={draftId} />}
       {modalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">
         <input
           type="number"

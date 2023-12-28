@@ -14,9 +14,11 @@ export const {
 )
 
 export const useCalculateKeeperRound = (draftId: string) => {
-  const { draftPicks, teamsCount } = usePreviousDraftData(draftId)
+  const result = usePreviousDraftData(draftId)
 
   const calculateKeeperRound = (playerName: string) => {
+    if (!result) return null
+    const { draftPicks, teamsCount } = result
     if (!draftPicks) return null
     const draftPick = draftPicks.find((dp) => dp.player.name === playerName)
     if (!draftPick) return null

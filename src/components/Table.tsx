@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 export interface TableColumn<T> {
-  name?: string;
+  header?: string | React.ReactNode;
   renderedValue?: (rowData: T) => React.ReactNode;
   value?: (rowData: T) => string | number | null | undefined;
   hidden?: boolean;
@@ -13,6 +13,7 @@ interface Props<T> {
   data: T[];
   xs?: boolean;
   maxItemsPerPage?: number;
+  minHeight?: string
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -41,7 +42,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
   </div>
 )
 
-const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50 }: Props<T>) => {
+const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50, minHeight = '600px' }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const [sortState, setSortState] = useState<{ column: number; direction: 'asc' | 'desc' | null }>({
@@ -93,7 +94,7 @@ const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50 }
   }
 
   return (
-    <div className="overflow-x-auto w-full min-h-[600px]">
+    <div className="overflow-x-auto w-full" style={{ minHeight }}>
       <table className={`table-zebra table${xs ? ' table-xs' : ''}`}>
         <thead>
           <tr>
@@ -103,7 +104,7 @@ const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50 }
                 onClick={() => handleColumnClick(index)}
                 style={{ cursor: 'pointer' }}
               >
-                {column.name}
+                {column.header}
                 {sortState.column === index && (
                   <span>
                     {sortState.direction === 'asc' ? '↑' : '↓'}

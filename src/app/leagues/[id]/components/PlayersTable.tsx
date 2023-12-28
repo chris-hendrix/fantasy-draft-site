@@ -61,15 +61,15 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
 
   const columns: TableColumn<PlayerArgs>[] = [
     {
-      name: 'Rank',
+      header: 'Rank',
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'Rank')), teamsCount)
     },
     {
-      name: 'ADP',
+      header: 'ADP',
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
     },
     {
-      name: 'Player',
+      header: 'Player',
       value: (player) => getPlayerData(player, 'PlayerInfo'),
       renderedValue: (player) => (
         <a
@@ -83,7 +83,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
       ),
     },
     {
-      name: 'Projections',
+      header: 'Projections',
       value: (player) => getPlayerData(player, 'Projections'),
       renderedValue: (player) => (
         <div
@@ -100,7 +100,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
         </div>
       ),
     },
-    { name: 'Team', value: (player) => getPlayerTeam(player)?.name || '' }
+    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '' }
   ]
 
   if (!players) return null

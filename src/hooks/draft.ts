@@ -3,6 +3,7 @@ import { DraftArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useUserLeagues } from './league'
+import { useSessionUser } from './user'
 
 export const {
   useGetObject: useGetDraft,
@@ -25,12 +26,18 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     id: draftId,
     queryParams: {
       include: {
-        draftTeams: { include: { team: true } },
+        draftTeams: { include: { team: { include: { teamUsers: true } } } },
         keepers: { include: { player: true } },
         draftPicks: { include: { player: true } }
       }
     }
   }, { skip })
+
+  const { user } = useSessionUser()
+
+  const sessionTeamId = draft?.draftTeams.filter(
+    (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === user?.id))
+  )?.[0]?.teamId || null
 
   return {
     draft,
@@ -41,7 +48,8 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     year: draft?.year,
     teamsCount: draft?.draftTeams?.length,
     rounds: draft?.rounds,
-    draftPicks: draft?.draftPicks
+    draftPicks: draft?.draftPicks,
+    sessionTeamId
   }
 }
 
@@ -53,5 +61,5 @@ export const usePreviousDraftData = (currentDraftId: string) => {
   )
   const draftId = drafts?.[0]?.id
   const result = useDraftData(draftId as string, !draftId)
-  return result
+  return draftId ? result : null
 }
