@@ -18,6 +18,10 @@ interface AutocompleteProps {
 const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions = 100, size = 'sm', initialValue = '' }) => {
   const [inputValue, setInputValue] = useState<string | undefined>(initialValue)
 
+  const filteredOptions = options.filter(
+    (option) => !inputValue || option.label.toLowerCase().includes(inputValue.toLowerCase())
+  ).slice(0, maxOptions)
+
   const {
     isOpen,
     getMenuProps,
@@ -25,16 +29,12 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
     getItemProps,
     selectItem,
   } = useCombobox({
-    items: options,
+    items: filteredOptions,
     itemToString: (item) => (item ? item.label : ''),
     onInputValueChange: ({ inputValue: newValue }) => setInputValue(newValue),
     onSelectedItemChange: ({ selectedItem: item }) => onSelection(item),
     initialSelectedItem: options.find((option) => option.value === initialValue),
   })
-
-  const filteredOptions = options.filter(
-    (option) => !inputValue || option.label.toLowerCase().includes(inputValue.toLowerCase())
-  ).slice(0, maxOptions)
 
   // Update input value when the initialValue prop changes
   useEffect(() => {

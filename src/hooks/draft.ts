@@ -48,7 +48,7 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
 export const usePreviousDraftData = (currentDraftId: string) => {
   const { leagueId, year } = useDraftData(currentDraftId)
   const { data: drafts } = useGetDrafts(
-    { where: { leagueId: leagueId as string, year: year as number } },
+    { where: { leagueId: String(leagueId), year: Number(year) - 1 } },
     { skip: !leagueId || !year }
   )
   const draftId = drafts?.[0]?.id
