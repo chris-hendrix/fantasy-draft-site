@@ -18,9 +18,16 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const [confirmGenerate, setConfirmGenerate] = useState(false)
   const [draftId, setDraftId] = useState<string | null>(null)
   const [keeperCount, setKeeperCount] = useState(defaultKeeperCount)
-  const { sessionTeamId } = useDraftData(draftId as string, !draftId)
+  const {
+    sessionTeamId,
+    keepersLockDate,
+    isCommissioner,
+    isSuccess
+  } = useDraftData(draftId as string, !draftId)
 
-  console.log({ sessionTeamId })
+  const canEdit = Boolean(
+    (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
+  )
 
   const handleClose = () => {
     setModalOpen(false)
@@ -36,6 +43,14 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     if ('error' in res) return
     invalidateKeepers()
     handleClose()
+  }
+
+  const handleLock = async () => {
+    if (!draftId || !isSuccess) return
+    await updateDraft({
+      id: draftId,
+      keepersLockDate: canEdit ? new Date() : null
+    })
   }
 
   if (confirmGenerate) {
@@ -54,17 +69,25 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       {draftId && sessionTeamId && (
         <>
           <h2 className="text-md font-bold mt-6">Keeper entry</h2>
-          <KeepersTable draftId={draftId} teamId={sessionTeamId} />
+          <KeepersTable draftId={draftId} teamId={sessionTeamId} edit={canEdit} />
         </>
       )}
       <h2 className="text-md font-bold mt-6">All keepers</h2>
-      <button
-        className="btn btn-sm w-32 my-4"
-        onClick={() => setModalOpen(true)}
-      >
-        🔄 Generate
-      </button>
-      {draftId && <KeepersTable draftId={draftId} />}
+      {isCommissioner && <div className="my-4">
+        <button
+          className="btn btn-sm w-32 mr-2"
+          onClick={() => setModalOpen(true)}
+        >
+          🔄 Generate
+        </button>
+        {isSuccess && <button
+          className="btn btn-sm w-32"
+          onClick={handleLock}
+        >
+          {canEdit ? '🔐 Lock' : '🔑 Unlock'}
+        </button>}
+      </div>}
+      {draftId && <KeepersTable draftId={draftId} edit={canEdit} />}
       {modalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">
         <input
           type="number"

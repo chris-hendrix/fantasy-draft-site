@@ -26,6 +26,7 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     id: draftId,
     queryParams: {
       include: {
+        league: { include: { commissioners: true } },
         draftTeams: { include: { team: { include: { teamUsers: true } } } },
         keepers: { include: { player: true } },
         draftPicks: { include: { player: true } }
@@ -34,6 +35,10 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
   }, { skip })
 
   const { user } = useSessionUser()
+
+  const isCommissioner = Boolean(
+    user && draft?.league.commissioners.find((c) => c.userId === user?.id)
+  )
 
   const sessionTeamId = draft?.draftTeams.filter(
     (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === user?.id))
@@ -44,11 +49,13 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     isLoading,
     isSuccess,
     error,
+    isCommissioner,
     leagueId: draft?.leagueId,
     year: draft?.year,
     teamsCount: draft?.draftTeams?.length,
     rounds: draft?.rounds,
     draftPicks: draft?.draftPicks,
+    keepersLockDate: draft?.keepersLockDate,
     sessionTeamId
   }
 }

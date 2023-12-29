@@ -11,9 +11,10 @@ import PlayerAutocomplete from './PlayerAutocomplete'
 interface Props {
   draftId: string;
   teamId?: string;
+  edit?: boolean
 }
 
-const KeepersTable: React.FC<Props> = ({ draftId, teamId }) => {
+const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
   const { isCommissioner } = useUserDraft(draftId)
   const { teamsCount, rounds } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
@@ -48,7 +49,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId }) => {
       header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
-        if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
+        if (!edit || !isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
           return <div
             className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
@@ -76,7 +77,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId }) => {
       value: ({ round }) => round,
       hidden: Boolean(teamId),
       renderedValue: ({ id, round }) => {
-        if (!isCommissioner) return <>{round}</>
+        if (!edit || !isCommissioner) return <>{round}</>
         if (editKeeperId !== id) {
           return <div
             className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
