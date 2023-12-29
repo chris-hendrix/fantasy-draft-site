@@ -5,6 +5,7 @@ import ConfirmModal from '@/components/ConfirmModal'
 import { useInvalidateKeepers } from '@/hooks/keeper'
 import DraftYearTabs from './DraftYearTabs'
 import KeepersTable from './KeepersTable'
+import KeeperInfo from './KeeperInfo'
 
 interface Props {
   leagueId: string;
@@ -19,15 +20,10 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const [draftId, setDraftId] = useState<string | null>(null)
   const [keeperCount, setKeeperCount] = useState(defaultKeeperCount)
   const {
-    sessionTeamId,
-    keepersLockDate,
+    sessionTeam,
     isCommissioner,
-    isSuccess
+    canEditKeepers
   } = useDraftData(draftId as string, !draftId)
-
-  const canEdit = Boolean(
-    (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
-  )
 
   const handleClose = () => {
     setModalOpen(false)
@@ -46,10 +42,10 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   }
 
   const handleLock = async () => {
-    if (!draftId || !isSuccess) return
+    if (!draftId || !isCommissioner) return
     await updateDraft({
       id: draftId,
-      keepersLockDate: canEdit ? new Date() : null
+      keepersLockDate: canEditKeepers ? new Date() : null
     })
   }
 
@@ -66,11 +62,19 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       <div className="flex flex-col items-center mt-8 mb-2">
         <DraftYearTabs leagueId={leagueId} onSelect={setDraftId} />
       </div>
-      {draftId && sessionTeamId && (
+      {draftId && sessionTeam && (
         <>
-          <h2 className="text-md font-bold mt-6">Keeper entry</h2>
-          <KeepersTable draftId={draftId} teamId={sessionTeamId} edit={canEdit} />
+          <h2 className="text-md font-bold mt-6">{`${sessionTeam.name}'s keeper entry`}</h2>
+          <div className="flex flex-row">
+            <div className="w-7/12">
+              <KeepersTable draftId={draftId} teamId={sessionTeam.id} edit={canEditKeepers} />
+            </div>
+            <div className="w-5/12">
+              <KeeperInfo draftId={draftId} />
+            </div>
+          </div>
         </>
+
       )}
       <h2 className="text-md font-bold mt-6">All keepers</h2>
       {isCommissioner && <div className="my-4">
@@ -80,14 +84,14 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
         >
           🔄 Generate
         </button>
-        {isSuccess && <button
+        <button
           className="btn btn-sm w-32"
           onClick={handleLock}
         >
-          {canEdit ? '🔐 Lock' : '🔑 Unlock'}
-        </button>}
+          {canEditKeepers ? '🔐 Lock' : '🔑 Unlock'}
+        </button>
       </div>}
-      {draftId && <KeepersTable draftId={draftId} edit={canEdit} />}
+      {draftId && <KeepersTable draftId={draftId} edit={canEditKeepers} />}
       {modalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">
         <input
           type="number"

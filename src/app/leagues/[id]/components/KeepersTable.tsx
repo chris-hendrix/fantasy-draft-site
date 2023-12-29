@@ -4,8 +4,8 @@ import { useState, ChangeEvent } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName, getPlayerData, formatRoundPick } from '@/utils/draft'
-import { useDraftData, useUserDraft } from '@/hooks/draft'
-import { useGetKeepers, useUpdateKeeper, useCalculateKeeperRound } from '@/hooks/keeper'
+import { useDraftData } from '@/hooks/draft'
+import { useGetKeepers, useUpdateKeeper, useCalculatePreviousKeeper } from '@/hooks/keeper'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
@@ -15,8 +15,7 @@ interface Props {
 }
 
 const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
-  const { isCommissioner } = useUserDraft(draftId)
-  const { teamsCount, rounds } = useDraftData(draftId)
+  const { teamsCount, rounds, isCommissioner } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
     {
       where: { draftId, ...(teamId ? { teamId } : {}) },
@@ -26,7 +25,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
     { skip: !draftId }
   )
   const { updateObject: updateKeeper } = useUpdateKeeper()
-  const { calculateKeeperRound } = useCalculateKeeperRound(draftId)
+  const { calculatePreviousKeeper } = useCalculatePreviousKeeper(draftId)
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
 
   const handlePlayerSelection = async (
@@ -109,21 +108,21 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
     {
       header: (
         <>
-          <span>Calculated round</span>
+          <span>Previous draft</span>
           <div
-            className="tooltip tooltip-bottom text-xs"
-            data-tip="Calculated based on previous draft, not guaranteed to be accurate"
+            className="tooltip tooltip-bottom text-xs max-w-[100px]"
+            data-tip="Not guaranteed to be accurate"
             style={{ cursor: 'pointer' }}
           >
             <span className="indicator-item badge badge-xs badge-primary ml-1">i</span>
           </div>
         </>
       ),
-      value: ({ player }) => (
-        player
-          ? calculateKeeperRound(player.name)
-          : ''
-      )
+      value: ({ player }) => {
+        if (!player) return ''
+        const { team, round } = calculatePreviousKeeper(player.name)
+        return `Rd ${round} by ${team?.name}`
+      }
     },
     {
       header: 'ADP',
@@ -139,7 +138,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
 
   return (
     <>
-      <Table columns={columns} data={keepers} xs maxItemsPerPage={300} minHeight="100px" />
+      <Table columns={columns} data={keepers} xs maxItemsPerPage={300} minHeight="400px" />
     </>
   )
 }

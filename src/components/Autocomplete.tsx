@@ -15,7 +15,7 @@ interface AutocompleteProps {
   initialValue?: string;
 }
 
-const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions = 100, size = 'sm', initialValue = '' }) => {
+const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions = 10, size = 'sm', initialValue = '' }) => {
   const [inputValue, setInputValue] = useState<string | undefined>(initialValue)
 
   const filteredOptions = options.filter(

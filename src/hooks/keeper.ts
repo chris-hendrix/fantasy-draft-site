@@ -13,18 +13,15 @@ export const {
   keeperApi
 )
 
-export const useCalculateKeeperRound = (draftId: string) => {
+export const useCalculatePreviousKeeper = (draftId: string) => {
   const result = usePreviousDraftData(draftId)
 
-  const calculateKeeperRound = (playerName: string) => {
-    if (!result) return null
+  const calculatePreviousKeeper = (playerName: string) => {
     const { draftPicks, teamsCount } = result
-    if (!draftPicks) return null
-    const draftPick = draftPicks.find((dp) => dp.player.name === playerName)
-    if (!draftPick) return null
-    const previousRound = getRound(draftPick.overall, teamsCount)
-    return previousRound - 1
+    const draftPick = draftPicks?.find((dp) => dp.player.name === playerName)
+    const round = draftPick && (getRound(draftPick.overall, teamsCount) - 1)
+    return { round, team: draftPick?.team }
   }
 
-  return { calculateKeeperRound }
+  return { calculatePreviousKeeper }
 }

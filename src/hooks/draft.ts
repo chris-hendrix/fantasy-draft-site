@@ -22,41 +22,40 @@ export const useUserDraft = (draftId: string) => {
 }
 
 export const useDraftData = (draftId: string, skip: boolean = false) => {
+  const { user } = useSessionUser()
   const { data: draft, isLoading, isSuccess, error } = useGetDraft({
     id: draftId,
     queryParams: {
       include: {
         league: { include: { commissioners: true } },
         draftTeams: { include: { team: { include: { teamUsers: true } } } },
-        keepers: { include: { player: true } },
-        draftPicks: { include: { player: true } }
+        keepers: { include: { player: true, team: true }, orderBy: { round: 'asc' } },
+        draftPicks: { include: { player: true, team: true }, orderBy: { overall: 'asc' } }
       }
     }
   }, { skip })
 
-  const { user } = useSessionUser()
-
+  const keepersLockDate = draft?.keepersLockDate
   const isCommissioner = Boolean(
     user && draft?.league.commissioners.find((c) => c.userId === user?.id)
   )
+  const canEditKeepers = Boolean(
+    (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
+  )
 
-  const sessionTeamId = draft?.draftTeams.filter(
+  const sessionTeam = draft?.draftTeams.filter(
     (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === user?.id))
-  )?.[0]?.teamId || null
+  )?.[0]?.team || null
 
   return {
-    draft,
     isLoading,
     isSuccess,
     error,
     isCommissioner,
-    leagueId: draft?.leagueId,
-    year: draft?.year,
+    canEditKeepers,
     teamsCount: draft?.draftTeams?.length,
-    rounds: draft?.rounds,
-    draftPicks: draft?.draftPicks,
-    keepersLockDate: draft?.keepersLockDate,
-    sessionTeamId
+    sessionTeam,
+    ...draft
   }
 }
 
@@ -68,5 +67,5 @@ export const usePreviousDraftData = (currentDraftId: string) => {
   )
   const draftId = drafts?.[0]?.id
   const result = useDraftData(draftId as string, !draftId)
-  return draftId ? result : null
+  return result
 }
