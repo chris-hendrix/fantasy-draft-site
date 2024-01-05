@@ -121,6 +121,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
       value: ({ player }) => {
         if (!player) return ''
         const { team, round } = calculatePreviousKeeper(player.name)
+        if (!team || !round) return ''
         return `Rd ${round} by ${team?.name}`
       }
     },

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import csv from 'csvtojson'
-import { createTeamIdArray } from '../src/utils/draft'
+import { createTeamIdArray, getRound } from '../src/utils/draft'
 import { generateHash } from '../src/app/api/utils/hash'
 
 const PLAYER_DATA = 'player-data-raw-seed.csv'
@@ -51,9 +51,12 @@ const generateUser = async () => {
 }
 
 export const generateSeedData = async () => {
-  const teamCount = 10
+  const teamsCount = 10
+  const keepersCount = 5
   const rounds = 22
   const adminEmail = `admin@${SEED_EMAIL_DOMAIN}`
+
+  // create admin and users
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
     update: { email: adminEmail },
@@ -64,8 +67,9 @@ export const generateSeedData = async () => {
       password: await generateHash('Abcd1234!')
     }
   })
-  const users = await Promise.all([...Array(teamCount - 1)].map(() => generateUser()))
+  const users = await Promise.all([...Array(teamsCount - 1)].map(() => generateUser()))
 
+  // create league
   const league = await prisma.league.create({
     data: {
       name: `Seed League ${new Date().getTime()}`,
@@ -82,6 +86,7 @@ export const generateSeedData = async () => {
     }
   })))
 
+  // create last year's draft
   const draft = await prisma.draft.create({
     data: {
       leagueId: league.id,
@@ -99,12 +104,22 @@ export const generateSeedData = async () => {
     }
   })))
 
-  const draftTeamData = await Promise.all(teams.map((t, i) => ({
-    draftId: draft.id, teamId: t.id, order: i
-  })))
-
+  // keepers
   Promise.all(
-    createTeamIdArray(draftTeamData.map((s) => s.teamId), rounds)
+    createTeamIdArray(teams.map((team) => team.id), keepersCount)
+      .map((teamId, i) => (prisma.keeper.create({
+        data: {
+          draftId: draft.id,
+          teamId,
+          playerId: players?.[i]?.id,
+          round: getRound(i + 1, teamsCount)
+        }
+      })))
+  )
+
+  // draft picks
+  Promise.all(
+    createTeamIdArray(teams.map((team) => team.id), rounds)
       .map((teamId, i) => (prisma.draftPick.create({
         data: {
           draftId: draft.id,
