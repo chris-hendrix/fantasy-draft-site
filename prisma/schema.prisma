@@ -128,6 +128,7 @@ model Draft {
   dues            Float       @default(0)
   draftTime       DateTime?
   keepersLockDate DateTime?
+  keeperEntryNote String?
   league          League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   players         Player[]
   draftTeams      DraftTeam[]

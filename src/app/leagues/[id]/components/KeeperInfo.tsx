@@ -1,9 +1,10 @@
 'use client'
 
-import { usePreviousDraftData } from '@/hooks/draft'
+import { usePreviousDraftData, useDraftData } from '@/hooks/draft'
 import { getPlayerName, getRound } from '@/utils/draft'
 import { getItemsInEqualColumns } from '@/utils/array'
 import { DraftPickArgs } from '@/types'
+import ReactMarkdown from 'react-markdown'
 
 interface Props {
   draftId: string;
@@ -11,6 +12,7 @@ interface Props {
 
 const KeeperInfo: React.FC<Props> = ({ draftId }) => {
   const { draftPicks, keepers, teamsCount, year, sessionTeam } = usePreviousDraftData(draftId)
+  const { keeperEntryNote } = useDraftData(draftId)
   const teamKeepers = keepers?.filter((k) => k.teamId === sessionTeam?.id)
   const teamDraftPicks = draftPicks?.filter((dp) => dp.teamId === sessionTeam?.id)
   const teamDraftPickCols = teamDraftPicks &&
@@ -19,10 +21,20 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
   if (!draftPicks || !keepers) return null
 
   return (
-    <div className="text-xs flex gap-1">
-      <div>
-        <h2 className="font-bold">{`${year} Draft`}</h2>
-        <div className="text-xs flex gap-1">
+    <div className="text-xs flex gap-3">
+      <div className="card flex flex-col items-center bg-base-200 p-4">
+        <h2 className="font-bold mb-2">{`${year} Keepers`}</h2>
+        <div>
+          {teamKeepers.map((k) => (
+            <div key={k.id}>
+              {`Rd ${k.round} - ${getPlayerName(k.player)}`}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="card flex flex-col items-center bg-base-200 p-4">
+        <h2 className="font-bold mb-2">{`${year} Draft`}</h2>
+        <div className="text-xs flex gap-2">
           {teamDraftPickCols.map((col, i) => (
             <div key={`$col-${i}`}>
               {col.map((dp) => (
@@ -34,13 +46,11 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
           ))}
         </div>
       </div>
-      <div>
-        <h2 className="font-bold">{`${year} Keepers`}</h2>
-        {teamKeepers.map((k) => (
-          <div key={k.id}>
-            {`Rd ${k.round} - ${getPlayerName(k.player)}`}
-          </div>
-        ))}
+      <div className="card flex flex-col items-center bg-base-200 p-4 flex-grow">
+        <h2 className="font-bold mb-2">Commissioner Note</h2>
+        <div className="w-full whitespace-pre-line">
+          <ReactMarkdown>{keeperEntryNote}</ReactMarkdown>
+        </div>
       </div>
     </div>
   )

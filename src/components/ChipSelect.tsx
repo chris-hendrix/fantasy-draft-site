@@ -69,7 +69,6 @@ const ChipSelect: React.FC<Props> = ({
 
   const {
     isOpen,
-    getToggleButtonProps,
     getLabelProps,
     getMenuProps,
     getInputProps,
@@ -164,14 +163,6 @@ const ChipSelect: React.FC<Props> = ({
               className="w-full input input-xs"
               {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             />
-            <button
-              aria-label="toggle menu"
-              className="px-2"
-              type="button"
-              {...getToggleButtonProps()}
-            >
-              &#8595;
-            </button>
           </div>
         </div>
       </div>
