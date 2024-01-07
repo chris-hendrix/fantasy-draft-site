@@ -12,7 +12,8 @@ export const {
   useUpdateObject: useUpdateDraft,
   useDeleteObject: useDeleteDraft
 } = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs, Prisma.DraftUpdateInput & {
-  keeperCount?: number
+  keeperCount?: number,
+  setKeepers?: boolean
 }>(draftApi)
 
 export const useUserDraft = (draftId: string) => {
@@ -23,7 +24,7 @@ export const useUserDraft = (draftId: string) => {
 
 export const useDraftData = (draftId: string, skip: boolean = false) => {
   const { user } = useSessionUser()
-  const { data: draft, isLoading, isSuccess, error } = useGetDraft({
+  const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
     id: draftId,
     queryParams: {
       include: {
@@ -55,6 +56,7 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     canEditKeepers,
     teamsCount: draft?.draftTeams?.length,
     sessionTeam,
+    refetch,
     ...draft
   }
 }

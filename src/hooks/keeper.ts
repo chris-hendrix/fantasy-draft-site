@@ -18,7 +18,7 @@ export const useCalculatePreviousKeeper = (draftId: string) => {
 
   const calculatePreviousKeeper = (playerName: string) => {
     const { draftPicks, teamsCount } = result
-    const draftPick = draftPicks?.find((dp) => dp.player.name === playerName)
+    const draftPick = draftPicks?.find((dp) => dp.player?.name === playerName)
     const round = draftPick && (getRound(draftPick.overall, teamsCount) - 1)
     return { round, team: draftPick?.team }
   }
