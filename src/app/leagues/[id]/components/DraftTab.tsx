@@ -31,11 +31,7 @@ const DraftTab: React.FC<Props> = ({ leagueId }) => {
 
   const handleAddDraft = async () => {
     if (selectedYear !== null) {
-      await addDraft({
-        rounds,
-        year: selectedYear,
-        leagueId
-      })
+      await addDraft({ rounds, year: selectedYear, leagueId })
       refetch()
       setModalOpen(false)
       setSelectedYear(currentYear)
@@ -46,7 +42,7 @@ const DraftTab: React.FC<Props> = ({ leagueId }) => {
   const tabs = drafts?.map((d, i) => ({
     name: String(d.year),
     component: <DraftPage draftId={d.id} />,
-    default: i + 1 === drafts.length,
+    default: i === 0,
   })) || []
 
   return (

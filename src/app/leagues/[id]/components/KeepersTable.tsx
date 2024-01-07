@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent } from 'react'
+import { useState, ChangeEvent, ReactNode } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName, getPlayerData, formatRoundPick } from '@/utils/draft'
@@ -11,10 +11,11 @@ import PlayerAutocomplete from './PlayerAutocomplete'
 interface Props {
   draftId: string;
   teamId?: string;
-  edit?: boolean
+  edit?: boolean;
+  notes?: string | ReactNode;
 }
 
-const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
+const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes }) => {
   const { teamsCount, rounds, isCommissioner } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
     {
@@ -139,7 +140,14 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false }) => {
 
   return (
     <>
-      <Table columns={columns} data={keepers} xs maxItemsPerPage={300} minHeight="400px" />
+      <Table
+        columns={columns}
+        data={keepers}
+        xs
+        maxItemsPerPage={300}
+        minHeight="300px"
+        notes={notes}
+      />
     </>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, ReactNode } from 'react'
 
 export interface TableColumn<T> {
   header?: string | React.ReactNode;
@@ -13,7 +13,8 @@ interface Props<T> {
   data: T[];
   xs?: boolean;
   maxItemsPerPage?: number;
-  minHeight?: string
+  minHeight?: string;
+  notes?: string | ReactNode;
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -42,7 +43,14 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
   </div>
 )
 
-const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50, minHeight = '600px' }: Props<T>) => {
+const Table = <T extends {}>({
+  columns,
+  data,
+  xs = false,
+  maxItemsPerPage = 50,
+  minHeight = '600px',
+  notes
+}: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const [sortState, setSortState] = useState<{ column: number; direction: 'asc' | 'desc' | null }>({
@@ -131,6 +139,11 @@ const Table = <T extends {}>({ columns, data, xs = false, maxItemsPerPage = 50, 
             totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
+        </div>
+      )}
+      {notes && (
+        <div className="mt-2">
+          {notes}
         </div>
       )}
     </div>
