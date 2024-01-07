@@ -14,12 +14,13 @@ const MAX_ROUND_FILTER = 30
 
 interface Props {
   draftId: string;
-  maxItemsPerPage?: number
+  maxItemsPerPage?: number,
+  hideTeamColumn?: boolean
 }
 
 type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
 
-const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
+const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTeamColumn }) => {
   const { data: players } = useGetPlayers(
     {
       where: { draftId },
@@ -100,7 +101,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
         </div>
       ),
     },
-    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '' }
+    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn }
   ]
 
   if (!players) return null
@@ -162,7 +163,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
             }}
           />
         </div>
-        <div className="w-60 card bg-base-200 p-1">
+        {!hideTeamColumn && <div className="w-60 card bg-base-200 p-1">
           <ChipSelect
             label="Team"
             items={getUniqueTeamOptions()}
@@ -175,7 +176,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100 }) => {
               })
             }}
           />
-        </div>
+        </div>}
       </div>
       <Table columns={columns} data={filteredPlayers} maxItemsPerPage={maxItemsPerPage} xs />
     </>

@@ -3,7 +3,7 @@
 import { useState, ChangeEvent, ReactNode } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
-import { getPlayerName, getPlayerData, formatRoundPick } from '@/utils/draft'
+import { getPlayerName } from '@/utils/draft'
 import { useDraftData } from '@/hooks/draft'
 import { useGetKeepers, useUpdateKeeper, useCalculatePreviousKeeper } from '@/hooks/keeper'
 import PlayerAutocomplete from './PlayerAutocomplete'
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes }) => {
-  const { teamsCount, rounds, isCommissioner } = useDraftData(draftId)
+  const { rounds, isCommissioner } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
     {
       where: { draftId, ...(teamId ? { teamId } : {}) },
@@ -28,6 +28,8 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
   const { updateObject: updateKeeper } = useUpdateKeeper()
   const { calculatePreviousKeeper } = useCalculatePreviousKeeper(draftId)
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
+
+  console.log({ isCommissioner, teamId, edit, condition: !(isCommissioner || teamId) })
 
   const handlePlayerSelection = async (
     keeperId: string,
@@ -49,7 +51,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
       header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
-        if (!edit || !isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
+        if (!edit || !(isCommissioner || teamId)) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
           return <div
             className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
@@ -107,32 +109,13 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
       }
     },
     {
-      header: (
-        <>
-          <span>Previous draft</span>
-          <div
-            className="tooltip tooltip-bottom text-xs max-w-[100px]"
-            data-tip="Not guaranteed to be accurate"
-            style={{ cursor: 'pointer' }}
-          >
-            <span className="indicator-item badge badge-xs badge-primary ml-1">i</span>
-          </div>
-        </>
-      ),
+      header: 'Previous draft',
       value: ({ player }) => {
         if (!player) return ''
         const { team, round } = calculatePreviousKeeper(player.name)
         if (!team || !round) return ''
         return `Rd ${round} by ${team?.name}`
       }
-    },
-    {
-      header: 'ADP',
-      value: ({ player }) => (
-        player
-          ? formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
-          : ''
-      )
     },
   ]
 

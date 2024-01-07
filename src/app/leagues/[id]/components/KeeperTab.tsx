@@ -6,6 +6,7 @@ import { useInvalidateKeepers } from '@/hooks/keeper'
 import DraftYearTabs from './DraftYearTabs'
 import KeepersTable from './KeepersTable'
 import KeeperInfo from './KeeperInfo'
+import PlayersTable from './PlayersTable'
 
 interface Props {
   leagueId: string;
@@ -95,22 +96,34 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           📝 Edit note
         </button>
       </div>}
-      {draftId && sessionTeam && (
+      {draftId && sessionTeam && canEditKeepers && (
         <>
-          <h2 className="text-md font-bold mt-6">{`${sessionTeam.name}'s keeper entry`}</h2>
+          <h2 className="text-lg font-bold my-6">📝 Keeper Entry</h2>
           <div className="flex flex-row">
             <KeepersTable
               draftId={draftId}
               teamId={sessionTeam.id}
               edit={canEditKeepers}
-              notes={<KeeperInfo draftId={draftId} />}
+              notes={<>
+                <div className="divider" />
+                <KeeperInfo draftId={draftId} />
+              </>}
             />
           </div>
+          <div className="divider" />
         </>
-
       )}
-      <h2 className="text-md font-bold mt-6">All keepers</h2>
-      {draftId && <KeepersTable draftId={draftId} edit={canEditKeepers} />}
+      {draftId &&
+        <div className="flex flex-row h-full w-full">
+          <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
+            <h2 className="text-lg font-bold my-6">✅ Selected Keepers</h2>
+            <KeepersTable draftId={draftId} edit={canEditKeepers} />
+          </div>
+          <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
+            <h2 className="text-lg font-bold my-6">👥 Player Pool</h2>
+            <PlayersTable draftId={draftId} hideTeamColumn />
+          </div>
+        </div>}
       {generateModalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">
         <input
           type="number"
