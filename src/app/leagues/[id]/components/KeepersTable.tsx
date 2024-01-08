@@ -5,7 +5,7 @@ import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName } from '@/utils/draft'
 import { useDraftData } from '@/hooks/draft'
-import { useGetKeepers, useUpdateKeeper, useCalculatePreviousKeeper } from '@/hooks/keeper'
+import { useGetKeepers, useUpdateKeeper } from '@/hooks/keeper'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
@@ -21,15 +21,13 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
     {
       where: { draftId, ...(teamId ? { teamId } : {}) },
       include: { team: true, player: true },
-      orderBy: [{ team: { name: 'asc' } }, { id: 'asc' }]
+      orderBy: [{ team: { name: 'asc' } }, { id: 'asc' }],
+      getPreviousPick: true
     },
     { skip: !draftId }
   )
   const { updateObject: updateKeeper } = useUpdateKeeper()
-  const { calculatePreviousKeeper } = useCalculatePreviousKeeper(draftId)
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
-
-  console.log({ isCommissioner, teamId, edit, condition: !(isCommissioner || teamId) })
 
   const handlePlayerSelection = async (
     keeperId: string,
@@ -110,9 +108,9 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
     },
     {
       header: 'Previous draft',
-      value: ({ player }) => {
-        if (!player) return ''
-        const { team, round } = calculatePreviousKeeper(player.name)
+      value: ({ previousDraftInfo }) => {
+        if (!previousDraftInfo) return ''
+        const { draftPick: { team }, round } = previousDraftInfo
         if (!team || !round) return ''
         return `Rd ${round} by ${team?.name}`
       }

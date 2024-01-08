@@ -60,5 +60,6 @@ export interface PlayerArgs extends Player {
 export interface KeeperArgs extends Keeper {
   draft: DraftArgs
   team: TeamArgs
-  player: PlayerArgs
+  player: PlayerArgs,
+  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
 }
