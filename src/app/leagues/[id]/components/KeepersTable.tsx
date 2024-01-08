@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent, ReactNode } from 'react'
+import { useState, ReactNode } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName } from '@/utils/draft'
@@ -28,6 +28,8 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
   )
   const { updateObject: updateKeeper } = useUpdateKeeper()
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
+  const [editRound, setEditRound] = useState<number | null>(null)
+  const [editKeeps, setEditKeeps] = useState<number | null>(null)
 
   const handlePlayerSelection = async (
     keeperId: string,
@@ -36,11 +38,12 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
     await updateKeeper({ id: keeperId, playerId: newPlayerId || null })
   }
 
-  const handleRoundSelection = async (
-    keeperId: string,
-    newRound: number | null
-  ) => {
-    await updateKeeper({ id: keeperId, round: newRound || null })
+  const handleRoundInputBlur = async () => {
+    if (!editKeeperId) return
+    await updateKeeper({ id: editKeeperId, round: editRound || null, keeps: editKeeps || null })
+    setEditKeeperId(null)
+    setEditKeeps(null)
+    setEditRound(null)
   }
 
   const columns: TableColumn<KeeperArgs>[] = [
@@ -76,33 +79,63 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
       header: 'Round',
       value: ({ round }) => round,
       hidden: Boolean(teamId),
-      renderedValue: ({ id, round }) => {
+      renderedValue: ({ id, round, keeps }) => {
         if (!edit || !isCommissioner) return <>{round}</>
         if (editKeeperId !== id) {
-          return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
-            onClick={() => setEditKeeperId(id || null)}
-          >
-            {round || ''}
-          </div>
+          return (
+            <div
+              className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+              onClick={() => {
+                setEditKeeperId(id || null)
+                setEditRound(round)
+                setEditKeeps(keeps)
+              }}
+            >
+              {round || ''}
+            </div>
+          )
         }
         return (
-          <select
-            className="select select-bordered select-xs w-full"
-            value={round || ''}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) => (
-              handleRoundSelection(id, parseInt(e.target.value, 10))
-            )}
-          >
-            <option disabled value="">
-              Round
-            </option>
-            {Array.from({ length: rounds }).map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
+          <input
+            type="number"
+            className="input input-bordered input-xs w-full text-xs"
+            placeholder="Round"
+            value={editRound || ''}
+            onChange={(e) => setEditRound(Number(e.target.value))}
+            onBlur={handleRoundInputBlur}
+          />
+        )
+      }
+    },
+    {
+      header: 'Keeps',
+      value: ({ keeps }) => keeps,
+      hidden: Boolean(teamId),
+      renderedValue: ({ id, keeps, round }) => {
+        if (!edit || !isCommissioner) return <>{keeps}</>
+        if (editKeeperId !== id) {
+          return (
+            <div
+              className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+              onClick={() => {
+                setEditKeeperId(id || null)
+                setEditRound(round)
+                setEditKeeps(keeps)
+              }}
+            >
+              {keeps || ''}
+            </div>
+          )
+        }
+        return (
+          <input
+            type="number"
+            className="input input-bordered input-xs w-full text-xs"
+            placeholder="Keeps"
+            value={editKeeps || ''}
+            onChange={(e) => setEditKeeps(Number(e.target.value))}
+            onBlur={handleRoundInputBlur}
+          />
         )
       }
     },

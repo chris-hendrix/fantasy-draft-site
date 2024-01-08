@@ -188,6 +188,7 @@ model Keeper {
   teamId    String   @map("team_id")
   playerId  String?  @map("player_id")
   round     Int?
+  keeps     Int?
   draft     Draft    @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   team      Team     @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   player    Player?  @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
