@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { stringify } from 'qs'
 import { useAlert } from '@/hooks/app'
 
@@ -119,12 +119,27 @@ export const getCrudHooks = <Object, FindManyArgs, UpdateInput>({
   }
 
   const useUpdateObject = (options: CrudHookOptions = {}) => {
-    const [updateObject, { isLoading, isSuccess, error }]: [
+    const [isLoading, setIsLoading] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
+    const [error, setError] = useState<any>(null)
+    const [updateObjectBase]: [
       (updateInput: UpdateInput) => Promise<Object>, {
         isLoading: boolean;
         isSuccess: boolean;
         error: any;
+        isError: boolean
       }] = useUpdateObjectMutation()
+
+    const updateObject = async (updateInput: UpdateInput) => {
+      setIsLoading(true)
+      const { data }: any = await updateObjectBase(updateInput)
+      if ('error' in data) {
+        setError(data.error)
+      } else {
+        setIsSuccess(true)
+      }
+      setIsLoading(false)
+    }
 
     useAlertEffect({ isSuccess, error, ...options }, true)
 

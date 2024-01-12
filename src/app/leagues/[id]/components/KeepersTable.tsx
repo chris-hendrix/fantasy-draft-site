@@ -26,7 +26,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
     },
     { skip: !draftId }
   )
-  const { updateObject: updateKeeper } = useUpdateKeeper()
+  const { updateObject: updateKeeper } = useUpdateKeeper({ errorMessage: 'Invalid keeper' })
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
   const [editRound, setEditRound] = useState<number | null>(null)
   const [editKeeps, setEditKeeps] = useState<number | null>(null)
