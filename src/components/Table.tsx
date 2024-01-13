@@ -1,12 +1,15 @@
-import React, { useState, ReactNode } from 'react'
+import React, { useState, ReactNode, CSSProperties } from 'react'
 
 export interface TableColumn<T> {
   header?: string | React.ReactNode;
   renderedValue?: (rowData: T) => React.ReactNode;
   value?: (rowData: T) => string | number | null | undefined;
   hidden?: boolean;
-  sort?: (a: T, b: T) => number; // Sort function for the column
+  sort?: (a: T, b: T) => number;
+  cellStyle?: CSSProperties
 }
+
+type CssWithClassName = CSSProperties & { className?: string }
 
 interface Props<T> {
   columns: TableColumn<T>[];
@@ -15,6 +18,7 @@ interface Props<T> {
   maxItemsPerPage?: number;
   minHeight?: string;
   notes?: string | ReactNode;
+  rowStyle?: CssWithClassName | ((rowData: T) => CssWithClassName)
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -49,7 +53,8 @@ const Table = <T extends {}>({
   xs = false,
   maxItemsPerPage = 50,
   minHeight = '600px',
-  notes
+  notes,
+  rowStyle,
 }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -58,7 +63,7 @@ const Table = <T extends {}>({
     direction: 'asc',
   })
 
-  const renderColumn = (row: T, column: TableColumn<T>) => {
+  const renderCell = (row: T, column: TableColumn<T>) => {
     if (column.renderedValue) return column.renderedValue(row)
     if (column.value) return column.value(row)
     return ''
@@ -93,12 +98,17 @@ const Table = <T extends {}>({
   const handleColumnClick = (index: number) => {
     if (sortState.column === index) {
       // same column is clicked
-      if (sortState.direction === 'asc') setSortState({ column: index, direction: 'desc', })
-      if (sortState.direction === 'desc') setSortState({ column: -1, direction: null, })
+      if (sortState.direction === 'asc') setSortState({ column: index, direction: 'desc' })
+      if (sortState.direction === 'desc') setSortState({ column: -1, direction: null })
     } else {
       // different column is clicked
-      setSortState({ column: index, direction: 'asc', })
+      setSortState({ column: index, direction: 'asc' })
     }
+  }
+
+  const getRowStyle = (rowData: T): CssWithClassName => {
+    if (typeof rowStyle === 'function') return rowStyle(rowData)
+    return rowStyle || {}
   }
 
   return (
@@ -126,7 +136,13 @@ const Table = <T extends {}>({
           {visibleData?.map((row, rowIndex) => (
             <tr key={rowIndex} className={'hover'}>
               {visibleColumns.map((column, colIndex) => (
-                <td key={colIndex}>{renderColumn(row, column)}</td>
+                <td
+                  className={getRowStyle(row)?.className}
+                  key={colIndex}
+                  style={{ ...column.cellStyle, ...getRowStyle(row) }}
+                >
+                  {renderCell(row, column)}
+                </td>
               ))}
             </tr>
           ))}

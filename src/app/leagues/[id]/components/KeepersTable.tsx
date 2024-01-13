@@ -51,6 +51,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
     {
       header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
+      cellStyle: { maxWidth: '256px', width: '256px', minHeight: '41px' },
       renderedValue: ({ id, player }) => {
         if (!edit || !(isCommissioner || teamId)) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
@@ -79,6 +80,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
       header: 'Round',
       value: ({ round }) => round,
       hidden: Boolean(teamId),
+      cellStyle: { maxWidth: '56px', width: '56px' },
       renderedValue: ({ id, round, keeps }) => {
         if (!edit || !isCommissioner) return <>{round}</>
         if (editKeeperId !== id) {
@@ -111,6 +113,7 @@ const KeepersTable: React.FC<Props> = ({ draftId, teamId, edit = false, notes })
       header: 'Keeps',
       value: ({ keeps }) => keeps,
       hidden: Boolean(teamId),
+      cellStyle: { maxWidth: '56px', width: '56px' },
       renderedValue: ({ id, keeps, round }) => {
         if (!edit || !isCommissioner) return <>{keeps}</>
         if (editKeeperId !== id) {

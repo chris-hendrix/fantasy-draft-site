@@ -139,6 +139,7 @@ export const getCrudHooks = <Object, FindManyArgs, UpdateInput>({
         setIsSuccess(true)
       }
       setIsLoading(false)
+      return data
     }
 
     useAlertEffect({ isSuccess, error, ...options }, true)

@@ -68,7 +68,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
   }
 
   const picks = edit ? editedDraftPicks : draftPicks
-  const columns: TableColumn<Partial<DraftPickArgs>>[] = [
+  const columns: TableColumn<DraftPickArgs>[] = [
     {
       header: '',
       hidden: !edit,
@@ -167,7 +167,15 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
           />
         </div>
       </div>
-      <Table columns={columns} data={filteredPicks} xs maxItemsPerPage={300} />
+      <Table
+        columns={columns}
+        data={filteredPicks}
+        xs
+        maxItemsPerPage={300}
+        rowStyle={(pick: DraftPickArgs) => (!pick?.player ? {} : {
+          className: 'bg-neutral-content'
+        })}
+      />
     </>
   )
 }

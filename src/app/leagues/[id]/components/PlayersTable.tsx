@@ -178,7 +178,15 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
           />
         </div>}
       </div>
-      <Table columns={columns} data={filteredPlayers} maxItemsPerPage={maxItemsPerPage} xs />
+      <Table
+        columns={columns}
+        data={filteredPlayers}
+        maxItemsPerPage={maxItemsPerPage}
+        xs
+        rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
+          className: 'bg-neutral-content'
+        })}
+      />
     </>
   )
 }
