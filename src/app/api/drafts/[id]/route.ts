@@ -3,13 +3,20 @@ import prisma from '@/lib/prisma'
 import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkDraftCommissioner } from '@/app/api/utils/permissions'
 import { createTeamIdArray, getRound } from '@/utils/draft'
+import { getAllDraftData } from '../../utils/draft'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
-    const queryParams: any = getParsedParams(req.nextUrl) || {}
-    if (!id) throw new ApiError('League id required', 400)
+    const { getAllData, ...queryParams }: any = getParsedParams(req.nextUrl) || {}
+    if (!id) throw new ApiError('Draft id required', 400)
+
+    if (getAllData) {
+      const draft = await getAllDraftData(id)
+      return NextResponse.json(draft)
+    }
     const draft = await prisma.draft.findUnique({ ...queryParams, where: { id } })
+    if (!draft) throw new ApiError('Draft not found', 400)
     return NextResponse.json(draft)
   }
 )

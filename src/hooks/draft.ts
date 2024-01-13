@@ -11,7 +11,9 @@ export const {
   useAddObject: useAddDraft,
   useUpdateObject: useUpdateDraft,
   useDeleteObject: useDeleteDraft
-} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs, Prisma.DraftUpdateInput & {
+} = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs & {
+  getAllData?: boolean
+}, Prisma.DraftUpdateInput & {
   keeperCount?: number,
   setKeepers?: boolean
 }>(draftApi)
@@ -26,14 +28,7 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
   const { user } = useSessionUser()
   const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
     id: draftId,
-    queryParams: {
-      include: {
-        league: { include: { commissioners: true } },
-        draftTeams: { include: { team: { include: { teamUsers: true } } } },
-        keepers: { include: { player: true, team: true }, orderBy: { round: 'asc' } },
-        draftPicks: { include: { player: true, team: true }, orderBy: { overall: 'asc' } }
-      }
-    }
+    queryParams: { getAllData: true }
   }, { skip })
 
   const keepersLockDate = draft?.keepersLockDate
