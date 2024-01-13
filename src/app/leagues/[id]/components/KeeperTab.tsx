@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
 import { useInvalidateKeepers } from '@/hooks/keeper'
+import { KeeperArgs } from '@/types'
 import DraftYearTabs from './DraftYearTabs'
 import KeepersTable from './KeepersTable'
 import KeeperInfo from './KeeperInfo'
@@ -22,11 +23,16 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const [confirmGenerate, setConfirmGenerate] = useState(false)
   const [draftId, setDraftId] = useState<string | null>(null)
   const [keeperCount, setKeeperCount] = useState(defaultKeeperCount)
+  const [teamEdit, setTeamEdit] = useState(false)
+  const [allEdit, setAllEdit] = useState(false)
+  const [teamKeepers, setTeamKeepers] = useState<KeeperArgs[]>([])
+  const [allKeepers, setAllKeepers] = useState<KeeperArgs[]>([])
+
   const {
     sessionTeam,
     isCommissioner,
     canEditKeepers,
-    keeperEntryNote
+    keeperEntryNote,
   } = useDraftData(draftId as string, !draftId)
 
   const handleClose = () => {
@@ -41,6 +47,34 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     if ('error' in res) return
     invalidateKeepers()
     handleClose()
+  }
+
+  const handleSaveTeamKeepers = async () => {
+    if (!draftId) return
+    const res = await updateDraft({
+      id: draftId,
+      teamKeepers
+    })
+    if ('error' in res) return
+    invalidateKeepers()
+    setTeamEdit(false)
+  }
+
+  const handleSaveAllKeepers = async () => {
+    if (!draftId) return
+    const keeperData = allKeepers.map(({ teamId, playerId, round, keeps }) => ({
+      teamId, playerId, round, keeps
+    }))
+    const res = await updateDraft({
+      id: draftId,
+      keepers: {
+        deleteMany: {},
+        createMany: { data: keeperData }
+      },
+    })
+    if ('error' in res) return
+    invalidateKeepers()
+    setAllEdit(false)
   }
 
   const handleSaveNote = async () => {
@@ -71,39 +105,47 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       <div className="flex flex-col items-center mt-8 mb-2">
         <DraftYearTabs leagueId={leagueId} onSelect={setDraftId} />
       </div>
-      {isCommissioner && <div className="mt-4 flex gap-2">
-        <button
-          className="btn btn-sm w-32"
-          onClick={handleLock}
-        >
-          {canEditKeepers ? '🔐 Lock' : '🔑 Unlock'}
-        </button>
-        <button
-          className="btn btn-sm w-32"
-          onClick={() => setGenerateModalOpen(true)}
-          disabled={!canEditKeepers}
-        >
-          🔄 Generate
-        </button>
-        <button
-          className="btn btn-sm w-32"
-          onClick={() => {
-            setNoteModalOpen(true)
-            setNote(keeperEntryNote || '')
-          }}
-          disabled={!canEditKeepers}
-        >
-          📝 Edit note
-        </button>
-      </div>}
+      {isCommissioner &&
+        <div className="mt-4 flex gap-2">
+          <button
+            className="btn btn-sm w-32"
+            onClick={handleLock}
+          >
+            {canEditKeepers ? '🔐 Lock' : '🔑 Unlock'}
+          </button>
+          <button
+            className="btn btn-sm w-32"
+            onClick={() => setGenerateModalOpen(true)}
+            disabled={!canEditKeepers}
+          >
+            🔄 Generate
+          </button>
+          <button
+            className="btn btn-sm w-32"
+            onClick={() => {
+              setNoteModalOpen(true)
+              setNote(keeperEntryNote || '')
+            }}
+            disabled={!canEditKeepers}
+          >
+            📝 Edit note
+          </button>
+        </div>
+      }
       {draftId && sessionTeam && canEditKeepers && (
         <>
           <h2 className="text-lg font-bold my-6">📝 Keeper Entry</h2>
+          <div className="flex gap-2 mb-2">
+            {!teamEdit && <button className="btn btn-sm w-32" onClick={() => setTeamEdit(true)}>📝 Edit</button>}
+            {teamEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveTeamKeepers}>💾 Save</button>}
+            {teamEdit && <button className="btn btn-sm w-32 btn-error" onClick={() => setTeamEdit(false)}>❌ Cancel</button>}
+          </div>
           <div className="flex flex-row">
             <KeepersTable
               draftId={draftId}
               teamId={sessionTeam.id}
-              edit={canEditKeepers}
+              edit={teamEdit && canEditKeepers}
+              onKeepersChange={setTeamKeepers}
               notes={<>
                 <div className="divider" />
                 <KeeperInfo draftId={draftId} />
@@ -117,7 +159,16 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
         <div className="flex flex-row h-full w-full">
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6">✅ Selected Keepers</h2>
-            <KeepersTable draftId={draftId} edit={canEditKeepers} />
+            <div className="flex gap-2 mb-2">
+              {!allEdit && <button className="btn btn-sm w-32" onClick={() => setAllEdit(true)}>📝 Edit</button>}
+              {allEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveAllKeepers}>💾 Save</button>}
+              {allEdit && <button className="btn btn-sm w-32 btn-error" onClick={() => setAllEdit(false)}>❌ Cancel</button>}
+            </div>
+            <KeepersTable
+              draftId={draftId}
+              edit={allEdit && canEditKeepers}
+              onKeepersChange={setAllKeepers}
+            />
           </div>
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6">👥 Player Pool</h2>

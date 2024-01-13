@@ -1,5 +1,5 @@
 import { draftApi } from '@/store/draft'
-import { DraftArgs } from '@/types'
+import { DraftArgs, KeeperArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useUserLeagues } from './league'
@@ -15,7 +15,8 @@ export const {
   getAllData?: boolean
 }, Prisma.DraftUpdateInput & {
   keeperCount?: number,
-  setKeepers?: boolean
+  setKeepers?: boolean,
+  teamKeepers?: KeeperArgs[]
 }>(draftApi)
 
 export const useUserDraft = (draftId: string) => {
@@ -26,6 +27,7 @@ export const useUserDraft = (draftId: string) => {
 
 export const useDraftData = (draftId: string, skip: boolean = false) => {
   const { user } = useSessionUser()
+  const userId = user?.id
   const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
     id: draftId,
     queryParams: { getAllData: true }
@@ -40,7 +42,7 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
   )
 
   const sessionTeam = draft?.draftTeams.filter(
-    (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === user?.id))
+    (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === userId))
   )?.[0]?.team || null
 
   return {

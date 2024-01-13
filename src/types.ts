@@ -39,6 +39,7 @@ export interface DraftArgs extends Draft {
   draftTeams: DraftTeamArgs[]
   draftPicks: DraftPickArgs[]
   keepers: KeeperArgs[]
+  players: PlayerArgs[]
 }
 
 export interface DraftTeamArgs extends DraftTeam {
@@ -49,17 +50,18 @@ export interface DraftTeamArgs extends DraftTeam {
 export interface DraftPickArgs extends DraftPick {
   draft: DraftArgs
   team: TeamArgs
-  player: PlayerArgs
+  player: PlayerArgs | null
 }
 
 export interface PlayerArgs extends Player {
   league: LeagueArgs,
   draftPicks: DraftPickArgs[]
+  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
 }
 
 export interface KeeperArgs extends Keeper {
   draft: DraftArgs
   team: TeamArgs
-  player: PlayerArgs,
+  player: PlayerArgs | null,
   previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
 }
