@@ -158,9 +158,9 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
               setFilterOptions({
                 ...filterOptions,
                 playerSearch: value
-                  ? (pick) => getPlayerName(pick?.player)?.toLowerCase().includes(
+                  ? ({ player }) => Boolean(player && getPlayerName(player)?.toLowerCase().includes(
                     value.toLowerCase()
-                  )
+                  ))
                   : () => true
               })
             }}

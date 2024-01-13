@@ -159,11 +159,11 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
         <div className="flex flex-row h-full w-full">
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6">✅ Selected Keepers</h2>
-            <div className="flex gap-2 mb-2">
+            {isCommissioner && <div className="flex gap-2 mb-2">
               {!allEdit && <button className="btn btn-sm w-32" onClick={() => setAllEdit(true)}>📝 Edit</button>}
               {allEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveAllKeepers}>💾 Save</button>}
               {allEdit && <button className="btn btn-sm w-32 btn-error" onClick={() => setAllEdit(false)}>❌ Cancel</button>}
-            </div>
+            </div>}
             <KeepersTable
               draftId={draftId}
               edit={allEdit && canEditKeepers}
