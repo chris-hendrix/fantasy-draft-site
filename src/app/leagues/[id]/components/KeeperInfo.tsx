@@ -33,7 +33,7 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
         <div>
           {teamKeepers.map((k) => (
             <div key={k.id}>
-              {`Rd ${k.round} - ${getPlayerName(k.player)}`}
+              {`Rd ${k.round} - ${getPlayerName(k.player) || ''}`}
             </div>
           ))}
         </div>
@@ -45,7 +45,7 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
             <div key={`$col-${i}`}>
               {col.map((dp) => (
                 <div key={dp.id}>
-                  {`Rd ${getRound(dp.overall, teamsCount)} - ${getPlayerName(dp.player)}`}
+                  {`Rd ${getRound(dp.overall, teamsCount)} - ${getPlayerName(dp.player) || ''}`}
                 </div>
               ))}
             </div>

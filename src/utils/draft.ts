@@ -36,7 +36,10 @@ export const getPlayerData = (player: PlayerArgs, key: string) => {
   return data[key] as any
 }
 
-export const getPlayerName = (player: PlayerArgs) => String(getPlayerData(player, NAME_KEY))
+export const getPlayerName = (player: PlayerArgs | null | undefined) => {
+  if (!player) return null
+  return String(getPlayerData(player, NAME_KEY))
+}
 
 export const getPlayerTeam = (player: PlayerArgs) => {
   const teams = player.draftPicks.map((dp) => dp.team)

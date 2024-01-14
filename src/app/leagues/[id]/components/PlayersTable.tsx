@@ -155,9 +155,9 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
               setFilterOptions({
                 ...filterOptions,
                 playerSearch: value
-                  ? (player) => getPlayerName(player)?.toLowerCase().includes(
-                    value.toLowerCase()
-                  )
+                  ? (player) => String(getPlayerName(player))
+                    ?.toLowerCase()
+                    .includes(value.toLowerCase())
                   : () => true
               })
             }}

@@ -73,7 +73,7 @@ const KeepersTable: React.FC<Props> = ({
             className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
             onClick={() => setEditKeeperId(id || null)}
           >
-            {player ? getPlayerName(player) : ''}
+            {getPlayerName(player) || ''}
           </div>
         }
         return draftId && <PlayerAutocomplete
