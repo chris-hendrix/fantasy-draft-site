@@ -1,4 +1,5 @@
 import { createRequest, RequestMethod } from 'node-mocks-http'
+import { NextRequest } from 'next/server'
 import prisma from '../src/lib/prisma'
 
 export const TEST_EMAIL_DOMAIN = 'test.com'
@@ -17,7 +18,7 @@ const defaultOptions = {
 
 export const createNextRequest = (options: CreateNextRequest = defaultOptions) => {
   const { method, body, searchParams } = options
-  const req = createRequest({ method })
+  const req: any = createRequest({ method })
   req.consumedBody = { ...body }
   req.headers = { 'content-type': '', ...req.headers }
   req.nextUrl = {
@@ -25,7 +26,7 @@ export const createNextRequest = (options: CreateNextRequest = defaultOptions) =
       Object.entries(searchParams || {}).map(([key, value]) => [key, value.toString()])
     )
   }
-  return req
+  return req as NextRequest
 }
 
 export const generateUserBody = () => {
