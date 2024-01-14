@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { ApiError } from '@/app/api/utils/api'
 import { getRound } from '@/utils/draft'
 import { Player } from '@prisma/client'
+import { PlayerData } from '@/types'
 
 export const getAllDraftData = async (draftId: string) => {
   const draft = await prisma.draft.findUnique({
@@ -34,4 +35,19 @@ export const getAllDraftData = async (draftId: string) => {
   })
 
   return { ...draft, players: playerData }
+}
+
+export const updateDraftPlayerData = async (draftId: string, playerData: PlayerData[]) => {
+  const results: { [key: string]: number } = {}
+
+  await Promise.all(
+    playerData.map(async (pd) => {
+      const updateResult = await prisma.player.updateMany({
+        where: { draftId, name: pd.name },
+        data: { data: pd.data },
+      })
+      results[pd.name] = updateResult.count
+    })
+  )
+  return results
 }

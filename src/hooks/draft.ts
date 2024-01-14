@@ -1,5 +1,5 @@
 import { draftApi } from '@/store/draft'
-import { DraftArgs, KeeperArgs } from '@/types'
+import { DraftArgs, KeeperArgs, PlayerData } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useUserLeagues } from './league'
@@ -17,6 +17,7 @@ export const {
   keeperCount?: number,
   setKeepers?: boolean,
   teamKeepers?: KeeperArgs[]
+  updatePlayerData?: PlayerData[]
 }>(draftApi)
 
 export const useUserDraft = (draftId: string) => {

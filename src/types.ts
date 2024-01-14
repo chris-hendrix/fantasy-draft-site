@@ -65,3 +65,5 @@ export interface KeeperArgs extends Keeper {
   player: PlayerArgs | null,
   previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
 }
+
+export type PlayerData = { name: string, data: any } // for importing/updating players
