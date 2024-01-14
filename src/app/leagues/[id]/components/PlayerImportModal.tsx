@@ -1,6 +1,7 @@
 import { ChangeEvent, useState } from 'react'
 import csv from 'csvtojson'
 import { useGetDrafts, useUpdateDraft } from '@/hooks/draft'
+import { useInvalidatePlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -17,6 +18,7 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     where: { leagueId },
     orderBy: { year: 'asc' }
   })
+  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
   const [players, setPlayers] = useState<Player[]>([])
   const [confirmSave, setConfirmSave] = useState(false)
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
@@ -35,12 +37,13 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       }
     })
     if ('error' in res) return
+    invalidatePlayers()
     onClose()
   }
 
   const columns: TableColumn<Player>[] = [
-    { name: 'Name', value: (player) => player.name },
-    { name: 'Data', value: (player) => JSON.stringify(player?.data || '') },
+    { header: 'Name', value: (player) => player.name },
+    { header: 'Data', value: (player) => JSON.stringify(player?.data || '') },
   ]
 
   const handleImport = async () => {
@@ -61,6 +64,8 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       {`This will delete all existing player data for ${selectedDraftYear}. Continue?`}
     </ConfirmModal>
   }
+
+  if (!drafts) return null
 
   return (
     <Modal title="Import players" size="lg" onClose={onClose}>

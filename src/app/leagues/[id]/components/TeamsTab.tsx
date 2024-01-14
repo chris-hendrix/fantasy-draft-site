@@ -31,11 +31,11 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
 
   const columns: TableColumn<TeamArgs>[] = [
     {
-      name: 'Name',
+      header: 'Name',
       value: (team) => team.name
     },
     {
-      name: 'User(s)',
+      header: 'User(s)',
       renderedValue: (team) => {
         const users = team.teamUsers
           .filter((tu) => Boolean(tu.user))

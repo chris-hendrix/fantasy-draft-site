@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 
 interface Tab {
   name: string;
-  component: React.ReactNode;
+  component?: React.ReactNode;
   hash?: string;
   default?: boolean
 }

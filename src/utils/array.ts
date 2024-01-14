@@ -35,3 +35,23 @@ export const getMax = <T>(
 
   return defaultPropertySelector(maxObject)
 }
+
+export const getItemsInEqualColumns = <T>(items: T[], numCols: number): T[][] => {
+  // remainder values should be added to the first column(s)
+  const colSize = Math.floor(items.length / numCols)
+  const remainder = items.length % numCols
+  const sizes = Array.from({ length: numCols }).map((_, i) => colSize + Number(i < remainder))
+
+  // get the start and end item index for each column
+  const indices = sizes.reduce((acc, size) => {
+    const start = acc.length > 0 ? acc[acc.length - 1].end + 1 : 0
+    const end = start + size - 1
+    acc.push({ start, end })
+    return acc
+  }, [] as { start: number; end: number }[])
+
+  // add the items to the columns
+  return indices.map(({ start, end }) => items.slice(start, end + 1))
+}
+
+export default getItemsInEqualColumns

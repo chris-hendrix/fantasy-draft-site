@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DraftArgs, DraftOrderSlotArgs } from '@/types'
+import { DraftArgs, DraftTeamArgs } from '@/types'
 import { useUpdateDraft } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
@@ -12,8 +12,8 @@ interface Props {
 }
 
 const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
-  const initialSlots = draft.draftOrderSlots || []
-  const [slots, setSlots] = useState<DraftOrderSlotArgs[]>(initialSlots)
+  const initialSlots = draft.draftTeams || []
+  const [slots, setSlots] = useState<DraftTeamArgs[]>(initialSlots)
   const { updateObject: updateDraft } = useUpdateDraft()
   const [confirmSave, setConfirmSave] = useState(false)
   const [confirmGenerate, setConfirmGenerate] = useState(false)
@@ -23,7 +23,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
   const handleSave = async () => {
     const res = await updateDraft({
       id: draft.id,
-      draftOrderSlots: {
+      draftTeams: {
         deleteMany: {},
         createMany: { data: slotData }
       },
@@ -43,7 +43,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     ).flat().map((teamId, i) => ({ teamId, overall: i + 1 }))
     const res = await updateDraft({
       id: draft.id,
-      draftOrderSlots: {
+      draftTeams: {
         deleteMany: {},
         createMany: { data: slotData }
       },
@@ -56,9 +56,9 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
     onClose()
   }
 
-  const columns: TableColumn<DraftOrderSlotArgs>[] = [
+  const columns: TableColumn<DraftTeamArgs>[] = [
     {
-      name: 'Team name',
+      header: 'Team name',
       value: (slot) => slot?.team?.name,
       renderedValue: (slot) => (
         <>
@@ -71,7 +71,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
         </>)
     },
     {
-      name: 'Order',
+      header: 'Order',
       value: (slot) => 1 + slots.findIndex((s) => s.id === slot.id),
     },
   ]

@@ -2,12 +2,13 @@ import {
   User,
   Commissioner,
   Draft,
-  DraftOrderSlot,
+  DraftTeam,
   DraftPick,
+  Keeper,
   League,
   Player,
   Team,
-  TeamUser
+  TeamUser,
 } from '@prisma/client'
 
 export interface CommissionerArgs extends Commissioner {
@@ -35,22 +36,32 @@ export interface TeamArgs extends Team {
 
 export interface DraftArgs extends Draft {
   league: LeagueArgs
-  draftOrderSlots: DraftOrderSlotArgs[]
+  draftTeams: DraftTeamArgs[]
   draftPicks: DraftPickArgs[]
+  keepers: KeeperArgs[]
+  players: PlayerArgs[]
 }
 
-export interface DraftOrderSlotArgs extends DraftOrderSlot {
+export interface DraftTeamArgs extends DraftTeam {
   league: LeagueArgs
   team: TeamArgs
 }
 
 export interface DraftPickArgs extends DraftPick {
-  league: LeagueArgs
+  draft: DraftArgs
   team: TeamArgs
-  player: PlayerArgs
+  player: PlayerArgs | null
 }
 
 export interface PlayerArgs extends Player {
   league: LeagueArgs,
   draftPicks: DraftPickArgs[]
+  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
+}
+
+export interface KeeperArgs extends Keeper {
+  draft: DraftArgs
+  team: TeamArgs
+  player: PlayerArgs | null,
+  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
 }

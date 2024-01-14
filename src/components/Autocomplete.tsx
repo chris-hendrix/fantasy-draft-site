@@ -15,8 +15,12 @@ interface AutocompleteProps {
   initialValue?: string;
 }
 
-const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions = 100, size = 'sm', initialValue = '' }) => {
+const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions = 10, size = 'sm', initialValue = '' }) => {
   const [inputValue, setInputValue] = useState<string | undefined>(initialValue)
+
+  const filteredOptions = options.filter(
+    (option) => !inputValue || option.label.toLowerCase().includes(inputValue.toLowerCase())
+  ).slice(0, maxOptions)
 
   const {
     isOpen,
@@ -25,16 +29,12 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
     getItemProps,
     selectItem,
   } = useCombobox({
-    items: options,
+    items: filteredOptions,
     itemToString: (item) => (item ? item.label : ''),
     onInputValueChange: ({ inputValue: newValue }) => setInputValue(newValue),
     onSelectedItemChange: ({ selectedItem: item }) => onSelection(item),
     initialSelectedItem: options.find((option) => option.value === initialValue),
   })
-
-  const filteredOptions = options.filter(
-    (option) => !inputValue || option.label.toLowerCase().includes(inputValue.toLowerCase())
-  ).slice(0, maxOptions)
 
   // Update input value when the initialValue prop changes
   useEffect(() => {
@@ -45,11 +45,11 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
   return (
     <div className="w-full dropdown">
       <label tabIndex={0} className="relative">
-        <div className={`w-full flex flex-col gap-1 input  ${inputSizes[size]}`}>
+        <div className={`w-full flex flex-col gap-1 input ${inputSizes[size]}`}>
           <div className="flex bg-transparent gap-0.5">
             <input
               {...getInputProps()}
-              className={`input ${inputSizes[size]} w-full`}
+              className={'w-full'}
               placeholder="Type here"
             />
             <button

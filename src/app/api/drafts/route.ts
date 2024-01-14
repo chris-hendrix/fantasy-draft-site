@@ -19,7 +19,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
 
   const draft = await prisma.draft.create({
     data: {
-      draftOrderSlots: { create: teams.map((t, i) => ({ teamId: t.id, order: i })) },
+      draftTeams: { create: teams.map((t, i) => ({ teamId: t.id, order: i })) },
       ...data
     },
   })

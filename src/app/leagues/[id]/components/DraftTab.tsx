@@ -1,23 +1,22 @@
 'use client'
 
 import React, { useState, ChangeEvent } from 'react'
-import { LeagueArgs } from '@/types'
 import { useAddDraft, useGetDrafts } from '@/hooks/draft'
 import Tabs from '@/components/Tabs'
 import Modal from '@/components/Modal'
 import DraftPage from './DraftPage'
 
 interface Props {
-  league: Partial<LeagueArgs>;
+  leagueId: string;
 }
 
-const DraftTab: React.FC<Props> = ({ league }) => {
+const DraftTab: React.FC<Props> = ({ leagueId }) => {
   const currentYear = new Date().getFullYear()
-  const defaultRounds = 22
+  const defaultRounds = 22 // TODO add to league model
 
   const { data: drafts, refetch } = useGetDrafts({
-    where: { leagueId: league.id },
-    orderBy: { year: 'asc' }
+    where: { leagueId },
+    orderBy: { year: 'desc' }
   })
   const { addObject: addDraft } = useAddDraft()
   const [modalOpen, setModalOpen] = useState(false)
@@ -32,11 +31,7 @@ const DraftTab: React.FC<Props> = ({ league }) => {
 
   const handleAddDraft = async () => {
     if (selectedYear !== null) {
-      await addDraft({
-        rounds,
-        year: selectedYear,
-        leagueId: league.id
-      })
+      await addDraft({ rounds, year: selectedYear, leagueId })
       refetch()
       setModalOpen(false)
       setSelectedYear(currentYear)
@@ -47,7 +42,7 @@ const DraftTab: React.FC<Props> = ({ league }) => {
   const tabs = drafts?.map((d, i) => ({
     name: String(d.year),
     component: <DraftPage draftId={d.id} />,
-    default: i + 1 === drafts.length,
+    default: i === 0,
   })) || []
 
   return (

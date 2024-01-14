@@ -23,15 +23,15 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
 
   const columns: TableColumn<TeamArgs>[] = [
     {
-      name: 'League',
+      header: 'League',
       value: ((team) => team.league.name)
     },
     {
-      name: 'Team',
+      header: 'Team',
       value: ((team) => team.name)
     },
     {
-      name: 'Sport',
+      header: 'Sport',
       value: ((team) => team.league.sport)
     },
     {
