@@ -47,11 +47,10 @@ const DraftPicksTable: React.FC<Props> = ({
     playerSearch: () => true
   })
 
-  const { send } = useSendBroadcast(draftId, 'test')
-  const { latestPayload } = useReceiveBroadcast(draftId, 'test')
+  const { send } = useSendBroadcast(draftId, 'draft')
+  const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
 
   // console.log({ latestPayload, draftId })
-
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
   useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
   useEffect(() => {
