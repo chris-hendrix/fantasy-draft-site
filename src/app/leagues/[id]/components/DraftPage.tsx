@@ -16,23 +16,38 @@ interface Props {
 }
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
-  const { isCommissioner, isLoading } = useDraftData(draftId)
+  const { isCommissioner, canEditDraft } = useDraftData(draftId)
   const { deleteObject: deleteLeague } = useDeleteDraft()
   const { updateObject: updateDraft } = useUpdateDraft()
   const [draftPicks, setDraftPicks] = useState<DraftPickArgs[]>([])
-  const [edit, setEdit] = useState(false)
+  const [editOrder, setEditOrder] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [draftOrderModalOpen, setDraftOrderModalOpen] = useState(false)
   const [confirmKeepersModalOpen, setConfirmKeepersModalOpen] = useState(false)
   const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
-  const draftingPick = draftPicks?.filter((p) => p.playerId === null)?.[0]
+
+  const draftingPick = canEditDraft && draftPicks?.filter((p) => p.playerId === null)?.[0]
 
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
 
+  const handleStart = async () => {
+    await updateDraft({
+      id: draftId,
+      draftLockDate: null
+    })
+  }
+
+  const handleLock = async () => {
+    await updateDraft({
+      id: draftId,
+      draftLockDate: new Date()
+    })
+  }
+
   const handleDelete = async () => {
-    const res = await deleteLeague(draftId as string)
+    const res = await deleteLeague(draftId)
     if ('error' in res) return
     window.location.reload()
   }
@@ -52,7 +67,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
     })
     if ('error' in res) return
     invalidateDraftPicks()
-    setEdit(false)
+    setEditOrder(false)
   }
 
   const handleConfirmKeepers = async () => {
@@ -67,13 +82,19 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
     <div className="flex flex-col items-start mt-2">
       {isCommissioner &&
         <div className="flex gap-2 my-2">
-          {!edit && <>
-            <button
+          {!editOrder && <>
+            {!canEditDraft && <button
               className="btn btn-sm btn-primary w-32"
-              onClick={() => setEdit(true)}
+              onClick={handleStart}
             >
               🚀 Start
-            </button>
+            </button>}
+            {canEditDraft && <button
+              className="btn btn-sm btn-primary w-32"
+              onClick={handleLock}
+            >
+              🔒 Lock
+            </button>}
             <button
               className="btn btn-sm w-32"
               onClick={() => setDraftOrderModalOpen(true)}
@@ -88,7 +109,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             </button>
             <button
               className="btn btn-sm w-32"
-              onClick={() => setEdit(true)}
+              onClick={() => setEditOrder(true)}
             >
               📝 Edit
             </button>
@@ -96,7 +117,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
               🗑️ Delete
             </button>
           </>}
-          {edit && <>
+          {editOrder && <>
             <button
               className="btn btn-sm w-32"
               onClick={handleSave}
@@ -105,7 +126,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             </button>
             <button
               className="btn btn-sm w-32"
-              onClick={() => setEdit(false)}
+              onClick={() => setEditOrder(false)}
             >
               ❌ Cancel
             </button>
@@ -117,7 +138,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
         <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
           <DraftPicksTable
             draftId={draftId}
-            edit={edit}
+            editOrder={editOrder}
             onOrderChange={setEditDraftPicks}
             onDraftPicksChanged={setDraftPicks}
           />
@@ -126,7 +147,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           <PlayersTable draftId={draftId} draftingPick={draftingPick} />
         </div>
       </div>
-      {!isLoading && !draftPicks?.length &&
+      {!draftPicks?.length &&
         <div className="text-sm w-full display-flex text-center p-4">
           <a onClick={() => setDraftOrderModalOpen(true)} className="link">Generate</a>
           &nbsp;the draft picks for this draft

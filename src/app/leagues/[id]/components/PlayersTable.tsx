@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useGetPlayers } from '@/hooks/player'
+import { useGetPlayers, useInvalidatePlayer } from '@/hooks/player'
 import { useDraftData } from '@/hooks/draft'
 import { useSendBroadcast } from '@/hooks/supabase'
 import { useUpdateDraftPick } from '@/hooks/draftPick'
@@ -10,6 +10,7 @@ import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
 import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
 import ChipSelect from '@/components/ChipSelect'
+import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
 
 const MAX_ROUND_FILTER = 30
@@ -37,17 +38,21 @@ const PlayersTable: React.FC<Props> = ({
     },
     { skip: !draftId }
   )
+  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
+  const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const canDraft = draftingPick && sessionTeam && draftingPick.teamId === sessionTeam.id
 
-  const handleSelection = async (
-    pickId: string,
-    newPlayerId: string | null
-  ) => {
+  const handleDraft = async () => {
+    if (!draftingPick || !playerToBeDrafted) return
+    const pickId = draftingPick.id
+    const newPlayerId = playerToBeDrafted.id
     const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
     if ('error' in res) return
+    setPlayerToBeDrafted(null)
+    invalidatePlayer(newPlayerId)
     await send({ pickId, oldPlayerId: null, newPlayerId })
   }
 
@@ -128,7 +133,7 @@ const PlayersTable: React.FC<Props> = ({
         <button
           className="btn btn-xs btn-primary text-xs"
           disabled={player?.draftPicks?.length > 0}
-          onClick={() => draftingPick && handleSelection(draftingPick.id, player.id)}
+          onClick={() => draftingPick && setPlayerToBeDrafted(player)}
         >
           Draft
         </button>
@@ -219,6 +224,18 @@ const PlayersTable: React.FC<Props> = ({
           className: 'bg-neutral-content'
         })}
       />
+      {draftingPick && playerToBeDrafted && (
+        <ConfirmModal
+          onConfirm={handleDraft}
+          onClose={() => setPlayerToBeDrafted(null)}
+        >
+          Draft&nbsp;
+          <b>{getPlayerName(playerToBeDrafted)}</b>
+          &nbsp;in round&nbsp;
+          {getRound(draftingPick.overall, teamsCount)}
+          ?
+        </ConfirmModal>
+      )}
     </>
   )
 }

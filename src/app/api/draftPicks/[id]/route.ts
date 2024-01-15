@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { ApiError, routeWrapper } from '@/app/api/utils/api'
-import { checkDraftCommissioner } from '@/app/api/utils/permissions'
+import { checkTeamEdit } from '@/app/api/utils/permissions'
 import { getNextPick } from '../../utils/draft'
 
 export const PUT = routeWrapper(
@@ -10,7 +10,7 @@ export const PUT = routeWrapper(
     if (!id) throw new ApiError('Pick id required', 400)
     const pick = await prisma.draftPick.findFirst({ where: { id } })
     if (!pick) throw new ApiError('Pick not found', 400)
-    await checkDraftCommissioner(pick.draftId)
+    await checkTeamEdit(pick.teamId)
     const { startClock, ...data }: any = req.consumedBody
     const updatedPick = await prisma.draftPick.update({ where: { id }, data })
 

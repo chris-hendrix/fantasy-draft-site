@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { DraftTeamArgs } from '@/types'
 import { useDraftData, useUpdateDraft } from '@/hooks/draft'
 import { useInvalidateDraftPicks } from '@/hooks/draftPick'
+import { useInvalidatePlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -15,6 +16,7 @@ interface Props {
 const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
   const { draftTeams, rounds } = useDraftData(draftId)
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
+  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
   const [editDraftTeams, setEditDraftTeams] = useState<DraftTeamArgs[]>([])
   const { updateObject: updateDraft } = useUpdateDraft()
   const [confirmSave, setConfirmSave] = useState(false)
@@ -39,6 +41,7 @@ const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
     })
     if ('error' in res) return
     invalidateDraftPicks()
+    invalidatePlayers()
     setConfirmSave(false)
   }
 
@@ -60,6 +63,7 @@ const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
     })
     if ('error' in res) return
     invalidateDraftPicks()
+    invalidatePlayers()
     onClose()
   }
 
