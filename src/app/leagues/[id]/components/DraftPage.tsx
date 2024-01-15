@@ -144,7 +144,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           />
         </div>
         <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
-          <PlayersTable draftId={draftId} draftingPick={draftingPick} />
+          <PlayersTable draftId={draftId} draftingPick={draftingPick || undefined} />
         </div>
       </div>
       {!draftPicks?.length &&
