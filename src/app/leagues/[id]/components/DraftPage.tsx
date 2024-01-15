@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useDeleteDraft, useGetDraft, useUpdateDraft } from '@/hooks/draft'
-import { useUserLeagues } from '@/hooks/league'
+import { useState, useEffect } from 'react'
+import { useDeleteDraft, useDraftData, useUpdateDraft } from '@/hooks/draft'
 import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -17,25 +16,18 @@ interface Props {
 }
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
-  const { data: draft, isLoading } = useGetDraft({
-    id: draftId,
-    queryParams: {
-      include: {
-        draftTeams: { include: { team: true }, orderBy: { order: 'asc' } },
-        draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } }
-      }
-    }
-  })
+  const { isCommissioner, draftPicks, isLoading } = useDraftData(draftId)
   const { deleteObject: deleteLeague } = useDeleteDraft()
   const { updateObject: updateDraft } = useUpdateDraft()
   const [edit, setEdit] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [draftOrderModalOpen, setDraftOrderModalOpen] = useState(false)
   const [confirmKeepersModalOpen, setConfirmKeepersModalOpen] = useState(false)
-  const { isCommissioner } = useUserLeagues(draft?.leagueId)
-  const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
+  const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
+
+  useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
 
   const handleDelete = async () => {
     const res = await deleteLeague(draftId as string)
@@ -44,7 +36,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   }
 
   const handleSave = async () => {
-    const draftPickData = draftPicks.map(({ teamId, playerId }, i) => ({
+    const draftPickData = editDraftPicks.map(({ teamId, playerId }, i) => ({
       teamId: teamId as string,
       playerId,
       overall: i + 1
@@ -57,6 +49,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       }
     })
     if ('error' in res) return
+    invalidateDraftPicks()
     setEdit(false)
   }
 
@@ -112,17 +105,16 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
 
         </div>
       }
-      {draft && (
-        <div className="flex flex-row h-full w-full">
-          <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
-            <DraftPicksTable draft={draft} edit={edit} onOrderChange={setDraftPicks} />
-          </div>
-          <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
-            <PlayersTable draftId={draft.id} />
-          </div>
+      <div className="flex flex-row h-full w-full">
+        <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
+          <DraftPicksTable draftId={draftId} edit={edit} onOrderChange={setEditDraftPicks} />
         </div>
-      )}
-      {!isLoading && !draft?.draftPicks?.length &&
+        <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
+          <PlayersTable draftId={draftId} />
+        </div>
+      </div>
+
+      {!isLoading && !draftPicks?.length &&
         <div className="text-sm w-full display-flex text-center p-4">
           <a onClick={() => setDraftOrderModalOpen(true)} className="link">Generate</a>
           &nbsp;the draft picks for this draft
@@ -136,7 +128,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           </div>
         </Modal>}
       {draftOrderModalOpen && <DraftOrderModal
-        draft={draft}
+        draftId={draftId}
         onClose={() => setDraftOrderModalOpen(false)}
       />}
       {confirmKeepersModalOpen && <ConfirmModal

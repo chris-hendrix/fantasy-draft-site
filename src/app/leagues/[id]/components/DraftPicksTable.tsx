@@ -1,36 +1,35 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DraftArgs, DraftPickArgs } from '@/types'
+import { DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName, getRound } from '@/utils/draft'
-import { useUserLeagues } from '@/hooks/league'
 import { useInvalidatePlayer } from '@/hooks/player'
 import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
 import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
 import ChipSelect from '@/components/ChipSelect'
 import { getUnique } from '@/utils/array'
 import SearchFilter from '@/components/SearchFilter'
+import { useDraftData } from '@/hooks/draft'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
-  draft: DraftArgs;
+  draftId: string;
   edit?: boolean;
-  onOrderChange: (draftPicks: Partial<DraftPickArgs>[]) => void
+  onOrderChange: (draftPicks: DraftPickArgs[]) => void
 }
 
 type FilterOptions = { [key: string]: (pick: DraftPickArgs) => boolean }
 
-const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }) => {
-  const { isCommissioner } = useUserLeagues(draft.leagueId)
-  const { data: draftPicks, refetch } = useGetDraftPicks(
+const DraftPicksTable: React.FC<Props> = ({ draftId, edit = false, onOrderChange }) => {
+  const { isCommissioner, teamsCount, rounds } = useDraftData(draftId)
+  const { data: draftPicks } = useGetDraftPicks(
     {
-      where: { draftId: draft.id },
+      where: { draftId },
       include: { team: true, player: true },
       orderBy: { overall: 'asc' }
-    },
-    { skip: !draft.id }
+    }
   )
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
@@ -42,14 +41,12 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     team: () => true,
     playerSearch: () => true
   })
-  const teamsCount = (draft?.draftTeams?.length || 1)
 
-  const { send } = useSendBroadcast(draft.id as string, 'test')
-  const { latestPayload } = useReceiveBroadcast(draft.id as string, 'test')
+  const { send } = useSendBroadcast(draftId, 'draft')
+  const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
 
-  useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
+  useEffect(() => { setEditedDraftPicks(draftPicks) }, [draftPicks])
   useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
-  useEffect(() => { refetch() }, [draft?.draftPicks])
 
   useEffect(() => {
     const { pickId, oldPlayerId } = latestPayload || {}
@@ -72,16 +69,26 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     {
       header: '',
       hidden: !edit,
-      renderedValue: (pick) => <MoveButtons
-        indexToMove={editedDraftPicks.findIndex((p) => p.id === pick.id)}
-        array={editedDraftPicks}
-        setArray={setEditedDraftPicks}
-      />
+      renderedValue: (pick) => (
+        <MoveButtons
+          indexToMove={editedDraftPicks.findIndex((p) => p.id === pick.id)}
+          array={editedDraftPicks}
+          setArray={setEditedDraftPicks}
+        />)
     },
-    { header: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
-    { header: 'Team', value: (pick) => pick.team?.name },
+    {
+      header: 'Pick',
+      cellStyle: { maxWidth: '56px' },
+      value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount)
+    },
+    {
+      header: 'Team',
+      value: (pick) => pick.team?.name
+    },
     {
       header: 'Player',
+      hidden: edit,
+      cellStyle: { maxWidth: '256px', width: '256px' },
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
         if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
@@ -93,8 +100,8 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
             {player ? getPlayerName(player) : ''}
           </div>
         }
-        return draft?.id && <PlayerAutocomplete
-          draftId={draft.id}
+        return <PlayerAutocomplete
+          draftId={draftId}
           onSelection={(newPlayerId) => {
             handleSelection(String(id), String(player?.id), newPlayerId)
           }}
@@ -111,7 +118,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
 
   if (!picks) return null
 
-  const filteredPicks = draftPicks.filter((pick) => Object
+  const filteredPicks = editedDraftPicks.filter((pick) => Object
     .values(filterOptions)
     .every((filter) => filter(pick)))
 
@@ -120,7 +127,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
       <div className="flex gap-1">
         <div className="w-24 card bg-base-200 p-1">
           <ChipSelect
-            items={Array.from({ length: draft?.rounds || 0 })
+            items={Array.from({ length: rounds })
               .map((_, i) => ({ value: i + 1, label: i + 1 }))
             }
             onSelection={({ selectedValues }) => {

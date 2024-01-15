@@ -15,12 +15,18 @@ const MAX_ROUND_FILTER = 30
 interface Props {
   draftId: string;
   maxItemsPerPage?: number,
-  hideTeamColumn?: boolean
+  hideTeamColumn?: boolean,
+  draftingTeamId?: string
 }
 
 type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
 
-const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTeamColumn }) => {
+const PlayersTable: React.FC<Props> = ({
+  draftId,
+  maxItemsPerPage = 100,
+  hideTeamColumn,
+  draftingTeamId
+}) => {
   const { data: players } = useGetPlayers(
     {
       where: { draftId },
@@ -101,7 +107,14 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
         </div>
       ),
     },
-    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn }
+    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
+    {
+      header: '',
+      hidden: !draftingTeamId,
+      renderedValue: () => (
+        <button className="btn btn-xs btn-primary text-xs">Draft</button>
+      )
+    }
   ]
 
   if (!players) return null
