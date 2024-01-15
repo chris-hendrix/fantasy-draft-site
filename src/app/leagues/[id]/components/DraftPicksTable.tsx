@@ -101,7 +101,7 @@ const DraftPicksTable: React.FC<Props> = ({
         if (!isCommissioner || !canEditDraft) return player && <div className="">{getPlayerName(player)}</div>
         if (editPickId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+            className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
             onClick={() => setEditPickId(id || null)}
           >
             {player ? getPlayerName(player) : ''}
@@ -134,7 +134,7 @@ const DraftPicksTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex gap-1">
-        <div className="w-24 card bg-base-200 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             items={Array.from({ length: rounds })
               .map((_, i) => ({ value: i + 1, label: i + 1 }))
@@ -150,7 +150,7 @@ const DraftPicksTable: React.FC<Props> = ({
             label="Round"
           />
         </div>
-        <div className="w-60 card bg-base-200 p-1">
+        <div className="w-60 card bg-base-300 p-1">
           <ChipSelect
             items={getUnique<DraftPickArgs>(
               draftPicks,
@@ -167,7 +167,7 @@ const DraftPicksTable: React.FC<Props> = ({
             }}
           />
         </div>
-        <div className="flex-grow card bg-base-200 p-1">
+        <div className="flex-grow card bg-base-300 p-1">
           <SearchFilter
             label="Player"
             onSearch={(value) => {

@@ -117,7 +117,7 @@ const PlayersTable: React.FC<Props> = ({
           onMouseLeave={() => setHoveredPlayerId(null)}
         >
           {hoveredPlayerId === player.id && (
-            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-200 text-xs">
+            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-200 text-xs">
               {getPlayerData(player, 'Notes')}
             </div>
           )}
@@ -150,7 +150,7 @@ const PlayersTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex gap-1">
-        <div className="w-24 card bg-base-200 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             label="Rank Round"
             items={[
@@ -169,7 +169,7 @@ const PlayersTable: React.FC<Props> = ({
             }}
           />
         </div>
-        <div className="w-24 card bg-base-200 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             label="Position"
             items={POSITIONS.map((pos) => ({ value: pos, label: pos }))}
@@ -185,7 +185,7 @@ const PlayersTable: React.FC<Props> = ({
             }}
           />
         </div>
-        <div className="flex-grow card bg-base-200 p-1">
+        <div className="flex-grow card bg-base-300 p-1">
           <SearchFilter
             label="Player"
             onSearch={(value) => {
@@ -200,7 +200,7 @@ const PlayersTable: React.FC<Props> = ({
             }}
           />
         </div>
-        {!hideTeamColumn && <div className="w-60 card bg-base-200 p-1">
+        {!hideTeamColumn && <div className="w-60 card bg-base-300 p-1">
           <ChipSelect
             label="Team"
             items={getUniqueTeamOptions()}

@@ -77,7 +77,7 @@ const KeepersTable: React.FC<Props> = ({
         if (!edit || !(isCommissioner || teamId)) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+            className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
             onClick={() => setEditKeeperId(id || null)}
           >
             {getPlayerName(player) || ''}

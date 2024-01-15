@@ -17,7 +17,7 @@ const Profile: React.FC<Props> = ({ user, canEdit = false }) => {
 
   return (
     <>
-      <div className="flex items-center justify-between bg-base-200 rounded-box p-4">
+      <div className="flex items-center justify-between bg-base-300 rounded-box p-4">
         <div className="flex items-center">
           <div className="mr-4 hidden md:block">
             <Avatar user={user} size={60} />
