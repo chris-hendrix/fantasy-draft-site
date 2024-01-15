@@ -51,3 +51,10 @@ export const updateDraftPlayerData = async (draftId: string, playerData: PlayerD
   )
   return results
 }
+
+export const getNextPick = async (draftId: string, overall: number) => {
+  const picks = await prisma.draftPick.findMany({
+    where: { draftId, overall: { gt: overall }, playerId: null }
+  })
+  return picks?.[0] || null
+}

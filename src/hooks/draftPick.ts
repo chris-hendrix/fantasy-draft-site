@@ -8,6 +8,8 @@ export const {
   useUpdateObject: useUpdateDraftPick,
   useInvalidateObject: useInvalidateDraftPick,
   useInvalidateObjects: useInvalidateDraftPicks
-} = getCrudHooks<DraftPickArgs, Prisma.DraftPickFindManyArgs, Prisma.DraftPickUncheckedUpdateInput>(
+} = getCrudHooks<DraftPickArgs, Prisma.DraftPickFindManyArgs, {
+  startClock?: boolean
+} & Prisma.DraftPickUncheckedUpdateInput>(
   draftPickApi
 )
