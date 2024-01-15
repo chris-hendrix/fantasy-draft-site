@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useParams } from 'next/navigation'
 import { useSessionUser } from '@/hooks/user'
 import { useUserLeagues } from '@/hooks/league'
@@ -111,7 +112,17 @@ const Navbar: React.FC = () => {
         {user && <LeagueDropdown />}
       </div>
       <div className="navbar-center">
-        <Link href="/" className="btn btn-ghost text-xl text-primary-content">⚾ Drafter 🏈</Link>
+        <Link href="/" className="btn btn-ghost text-xl text-primary-content">
+          <div className="border-white border-2 shadow-lg">
+            <Image
+              src="/drafter-banner.svg"
+              alt="Drafter Logo"
+              width={180}
+              height={75}
+              priority
+            />
+          </div>
+        </Link>
       </div>
       <div className="navbar-end">
         <UserDropdown />

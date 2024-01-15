@@ -49,7 +49,7 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
           <div className="flex bg-transparent gap-0.5">
             <input
               {...getInputProps()}
-              className={'w-full'}
+              className={'w-full bg-transparent'}
               placeholder="Type here"
             />
             <button
@@ -63,7 +63,7 @@ const Autocomplete: FC<AutocompleteProps> = ({ options, onSelection, maxOptions 
           </div>
         </div>
       </label>
-      <ul {...getMenuProps()} className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full">
+      <ul {...getMenuProps()} className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-neutral rounded-box w-full">
         {isOpen && filteredOptions?.length > 0 &&
           filteredOptions.map((item, index) => (
             <li

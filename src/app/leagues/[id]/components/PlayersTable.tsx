@@ -221,7 +221,7 @@ const PlayersTable: React.FC<Props> = ({
         maxItemsPerPage={maxItemsPerPage}
         xs
         rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
-          className: 'bg-neutral-content'
+          className: 'bg-gray-700 italic text-gray-500'
         })}
       />
       {draftingPick && playerToBeDrafted && (
