@@ -18,13 +18,18 @@ interface Props {
   draftId: string;
   edit?: boolean;
   onOrderChange: (draftPicks: DraftPickArgs[]) => void
+  onDraftPicksChanged?: (draftPicks: DraftPickArgs[]) => void
 }
 
 type FilterOptions = { [key: string]: (pick: DraftPickArgs) => boolean }
 
-const DraftPicksTable: React.FC<Props> = ({ draftId, edit = false, onOrderChange }) => {
+const DraftPicksTable: React.FC<Props> = ({
+  draftId, edit = false,
+  onOrderChange,
+  onDraftPicksChanged
+}) => {
   const { isCommissioner, teamsCount, rounds } = useDraftData(draftId)
-  const { data: draftPicks } = useGetDraftPicks(
+  const { data: draftPicks, isSuccess } = useGetDraftPicks(
     {
       where: { draftId },
       include: { team: true, player: true },
@@ -35,18 +40,23 @@ const DraftPicksTable: React.FC<Props> = ({ draftId, edit = false, onOrderChange
   const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
-  const [editedDraftPicks, setEditedDraftPicks] = useState<DraftPickArgs[]>([])
+  const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     round: () => true,
     team: () => true,
     playerSearch: () => true
   })
 
-  const { send } = useSendBroadcast(draftId, 'draft')
-  const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
+  const { send } = useSendBroadcast(draftId, 'test')
+  const { latestPayload } = useReceiveBroadcast(draftId, 'test')
 
-  useEffect(() => { setEditedDraftPicks(draftPicks) }, [draftPicks])
-  useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
+  // console.log({ latestPayload, draftId })
+
+  useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
+  useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
+  useEffect(() => {
+    isSuccess && onDraftPicksChanged && onDraftPicksChanged(draftPicks)
+  }, [isSuccess])
 
   useEffect(() => {
     const { pickId, oldPlayerId } = latestPayload || {}
@@ -64,16 +74,16 @@ const DraftPicksTable: React.FC<Props> = ({ draftId, edit = false, onOrderChange
     await send({ pickId, oldPlayerId, newPlayerId })
   }
 
-  const picks = edit ? editedDraftPicks : draftPicks
+  const picks = edit ? editDraftPicks : draftPicks
   const columns: TableColumn<DraftPickArgs>[] = [
     {
       header: '',
       hidden: !edit,
       renderedValue: (pick) => (
         <MoveButtons
-          indexToMove={editedDraftPicks.findIndex((p) => p.id === pick.id)}
-          array={editedDraftPicks}
-          setArray={setEditedDraftPicks}
+          indexToMove={editDraftPicks.findIndex((p) => p.id === pick.id)}
+          array={editDraftPicks}
+          setArray={setEditDraftPicks}
         />)
     },
     {
@@ -118,7 +128,7 @@ const DraftPicksTable: React.FC<Props> = ({ draftId, edit = false, onOrderChange
 
   if (!picks) return null
 
-  const filteredPicks = editedDraftPicks.filter((pick) => Object
+  const filteredPicks = (editDraftPicks || []).filter((pick) => Object
     .values(filterOptions)
     .every((filter) => filter(pick)))
 

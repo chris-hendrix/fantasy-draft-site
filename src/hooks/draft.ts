@@ -17,7 +17,8 @@ export const {
   keeperCount?: number,
   setKeepers?: boolean,
   teamKeepers?: KeeperArgs[]
-  updatePlayerData?: PlayerData[]
+  updatePlayerData?: PlayerData[],
+  startDraft?: boolean;
 }>(draftApi)
 
 export const useUserDraft = (draftId: string) => {

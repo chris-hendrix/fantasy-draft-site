@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useGetPlayers } from '@/hooks/player'
 import { useDraftData } from '@/hooks/draft'
+import { useSendBroadcast } from '@/hooks/supabase'
+import { useUpdateDraftPick } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
-import { PlayerArgs, TeamArgs } from '@/types'
+import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
 import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
 import ChipSelect from '@/components/ChipSelect'
@@ -16,7 +18,7 @@ interface Props {
   draftId: string;
   maxItemsPerPage?: number,
   hideTeamColumn?: boolean,
-  draftingTeamId?: string
+  draftingPick?: DraftPickArgs
 }
 
 type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
@@ -25,8 +27,9 @@ const PlayersTable: React.FC<Props> = ({
   draftId,
   maxItemsPerPage = 100,
   hideTeamColumn,
-  draftingTeamId
+  draftingPick
 }) => {
+  const { teamsCount, sessionTeam } = useDraftData(draftId)
   const { data: players } = useGetPlayers(
     {
       where: { draftId },
@@ -34,9 +37,19 @@ const PlayersTable: React.FC<Props> = ({
     },
     { skip: !draftId }
   )
+  const { send } = useSendBroadcast(draftId, 'draft')
+  const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
+  const canDraft = draftingPick && sessionTeam && draftingPick.teamId === sessionTeam.id
 
-  const { teamsCount } = useDraftData(draftId)
+  const handleSelection = async (
+    pickId: string,
+    newPlayerId: string | null
+  ) => {
+    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
+    if ('error' in res) return
+    await send({ pickId, oldPlayerId: null, newPlayerId })
+  }
 
   const getPlayerRound = (player: PlayerArgs) => {
     const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)
@@ -110,9 +123,15 @@ const PlayersTable: React.FC<Props> = ({
     { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
     {
       header: '',
-      hidden: !draftingTeamId,
-      renderedValue: () => (
-        <button className="btn btn-xs btn-primary text-xs">Draft</button>
+      hidden: !canDraft,
+      renderedValue: (player) => (
+        <button
+          className="btn btn-xs btn-primary text-xs"
+          disabled={player?.draftPicks?.length > 0}
+          onClick={() => draftingPick && handleSelection(draftingPick.id, player.id)}
+        >
+          Draft
+        </button>
       )
     }
   ]

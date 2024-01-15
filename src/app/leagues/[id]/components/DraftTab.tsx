@@ -46,7 +46,7 @@ const DraftTab: React.FC<Props> = ({ leagueId }) => {
   })) || []
 
   return (
-    <div className="flex flex-col items-center mt-3">
+    <div className="flex flex-col items-center mt-8">
       <Tabs tabs={tabs} onAdd={() => setModalOpen(true)} width="full" />
       {modalOpen && (
         <Modal title="Add draft" size="xs" onClose={() => setModalOpen(false)}>
