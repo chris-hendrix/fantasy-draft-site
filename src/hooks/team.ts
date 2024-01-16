@@ -10,7 +10,8 @@ export const {
   useGetObjects: useGetTeams,
   useAddObject: useAddTeam,
   useUpdateObject: useUpdateTeam,
-  useDeleteObject: useDeleteTeam
+  useDeleteObject: useDeleteTeam,
+  useInvalidateObject: useInvalidateTeam
 } = getCrudHooks<TeamArgs & {
   inviteEmail?: string
 }, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput & {
@@ -20,15 +21,17 @@ export const {
 
 export const useInviteTeams = () => {
   const { user } = useSessionUser()
-  const { data: inviteTeams, isLoading, isSuccess } = useGetTeams(
+  const { data, isLoading, isSuccess, refetch } = useGetTeams(
     {
-      where: { teamUsers: { some: { inviteEmail: user?.email, userId: null } } },
-      include: { league: true }
+      where: { teamUsers: { some: { inviteEmail: user.email, userId: null } } },
+      include: { league: true, teamUsers: { where: { userId: user.id } } }
     },
     { skip: !user?.email }
   )
 
-  return { inviteTeams, isLoading, isSuccess }
+  const inviteTeams = data?.filter((team) => team.teamUsers.length === 0)
+
+  return { inviteTeams, isLoading, isSuccess, refetch }
 }
 
 export const useUserTeam = (leagueId: string, skip: boolean = false) => {

@@ -1,4 +1,4 @@
-import { useInviteTeams, useUpdateTeam } from '@/hooks/team'
+import { useInviteTeams, useUpdateTeam, useInvalidateTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
 import Table, { TableColumn } from '@/components/Table'
 import { TeamArgs } from '@/types'
@@ -12,13 +12,15 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
   const { user } = useSessionUser()
   const { inviteTeams } = useInviteTeams()
   const { updateObject: updateTeam } = useUpdateTeam()
+  const { invalidateObject: invalidateTeam } = useInvalidateTeam()
 
   const handleUpdate = async (team: TeamArgs, decline = false) => {
     if (decline) {
       await updateTeam({ id: team.id, declineEmail: user.email })
-      return
+    } else {
+      await updateTeam({ id: team.id, acceptEmail: user.email })
     }
-    await updateTeam({ id: team.id, acceptEmail: user.email })
+    invalidateTeam(team.id)
   }
 
   const columns: TableColumn<TeamArgs>[] = [

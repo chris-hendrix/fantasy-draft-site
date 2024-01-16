@@ -100,7 +100,6 @@ const LeagueDropdown: React.FC = () => {
       {leagueModalOpen && <LeagueModal onClose={() => setLeagueModalOpen(false)} />}
       {inviteModalOpen && <InviteModal onClose={() => setInviteModalOpen(false)} />}
     </>
-
   )
 }
 
