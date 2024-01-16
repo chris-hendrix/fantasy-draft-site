@@ -189,7 +189,7 @@ const DraftPicksTable: React.FC<Props> = ({
         xs
         maxItemsPerPage={300}
         rowStyle={(pick: DraftPickArgs) => (!pick?.player ? {} : {
-          className: 'bg-gray-700 italic text-gray-500'
+          className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
         })}
       />
     </>

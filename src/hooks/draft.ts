@@ -40,11 +40,11 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
   const isCommissioner = Boolean(
     user && draft?.league.commissioners.find((c) => c.userId === user?.id)
   )
-  const canEditKeepers = Boolean(
-    (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
-  )
   const canEditDraft = Boolean(
     (isSuccess && !draftLockDate) || (draftLockDate && draftLockDate > new Date())
+  )
+  const canEditKeepers = Boolean(
+    (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
   )
 
   const sessionTeam = draft?.draftTeams.filter(

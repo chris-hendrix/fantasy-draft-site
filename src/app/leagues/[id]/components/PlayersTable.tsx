@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useGetPlayers, useInvalidatePlayer } from '@/hooks/player'
+import { useGetSortedPlayers, useInvalidatePlayer } from '@/hooks/player'
 import { useDraftData } from '@/hooks/draft'
 import { useSendBroadcast } from '@/hooks/supabase'
 import { useUpdateDraftPick } from '@/hooks/draftPick'
@@ -30,14 +30,8 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
   draftingPick
 }) => {
-  const { teamsCount, sessionTeam } = useDraftData(draftId)
-  const { data: players } = useGetPlayers(
-    {
-      where: { draftId },
-      include: { draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } } }
-    },
-    { skip: !draftId }
-  )
+  const { teamsCount, sessionTeam, canEditDraft } = useDraftData(draftId)
+  const { players } = useGetSortedPlayers(draftId, 'Rank')
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
@@ -128,11 +122,11 @@ const PlayersTable: React.FC<Props> = ({
     { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
     {
       header: '',
-      hidden: !canDraft,
+      hidden: !canEditDraft,
       renderedValue: (player) => (
         <button
           className="btn btn-xs btn-primary text-xs"
-          disabled={player?.draftPicks?.length > 0}
+          disabled={player?.draftPicks?.length > 0 || !canDraft}
           onClick={() => draftingPick && setPlayerToBeDrafted(player)}
         >
           Draft
@@ -221,7 +215,7 @@ const PlayersTable: React.FC<Props> = ({
         maxItemsPerPage={maxItemsPerPage}
         xs
         rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
-          className: 'bg-gray-700 italic text-gray-500'
+          className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
         })}
       />
       {draftingPick && playerToBeDrafted && (

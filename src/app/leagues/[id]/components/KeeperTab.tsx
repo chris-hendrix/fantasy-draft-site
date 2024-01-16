@@ -137,7 +137,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
         <>
           <h2 className="text-lg font-bold my-6">📝 Keeper Entry</h2>
           <div className="flex gap-2 mb-2">
-            {!teamEdit && <button className="btn btn-sm w-32" onClick={() => setTeamEdit(true)}>📝 Edit</button>}
+            {teamEdit && <button className="btn btn-sm w-32" onClick={() => setTeamEdit(true)}>📝 Edit</button>}
             {teamEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveTeamKeepers}>💾 Save</button>}
             {teamEdit && <button className="btn btn-sm w-32 btn-error" onClick={() => setTeamEdit(false)}>❌ Cancel</button>}
           </div>

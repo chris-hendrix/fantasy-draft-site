@@ -20,8 +20,8 @@ const Modal: React.FC<Props> = ({ children, onClose, title = '', size = 'sm' }) 
   <div className="modal modal-open">
     <div className={`modal-box ${sizes[size]}`}>
       <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={onClose}>✕</button>
-      <h3 className="font-bold text-lg text-gray-500">{title}</h3>
-      <div className="mt-4 text-gray-500">{children}</div>
+      <h3 className="font-bold text-lg">{title}</h3>
+      <div className="mt-4">{children}</div>
     </div>
   </div>
 )

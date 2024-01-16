@@ -68,7 +68,11 @@ const KeepersTable: React.FC<Props> = ({
   }
 
   const columns: TableColumn<KeeperArgs>[] = [
-    { header: 'Team', value: ({ team }) => team?.name },
+    {
+      header: 'Team',
+      cellStyle: { maxWidth: '160px', width: '160px' },
+      value: ({ team }) => team?.name
+    },
     {
       header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
