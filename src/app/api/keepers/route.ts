@@ -14,7 +14,6 @@ export const GET = routeWrapper(
     // this attaches last years draft pick for each player
     const draftId = queryParams?.where?.draftId
     if (getPreviousPick && draftId) {
-      console.log('here')
       const draft = await prisma.draft.findFirst({ where: { id: String(draftId) } })
       if (!draft) throw new ApiError('Keeper not found', 400)
 
