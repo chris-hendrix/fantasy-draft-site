@@ -14,7 +14,7 @@ export const {
   useInvalidateObjects: useInvalidatePlayers
 } = getCrudHooks<PlayerArgs, Prisma.PlayerFindManyArgs, Prisma.PlayerUpdateInput>(playerApi)
 
-export const useGetSortedPlayers = (draftId: string, dataKey?: string) => {
+export const useGetSortedPlayers = (draftId: string, dataKey?: string, nullValue?: any) => {
   const result = useGetPlayers(
     {
       where: { draftId },
@@ -23,8 +23,8 @@ export const useGetSortedPlayers = (draftId: string, dataKey?: string) => {
   )
 
   const players = [...(result?.data || [])].sort((a, b) => {
-    const aValue = dataKey ? getPlayerData(a, dataKey) : a.name
-    const bValue = dataKey ? getPlayerData(b, dataKey) : b.name
+    const aValue = dataKey ? getPlayerData(a, dataKey) || nullValue : a.name
+    const bValue = dataKey ? getPlayerData(b, dataKey) || nullValue : b.name
     if (typeof aValue === 'number' && typeof bValue === 'number') {
       return aValue - bValue
     }

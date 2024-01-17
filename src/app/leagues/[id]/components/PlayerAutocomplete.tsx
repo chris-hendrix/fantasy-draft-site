@@ -19,7 +19,7 @@ const PlayerAutocomplete: React.FC<Props> = ({
   initialId,
   excludeIds = []
 }) => {
-  const { players } = useGetSortedPlayers(draftId, 'Rank')
+  const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
 
   const options = players?.filter((p) => !excludeIds.includes(p.id)).map((player) => ({
     label: getPlayerData(player, 'PlayerInfo'),

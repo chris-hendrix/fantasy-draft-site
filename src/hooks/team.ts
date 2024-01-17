@@ -3,7 +3,6 @@ import { Prisma } from '@prisma/client'
 import { TeamArgs } from '@/types'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useSessionUser } from './user'
-import { useDraftData } from './draft'
 
 export const {
   useGetObject: useGetTeam,
@@ -16,6 +15,8 @@ export const {
 } = getCrudHooks<TeamArgs & {
   inviteEmail?: string
 }, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput & {
+  oldInviteEmail?: string,
+  newInviteEmail?: string,
   acceptEmail?: string,
   declineEmail?: string
 }>(teamApi)
@@ -45,12 +46,6 @@ export const useUserTeam = (leagueId: string, skip: boolean = false) => {
   )
   const team = teams?.[0]
   return { team, isLoading, isSuccess, teamId: team?.id }
-}
-
-export const useUserDraftTeam = (draftId: string) => {
-  const { leagueId } = useDraftData(draftId)
-  const result = useUserTeam(leagueId, !leagueId)
-  return result
 }
 
 export const useLeagueTeams = (leagueId: string) => {

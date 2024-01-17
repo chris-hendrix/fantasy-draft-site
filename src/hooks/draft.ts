@@ -2,7 +2,6 @@ import { draftApi } from '@/store/draft'
 import { DraftArgs, KeeperArgs, PlayerData } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
-import { useUserLeagues } from './league'
 import { useSessionUser } from './user'
 
 export const {
@@ -20,12 +19,6 @@ export const {
   updatePlayerData?: PlayerData[],
   startDraft?: boolean;
 }>(draftApi)
-
-export const useUserDraft = (draftId: string) => {
-  const { data: draft, isLoading: isDraftLoading } = useGetDraft({ id: draftId })
-  const { isCommissioner, isLoading: isLeagueLoading } = useUserLeagues(draft?.leagueId || null)
-  return { draft, isCommissioner, isLoading: isDraftLoading || isLeagueLoading }
-}
 
 export const useDraftData = (draftId: string, skip: boolean = false) => {
   const { user } = useSessionUser()

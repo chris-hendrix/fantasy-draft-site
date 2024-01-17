@@ -31,7 +31,7 @@ const PlayersTable: React.FC<Props> = ({
   draftingPick
 }) => {
   const { teamsCount, sessionTeam, canEditDraft, disableUserDraft } = useDraftData(draftId)
-  const { players } = useGetSortedPlayers(draftId, 'Rank')
+  const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()

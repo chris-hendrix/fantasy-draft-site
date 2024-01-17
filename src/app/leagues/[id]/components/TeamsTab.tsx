@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { League } from '@prisma/client'
 import { useGetTeams, useDeleteTeam, useUserTeam } from '@/hooks/team'
-import { useUserLeagues } from '@/hooks/league'
+import { useLeagueData } from '@/hooks/league'
 import TeamModal from '@/components/TeamModal'
 import ConfirmModal from '@/components/ConfirmModal'
 import Table, { TableColumn } from '@/components/Table'
@@ -24,7 +24,7 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
   }, { skip: !league?.id })
   const { team: userTeam } = useUserTeam(league.id as string)
   const { deleteObject: deleteTeam } = useDeleteTeam()
-  const { isCommissioner } = useUserLeagues(league.id)
+  const { isCommissioner } = useLeagueData()
   const [modalOpen, setModalOpen] = useState(false)
   const [teamToDelete, setTeamToDelete] = useState<TeamArgs | null>(null)
   const [teamToEdit, setTeamToEdit] = useState<TeamArgs | null>(null)
@@ -48,7 +48,7 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
             key={u.id}
             className="badge cursor-pointer"
           >
-            ✅ <Link href={`/users/${u.id}`}>{u.name || u.email}</Link>
+            ✅&nbsp;<Link href={`/users/${u.id}`}>{u.name || u.email}</Link>
           </div>)}
           {inviteEmails.map((e) => <div key={e} className="badge">⚠️ {e}</div>)}
         </>

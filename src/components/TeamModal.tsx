@@ -13,14 +13,17 @@ interface FormProps {
   invite?: boolean
 }
 
-const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null, invite = false }) => {
+const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null }) => {
   const { user } = useSessionUser()
   const { addObject: addTeam, isLoading: isAdding } = useAddTeam()
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
+  const teamUser = team?.teamUsers?.[0] // first one for now
+  const inviteEmail = teamUser?.inviteEmail
+  const teamUserId = teamUser?.userId
 
   const form = useForm({
     mode: 'onChange',
-    defaultValues: { name: team?.name || '' },
+    defaultValues: { name: team?.name || '', email: inviteEmail },
   })
   const isLoading = isAdding || isUpdating
 
@@ -28,7 +31,12 @@ const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null, invite =
     const { name, email } = data
 
     const res = team
-      ? await updateTeam({ id: team.id, name: name as string })
+      ? await updateTeam({
+        id: team.id,
+        name: String(name),
+        oldInviteEmail: String(inviteEmail),
+        newInviteEmail: String(email)
+      })
       : await addTeam({
         name: name as string,
         leagueId: league.id,
@@ -51,9 +59,10 @@ const TeamModal: React.FC<FormProps> = ({ league, onClose, team = null, invite =
       >
         <TextInput
           name="name" form={form} disabled={isLoading}
-          required validate={(value: string) => value.length > 4 || 'Too short'}
+          required
+          validate={(value: string) => value.length > 1 || 'Too short'}
         />
-        {invite && <TextInput name="email" form={form} disabled={isLoading} labelOverride="Invite email" />}
+        {!teamUserId && <TextInput name="email" form={form} disabled={isLoading} labelOverride="Invite email" />}
       </Form>
     </Modal>
   )
