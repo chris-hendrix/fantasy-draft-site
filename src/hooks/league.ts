@@ -10,7 +10,8 @@ export const {
   useGetObjects: useGetLeagues,
   useAddObject: useAddLeague,
   useUpdateObject: useUpdateLeague,
-  useDeleteObject: useDeleteLeague
+  useDeleteObject: useDeleteLeague,
+  useInvalidateObjects: useInvalidateLeagues
 } = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs, Prisma.LeagueUpdateInput>(leagueApi)
 
 export const useUserLeagues = (leagueId: string | null = null) => {

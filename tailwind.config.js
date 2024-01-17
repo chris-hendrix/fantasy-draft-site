@@ -6,6 +6,16 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
-  daisyui: { themes: ['night'] },
+  daisyui: {
+    themes: [
+      {
+        night: {
+          ...require('daisyui/src/theming/themes')['night'],
+          accent: '#ea6947',
+          'accent-content': '#130402'
+        },
+      },
+    ],
+  },
   safelist: [{ pattern: /alert-+/ }] // allows dynamic strings for alert classes
 }

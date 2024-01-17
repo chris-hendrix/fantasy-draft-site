@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { AlertType } from '@/store/app'
 
 type Props = {
-  message?: string,
+  message?: string | ReactNode,
   error?: any,
   type?: AlertType
   duration?: number

@@ -1,4 +1,5 @@
-import { useInviteTeams, useUpdateTeam, useInvalidateTeam } from '@/hooks/team'
+import { useInviteTeams, useUpdateTeam, useInvalidateTeams } from '@/hooks/team'
+import { useInvalidateLeagues } from '@/hooks/league'
 import Modal from '@/components/Modal'
 import Table, { TableColumn } from '@/components/Table'
 import { TeamArgs } from '@/types'
@@ -11,8 +12,9 @@ interface FormProps {
 const InviteModal: React.FC<FormProps> = ({ onClose }) => {
   const { user } = useSessionUser()
   const { inviteTeams } = useInviteTeams()
-  const { updateObject: updateTeam } = useUpdateTeam()
-  const { invalidateObject: invalidateTeam } = useInvalidateTeam()
+  const { updateObject: updateTeam, isLoading } = useUpdateTeam()
+  const { invalidateObjects: invalidateTeams } = useInvalidateTeams()
+  const { invalidateObjects: invalidateLeagues } = useInvalidateLeagues()
 
   const handleUpdate = async (team: TeamArgs, decline = false) => {
     if (decline) {
@@ -20,7 +22,8 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
     } else {
       await updateTeam({ id: team.id, acceptEmail: user.email })
     }
-    invalidateTeam(team.id)
+    invalidateTeams()
+    invalidateLeagues()
   }
 
   const columns: TableColumn<TeamArgs>[] = [
@@ -38,15 +41,27 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
     },
     {
       renderedValue: ((team) => <>
-        <button className="btn btn-ghost btn-square btn-sm" onClick={() => handleUpdate(team)} >✅</button>
-        <button className="btn btn-ghost btn-square btn-sm" onClick={() => handleUpdate(team, true)}>❌</button>
+        <button
+          className="btn btn-ghost btn-square btn-sm"
+          onClick={() => handleUpdate(team)}
+          disabled={isLoading}
+        >
+          ✅
+        </button>
+        <button
+          className="btn btn-ghost btn-square btn-sm"
+          onClick={() => handleUpdate(team, true)}
+          disabled={isLoading}
+        >
+          ❌
+        </button>
       </>)
     }
   ]
 
   return (
     <Modal title={'League invites'} onClose={onClose}>
-      {inviteTeams?.length > 0 && <Table columns={columns} data={inviteTeams} />}
+      <Table columns={columns} data={inviteTeams} />
     </Modal>
   )
 }
