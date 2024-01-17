@@ -53,10 +53,27 @@ export const useUserLeagues = (leagueId: string | null = null) => {
   }
 }
 
-export const useLeague = () => {
+export const useLeagueData = (leagueId?: string) => {
   const { id } = useParams()
-  const leagueId = id as string
-  const { data: league, isLoading, isSuccess } = useGetLeague({ id: leagueId })
+  const { user } = useSessionUser()
+  const result = useGetLeague({
+    id: leagueId || String(id),
+    queryParams: {
+      include: {
+        drafts: { orderBy: { year: 'desc' } },
+        commissioners: { include: { user: true } },
+        teams: { include: { teamUsers: true } }
+      }
+    }
+  }, { skip: !id })
 
-  return { leagueId, league, isLoading, isSuccess }
+  const league = result.data
+  const isCommissioner = Boolean(
+    user && league?.commissioners.find((c) => c.userId === user?.id)
+  )
+  const isMember = Boolean(
+    user && league.teams.some((t) => t.teamUsers.find((tu) => tu.userId === user.id))
+  )
+
+  return { league, isCommissioner, isMember, ...result }
 }

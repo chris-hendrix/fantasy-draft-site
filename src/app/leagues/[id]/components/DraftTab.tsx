@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, ChangeEvent } from 'react'
+import { useLeagueData } from '@/hooks/league'
 import { useAddDraft, useGetDrafts } from '@/hooks/draft'
 import Tabs from '@/components/Tabs'
 import Modal from '@/components/Modal'
@@ -13,7 +14,7 @@ interface Props {
 const DraftTab: React.FC<Props> = ({ leagueId }) => {
   const currentYear = new Date().getFullYear()
   const defaultRounds = 22 // TODO add to league model
-
+  const { isCommissioner } = useLeagueData()
   const { data: drafts, refetch } = useGetDrafts({
     where: { leagueId },
     orderBy: { year: 'desc' }
@@ -47,7 +48,11 @@ const DraftTab: React.FC<Props> = ({ leagueId }) => {
 
   return (
     <div className="flex flex-col items-center mt-8">
-      <Tabs tabs={tabs} onAdd={() => setModalOpen(true)} width="full" />
+      <Tabs
+        tabs={tabs}
+        onAdd={!isCommissioner ? undefined : () => setModalOpen(true)}
+        width="full"
+      />
       {modalOpen && (
         <Modal title="Add draft" size="xs" onClose={() => setModalOpen(false)}>
           <div>Year</div>
