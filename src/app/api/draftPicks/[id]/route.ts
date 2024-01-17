@@ -8,9 +8,9 @@ export const PUT = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
     if (!id) throw new ApiError('Pick id required', 400)
-    const pick = await prisma.draftPick.findFirst({ where: { id } })
+    const pick = await prisma.draftPick.findFirst({ where: { id }, include: { draft: true } })
     if (!pick) throw new ApiError('Pick not found', 400)
-    await checkTeamEdit(pick.teamId)
+    await checkTeamEdit(pick.teamId, pick.draft.disableUserDraft)
     const { startClock, ...data }: any = req.consumedBody
     const updatedPick = await prisma.draftPick.update({ where: { id }, data })
 

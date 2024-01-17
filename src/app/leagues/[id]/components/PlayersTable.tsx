@@ -30,7 +30,7 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
   draftingPick
 }) => {
-  const { teamsCount, sessionTeam, canEditDraft } = useDraftData(draftId)
+  const { teamsCount, sessionTeam, canEditDraft, disableUserDraft } = useDraftData(draftId)
   const { players } = useGetSortedPlayers(draftId, 'Rank')
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
@@ -122,7 +122,7 @@ const PlayersTable: React.FC<Props> = ({
     { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
     {
       header: '',
-      hidden: !canEditDraft,
+      hidden: !canEditDraft || disableUserDraft,
       renderedValue: (player) => (
         <button
           className="btn btn-xs btn-primary text-xs"

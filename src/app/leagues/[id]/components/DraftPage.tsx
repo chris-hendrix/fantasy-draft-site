@@ -16,7 +16,7 @@ interface Props {
 }
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
-  const { isCommissioner, canEditDraft } = useDraftData(draftId)
+  const { isCommissioner, canEditDraft, disableUserDraft } = useDraftData(draftId)
   const { deleteObject: deleteLeague } = useDeleteDraft()
   const { updateObject: updateDraft } = useUpdateDraft()
   const [draftPicks, setDraftPicks] = useState<DraftPickArgs[]>([])
@@ -52,6 +52,13 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
     window.location.reload()
   }
 
+  const handleToggleUserDraft = async () => {
+    await updateDraft({
+      id: draftId,
+      disableUserDraft: !disableUserDraft
+    })
+  }
+
   const handleSave = async () => {
     const draftPickData = editDraftPicks.map(({ teamId, playerId }, i) => ({
       teamId: teamId as string,
@@ -81,7 +88,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   return (
     <div className="flex flex-col items-start mt-2">
       {isCommissioner &&
-        <div className="flex gap-2 my-2">
+        <div className="flex gap-2 my-2 w-full">
           {!editOrder && <>
             {!canEditDraft && <button
               className="btn btn-sm btn-primary w-32"
@@ -116,6 +123,17 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             <button className="btn btn-sm btn-error w-32" onClick={() => setModalOpen(true)}>
               🗑️ Delete
             </button>
+            <div className="form-control ml-auto">
+              <label className="label cursor-pointer">
+                <span className="label-text mr-2">Enable user draft</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary"
+                  checked={!disableUserDraft}
+                  onChange={handleToggleUserDraft}
+                />
+              </label>
+            </div>
           </>}
           {editOrder && <>
             <button
