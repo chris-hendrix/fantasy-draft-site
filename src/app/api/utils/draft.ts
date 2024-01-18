@@ -20,17 +20,22 @@ export const getAllDraftData = async (draftId: string) => {
 
   const previousDraft = await prisma.draft.findFirst({
     where: { leagueId: draft.leagueId, year: draft.year - 1 },
-    include: { draftTeams: true, draftPicks: { include: { team: true, player: true } } }
+    include: {
+      draftTeams: true,
+      draftPicks: { include: { team: true, player: true } },
+      keepers: { include: { player: true } }
+    }
   })
 
   if (!previousDraft) return draft
 
-  const { draftPicks, draftTeams } = previousDraft
+  const { draftPicks, draftTeams, keepers } = previousDraft
   const teamsCount = draftTeams.length
   const playerData = draft.players.map((player: Player) => {
     const draftPick = draftPicks.find((dp) => dp.player && dp.player.name === player?.name)
+    const keeper = keepers.find((k) => k.player && k.player.name === draftPick?.player?.name)
     const round = draftPick && getRound(draftPick.overall, teamsCount)
-    const previousDraftInfo = draftPick && { round, draftPick }
+    const previousDraftInfo = draftPick && { round, draftPick, keeper }
     return { ...player, previousDraftInfo }
   })
 

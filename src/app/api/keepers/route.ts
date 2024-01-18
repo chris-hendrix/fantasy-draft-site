@@ -19,16 +19,29 @@ export const GET = routeWrapper(
 
       const previousDraft = await prisma.draft.findFirst({
         where: { leagueId: draft.leagueId, year: draft.year - 1 },
-        include: { draftTeams: true, draftPicks: { include: { team: true, player: true } } }
+        include: {
+          draftTeams: true,
+          draftPicks: { include: { team: true, player: true } },
+          keepers: { include: { player: true } }
+        }
       })
 
       if (previousDraft) {
-        const { draftPicks, draftTeams } = previousDraft
+        const { draftPicks, draftTeams, keepers: previousKeepers } = previousDraft
         const teamsCount = draftTeams.length
         keepers = keepers.map((k: any) => {
-          const draftPick = draftPicks.find((dp) => dp.player && dp.player.name === k.player?.name)
-          const round = draftPick && getRound(draftPick.overall, teamsCount)
-          const previousDraftInfo = draftPick && { round, draftPick }
+          const previousDraftPick = draftPicks.find(
+            (dp) => dp.player && dp.player.name === k.player?.name
+          )
+          const previousKeeper = previousKeepers.find(
+            (pk) => pk.player && pk.player.name === k.player?.name
+          )
+          const round = previousDraftPick && getRound(previousDraftPick.overall, teamsCount)
+          const previousDraftInfo = previousDraftPick && {
+            round,
+            draftPick: previousDraftPick,
+            keeper: previousKeeper
+          }
           return { ...k, previousDraftInfo }
         })
       }

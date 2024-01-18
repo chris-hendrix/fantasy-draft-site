@@ -139,9 +139,9 @@ const KeepersTable: React.FC<Props> = ({
       value: ({ playerId }) => {
         const { previousDraftInfo } = players?.find((p) => p.id === playerId) || {}
         if (!previousDraftInfo) return ''
-        const { draftPick: { team }, round } = previousDraftInfo
+        const { draftPick: { team }, round, keeper: { keeps } } = previousDraftInfo
         if (!team || !round) return ''
-        return `Rd ${round} by ${team?.name}`
+        return `Rd ${round} by ${team?.name} (${keeps || 0} kps)`
       }
     },
     {

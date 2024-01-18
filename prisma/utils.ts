@@ -112,7 +112,8 @@ export const generateSeedData = async () => {
           draftId: draft.id,
           teamId,
           playerId: players?.[i]?.id,
-          round: getRound(i + 1, teamsCount)
+          round: getRound(i + 1, teamsCount),
+          keeps: (i % 3) + 1
         }
       })))
   )

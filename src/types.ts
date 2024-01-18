@@ -56,14 +56,14 @@ export interface DraftPickArgs extends DraftPick {
 export interface PlayerArgs extends Player {
   league: LeagueArgs,
   draftPicks: DraftPickArgs[]
-  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
+  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs, keeper: KeeperArgs }
 }
 
 export interface KeeperArgs extends Keeper {
   draft: DraftArgs
   team: TeamArgs
   player: PlayerArgs | null,
-  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs }
+  previousDraftInfo?: { round: Number, draftPick: DraftPickArgs, keeper: KeeperArgs }
 }
 
 export type PlayerData = { name: string, data: any } // for importing/updating players
