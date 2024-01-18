@@ -73,6 +73,8 @@ model League {
   sport         Sport          @default(baseball)
   url           String?
   rules         String?
+  defaultRounds Int?
+  defaultKeeps  Int?
   commissioners Commissioner[]
   teams         Team[]
   drafts        Draft[]
