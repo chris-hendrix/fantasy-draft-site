@@ -10,12 +10,12 @@ export const {
   useGetObjects: useGetLeagues,
   useAddObject: useAddLeague,
   useUpdateObject: useUpdateLeague,
-  useDeleteObject: useDeleteLeague
+  useDeleteObject: useDeleteLeague,
+  useInvalidateObjects: useInvalidateLeagues
 } = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs, Prisma.LeagueUpdateInput>(leagueApi)
 
-export const useUserLeagues = (leagueId: string | null = null) => {
+export const useUserLeagues = () => {
   const { user } = useSessionUser()
-  const { id } = useParams()
   const userId = user?.id
   const { data: commissionerLeagues, isLoading: isCommissionerLeaguesLoading } = useGetLeagues({
     where: { commissioners: { some: { userId } } },
@@ -35,27 +35,35 @@ export const useUserLeagues = (leagueId: string | null = null) => {
   )
   const defaultLeague = leagues?.[0] || null
 
-  const isCommissioner = commissionerLeagues?.find((league) => league.id === (leagueId || id))
-  const league = leagues?.find((lg) => lg?.id === leagueId)
-  const isMember = Boolean(league)
-  const teamCount = league?.teams?.length
-
   return {
     isLoading,
     leagues,
     commissionerLeagues,
-    isCommissioner,
-    isMember,
-    defaultLeague,
-    league,
-    teamCount
+    defaultLeague
   }
 }
 
-export const useLeague = () => {
+export const useLeagueData = (leagueId?: string) => {
   const { id } = useParams()
-  const leagueId = id as string
-  const { data: league, isLoading, isSuccess } = useGetLeague({ id: leagueId })
+  const { user } = useSessionUser()
+  const result = useGetLeague({
+    id: leagueId || String(id),
+    queryParams: {
+      include: {
+        drafts: { orderBy: { year: 'desc' } },
+        commissioners: { include: { user: true } },
+        teams: { include: { teamUsers: true } }
+      }
+    }
+  }, { skip: !id })
 
-  return { leagueId, league, isLoading, isSuccess }
+  const league = result.data
+  const isCommissioner = Boolean(
+    user && league?.commissioners.find((c) => c.userId === user?.id)
+  )
+  const isMember = Boolean(
+    user && league?.teams.some((t) => t.teamUsers.find((tu) => tu.userId === user.id))
+  )
+
+  return { league, isCommissioner, isMember, ...result }
 }

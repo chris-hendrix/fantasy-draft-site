@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useDeleteDraft, useGetDraft, useUpdateDraft } from '@/hooks/draft'
-import { useUserLeagues } from '@/hooks/league'
+import { useState, useEffect } from 'react'
+import { useDeleteDraft, useDraftData, useUpdateDraft } from '@/hooks/draft'
 import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -17,34 +16,51 @@ interface Props {
 }
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
-  const { data: draft, isLoading } = useGetDraft({
-    id: draftId,
-    queryParams: {
-      include: {
-        draftTeams: { include: { team: true }, orderBy: { order: 'asc' } },
-        draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } }
-      }
-    }
-  })
+  const { isCommissioner, canEditDraft, disableUserDraft } = useDraftData(draftId)
   const { deleteObject: deleteLeague } = useDeleteDraft()
   const { updateObject: updateDraft } = useUpdateDraft()
-  const [edit, setEdit] = useState(false)
+  const [draftPicks, setDraftPicks] = useState<DraftPickArgs[]>([])
+  const [editOrder, setEditOrder] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [draftOrderModalOpen, setDraftOrderModalOpen] = useState(false)
   const [confirmKeepersModalOpen, setConfirmKeepersModalOpen] = useState(false)
-  const { isCommissioner } = useUserLeagues(draft?.leagueId)
-  const [draftPicks, setDraftPicks] = useState<Partial<DraftPickArgs>[]>(draft?.draftPicks || [])
+  const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
 
+  const draftingPick = canEditDraft && draftPicks?.filter((p) => p.playerId === null)?.[0]
+
+  useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
+
+  const handleStart = async () => {
+    await updateDraft({
+      id: draftId,
+      draftLockDate: null
+    })
+  }
+
+  const handleLock = async () => {
+    await updateDraft({
+      id: draftId,
+      draftLockDate: new Date()
+    })
+  }
+
   const handleDelete = async () => {
-    const res = await deleteLeague(draftId as string)
+    const res = await deleteLeague(draftId)
     if ('error' in res) return
     window.location.reload()
   }
 
+  const handleToggleUserDraft = async () => {
+    await updateDraft({
+      id: draftId,
+      disableUserDraft: !disableUserDraft
+    })
+  }
+
   const handleSave = async () => {
-    const draftPickData = draftPicks.map(({ teamId, playerId }, i) => ({
+    const draftPickData = editDraftPicks.map(({ teamId, playerId }, i) => ({
       teamId: teamId as string,
       playerId,
       overall: i + 1
@@ -57,7 +73,8 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       }
     })
     if ('error' in res) return
-    setEdit(false)
+    invalidateDraftPicks()
+    setEditOrder(false)
   }
 
   const handleConfirmKeepers = async () => {
@@ -69,42 +86,65 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   }
 
   return (
-    <div className="flex flex-col items-start mt-8">
+    <div className="flex flex-col items-start mt-2">
       {isCommissioner &&
-        <div className="flex mb-2">
-          {!edit && <>
-            <button
-              className="btn btn-sm mr-2 w-32"
-              onClick={() => setEdit(true)}
+        <div className="flex gap-2 my-2 w-full">
+          {!editOrder && <>
+            {!canEditDraft && <button
+              className="btn btn-sm btn-primary w-32"
+              onClick={handleStart}
             >
-              📝 Edit
-            </button>
+              🚀 Start
+            </button>}
+            {canEditDraft && <button
+              className="btn btn-sm btn-primary w-32"
+              onClick={handleLock}
+            >
+              🔒 Lock
+            </button>}
             <button
-              className="btn btn-sm mr-2 w-32"
+              className="btn btn-sm w-32"
               onClick={() => setDraftOrderModalOpen(true)}
             >
               🔄 Generate
             </button>
             <button
-              className="btn btn-sm mr-2 w-32"
+              className="btn btn-sm w-32"
               onClick={() => setConfirmKeepersModalOpen(true)}
             >
               📥 Keepers
             </button>
+            <button
+              className="btn btn-sm w-32"
+              onClick={() => setEditOrder(true)}
+            >
+              📝 Edit
+            </button>
             <button className="btn btn-sm btn-error w-32" onClick={() => setModalOpen(true)}>
               🗑️ Delete
             </button>
+            <div className="form-control ml-auto">
+              <label className="label cursor-pointer">
+                <span className="label-text mr-2">Enable user draft</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary"
+                  checked={!disableUserDraft}
+                  onChange={handleToggleUserDraft}
+                />
+              </label>
+            </div>
           </>}
-          {edit && <>
+          {editOrder && <>
             <button
-              className="btn btn-sm mr-2 w-32"
+              className="btn btn-sm w-32"
               onClick={handleSave}
             >
               💾 Save
             </button>
             <button
-              className="btn btn-sm mr-2 w-32"
-              onClick={() => setEdit(false)}
+              className="btn btn-sm w-32"
+              onClick={() => setEditOrder(false)}
             >
               ❌ Cancel
             </button>
@@ -112,17 +152,20 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
 
         </div>
       }
-      {draft && (
-        <div className="flex flex-row h-full w-full">
-          <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
-            <DraftPicksTable draft={draft} edit={edit} onOrderChange={setDraftPicks} />
-          </div>
-          <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
-            <PlayersTable draftId={draft.id} />
-          </div>
+      <div className="flex flex-row h-full w-full">
+        <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
+          <DraftPicksTable
+            draftId={draftId}
+            editOrder={editOrder}
+            onOrderChange={setEditDraftPicks}
+            onDraftPicksChanged={setDraftPicks}
+          />
         </div>
-      )}
-      {!isLoading && !draft?.draftPicks?.length &&
+        <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
+          <PlayersTable draftId={draftId} draftingPick={draftingPick || undefined} />
+        </div>
+      </div>
+      {!draftPicks?.length &&
         <div className="text-sm w-full display-flex text-center p-4">
           <a onClick={() => setDraftOrderModalOpen(true)} className="link">Generate</a>
           &nbsp;the draft picks for this draft
@@ -136,7 +179,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           </div>
         </Modal>}
       {draftOrderModalOpen && <DraftOrderModal
-        draft={draft}
+        draftId={draftId}
         onClose={() => setDraftOrderModalOpen(false)}
       />}
       {confirmKeepersModalOpen && <ConfirmModal

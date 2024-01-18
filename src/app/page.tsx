@@ -6,13 +6,16 @@ const Home = () => (
   <main className="">
     <div className="flex flex-col items-center mt-16">
       <h1 className="text-5xl font-bold">Hello!</h1>
-      <p className="mt-4">This is a Next.js template with user authentication using next-auth.</p>
+      <div className="max-w-xl mt-4 text-center">
+        Welcome to the best fantasy draft site. Enjoy this AI generated logo of a baseball
+        sitting in an office chair!
+      </div>
       <div className="flex items-center justify-center mt-12">
         <Image
-          src="/next.svg"
+          src="/drafter.png"
           alt="Next.js Logo"
-          width={180}
-          height={37}
+          width={500}
+          height={500}
           priority
         />
       </div>

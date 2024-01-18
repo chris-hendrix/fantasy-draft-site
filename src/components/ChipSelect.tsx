@@ -168,7 +168,7 @@ const ChipSelect: React.FC<Props> = ({
       </div>
       <div {...getMenuProps()}>
         {isOpen && <ul
-          className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-white rounded-box w-full"
+          className="absolute menu menu-sm dropdown-content mt-1 z-[1] p-1 shadow bg-neutral rounded-box w-full"
         >
           {filteredItems.map((item, index) => (
             <li key={`${item.value}${index}`} {...getItemProps({ item, index })} >

@@ -22,23 +22,23 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
 
   return (
     <div className="text-xs flex gap-3">
-      <div className="card flex flex-col items-center bg-base-200 p-4 flex-grow">
+      <div className="card flex flex-col items-center bg-base-300 p-4 flex-grow">
         <h2 className="font-bold mb-2">Commissioner Note</h2>
         <div className="w-full whitespace-pre-line">
           <ReactMarkdown>{keeperEntryNote}</ReactMarkdown>
         </div>
       </div>
-      <div className="card flex flex-col items-center bg-base-200 p-4">
+      <div className="card flex flex-col items-center bg-base-300 p-4">
         <h2 className="font-bold mb-2">{`${year} Keepers`}</h2>
         <div>
           {teamKeepers.map((k) => (
             <div key={k.id}>
-              {`Rd ${k.round} - ${getPlayerName(k.player) || ''}`}
+              {`Rd ${k.round} - ${getPlayerName(k.player) || ''} - ${k.keeps} kps`}
             </div>
           ))}
         </div>
       </div>
-      <div className="card flex flex-col items-center bg-base-200 p-4">
+      <div className="card flex flex-col items-center bg-base-300 p-4">
         <h2 className="font-bold mb-2">{`${year} Draft`}</h2>
         <div className="text-xs flex gap-2">
           {teamDraftPickCols.map((col, i) => (

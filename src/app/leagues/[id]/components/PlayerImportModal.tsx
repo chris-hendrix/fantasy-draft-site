@@ -1,97 +1,80 @@
-import { ChangeEvent, useState } from 'react'
+import { useState } from 'react'
 import csv from 'csvtojson'
-import { useGetDrafts, useUpdateDraft } from '@/hooks/draft'
+import { useDraftData, useUpdateDraft } from '@/hooks/draft'
 import { useInvalidatePlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
+import { PlayerData } from '@/types'
 
 interface Props {
-  leagueId: string
+  draftId: string
   onClose: () => void;
 }
 
-type Player = { name: string, data: any }
-
-const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
-  const { data: drafts } = useGetDrafts({
-    where: { leagueId },
-    orderBy: { year: 'asc' }
-  })
+const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
+  const { year } = useDraftData(draftId)
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
-  const [players, setPlayers] = useState<Player[]>([])
-  const [confirmSave, setConfirmSave] = useState(false)
-  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const [players, setPlayers] = useState<PlayerData[]>([])
+  const [confirmOverwrite, setConfirmOverwrite] = useState(false)
+  const [confirmUpdate, setConfirmUpdate] = useState(false)
   const { updateObject: updateDraft } = useUpdateDraft()
   const [csvString, setCsvString] = useState('')
 
-  const selectedDraftYear = drafts?.find((d) => d.id === selectedDraftId)?.year
-
   const handleSave = async () => {
-    if (!selectedDraftId) return
+    if (!draftId) return
     const res = await updateDraft({
-      id: selectedDraftId,
-      players: {
-        deleteMany: {},
-        createMany: { data: players }
-      }
+      id: draftId,
+      ...(!confirmOverwrite ? {} : {
+        players: {
+          deleteMany: {},
+          createMany: { data: players }
+        }
+      }),
+      ...(!confirmUpdate ? {} : {
+        updatePlayerData: players
+      })
     })
     if ('error' in res) return
     invalidatePlayers()
     onClose()
   }
 
-  const columns: TableColumn<Player>[] = [
+  const columns: TableColumn<PlayerData>[] = [
     { header: 'Name', value: (player) => player.name },
     { header: 'Data', value: (player) => JSON.stringify(player?.data || '') },
   ]
 
   const handleImport = async () => {
-    if (!selectedDraftId) return
+    if (!draftId) return
     const objects = await csv({ checkType: true }).fromString(csvString)
     const imported = objects.map((obj: any) => ({
-      name: String(obj?.name || obj?.Name),
+      name: String(obj?.id || obj?.ID || obj?.Id || obj?.name || obj?.Name),
       data: obj
     }))
     setPlayers(imported)
   }
 
-  if (confirmSave) {
+  if (confirmOverwrite || confirmUpdate) {
     return <ConfirmModal
       onConfirm={handleSave}
-      onClose={() => setConfirmSave(false)}
+      onClose={() => {
+        setConfirmOverwrite(false)
+        setConfirmUpdate(false)
+      }}
     >
-      {`This will delete all existing player data for ${selectedDraftYear}. Continue?`}
+      {`This will ${confirmOverwrite ? 'overwrite' : 'update'} all existing player data for ${year}. Continue?`}
     </ConfirmModal>
   }
 
-  if (!drafts) return null
-
   return (
-    <Modal title="Import players" size="lg" onClose={onClose}>
+    <Modal title={`Import players for ${year}`} size="lg" onClose={onClose}>
       <div className="mb-2">
         {` Paste a csv of players here. The first line must have column names, and 
         a "Name" column must exist.`}
       </div>
-      <div>Year</div>
-      <select
-        className="select select-bordered w-200"
-        value={selectedDraftId || ''}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => (
-          setSelectedDraftId(e.target.value || null)
-        )}
-      >
-        <option disabled value="">
-          Select year
-        </option>
-        {drafts.map((d) => (
-          <option key={d.id} value={d.id}>
-            {d.year}
-          </option>
-        ))}
-      </select>
       <textarea
-        className="textarea textarea-bordered w-full textarea-sm mt-2 mb-2"
+        className="textarea textarea-bordered w-full textarea-sm mt-2 mb-2 min-h-[300px]"
         onChange={(e) => setCsvString(e.target.value)}
         placeholder="Paste csv values here"
       />
@@ -104,11 +87,18 @@ const PlayerImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
           Import
         </button>
         <button
-          onClick={() => setConfirmSave(true)}
+          onClick={() => setConfirmOverwrite(true)}
           className="btn btn-primary w-32 mr-2"
           disabled={!players?.length}
         >
-          Save
+          Overwrite
+        </button>
+        <button
+          onClick={() => setConfirmUpdate(true)}
+          className="btn btn-primary w-32 mr-2"
+          disabled={!players?.length}
+        >
+          Update
         </button>
         <button onClick={onClose} className="btn w-32">
           Cancel

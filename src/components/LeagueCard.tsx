@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { LeagueArgs } from '@/types'
 import { formatDate } from '@/utils/date'
-import { useUserLeagues } from '@/hooks/league'
+import { useLeagueData } from '@/hooks/league'
 import LeagueModal from '@/components/LeagueModal'
 import Card from '@/components/Card'
 
@@ -11,7 +11,7 @@ interface LeagueCardProps {
 
 const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
   const [modalOpen, setModalOpen] = useState(false)
-  const { isCommissioner } = useUserLeagues(league.id)
+  const { isCommissioner } = useLeagueData()
   const teamCount = league.teams?.length
 
   const commissionerNames = league?.commissioners?.map((commissioner) => commissioner.user.email).join(', ') || ''

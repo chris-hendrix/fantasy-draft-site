@@ -15,7 +15,7 @@ interface Props {
 
 const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const defaultKeeperCount = 5 // TODO add to league model
-  const { updateObject: updateDraft } = useUpdateDraft()
+  const { updateObject: updateDraft } = useUpdateDraft({ errorMessage: 'Invalid keepers' })
   const { invalidateObjects: invalidateKeepers } = useInvalidateKeepers()
   const [note, setNote] = useState('')
   const [generateModalOpen, setGenerateModalOpen] = useState(false)
@@ -51,9 +51,10 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
 
   const handleSaveTeamKeepers = async () => {
     if (!draftId) return
+
     const res = await updateDraft({
       id: draftId,
-      teamKeepers
+      teamKeepers: teamKeepers.filter((k) => k.teamId === sessionTeam.id)
     })
     if ('error' in res) return
     invalidateKeepers()
@@ -146,6 +147,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
               teamId={sessionTeam.id}
               edit={teamEdit && canEditKeepers}
               onKeepersChange={setTeamKeepers}
+              showPlayerData
               notes={<>
                 <div className="divider" />
                 <KeeperInfo draftId={draftId} />

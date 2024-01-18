@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useParams } from 'next/navigation'
 import { useSessionUser } from '@/hooks/user'
 import { useUserLeagues } from '@/hooks/league'
@@ -78,7 +79,7 @@ const LeagueDropdown: React.FC = () => {
       <Dropdown
         label={
           <div className="btn btn-ghost text-primary-content">
-            {selectedLeague ? selectedLeague.name : 'My leagues'} 🔽
+            {selectedLeague ? selectedLeague.name : 'My Leagues'} 🔽
           </div>
         }
       >
@@ -99,24 +100,60 @@ const LeagueDropdown: React.FC = () => {
       {leagueModalOpen && <LeagueModal onClose={() => setLeagueModalOpen(false)} />}
       {inviteModalOpen && <InviteModal onClose={() => setInviteModalOpen(false)} />}
     </>
-
   )
 }
 
 const Navbar: React.FC = () => {
   const { user } = useSessionUser()
+  const { inviteTeams } = useInviteTeams()
+  const { leagues } = useUserLeagues()
+  const pathname = usePathname()
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const invitesCount = inviteTeams?.length
+  const defaultLeague = leagues?.[0]
+  const isHome = pathname === '/'
+
   return (
-    <div className="navbar bg-primary">
-      <div className="navbar-start">
-        {user && <LeagueDropdown />}
+    <>
+      <div className="navbar bg-primary">
+        <div className="navbar-start">
+          {user && <LeagueDropdown />}
+        </div>
+        <div className="navbar-center">
+          <Link href="/" className="btn btn-ghost text-xl text-primary-content">
+            <div className="border-white border-2 shadow-lg">
+              <Image
+                src="/drafter-banner.svg"
+                alt="Drafter Logo"
+                width={180}
+                height={75}
+                priority
+              />
+            </div>
+          </Link>
+        </div>
+        <div className="navbar-end">
+          <UserDropdown />
+        </div>
       </div>
-      <div className="navbar-center">
-        <Link href="/" className="btn btn-ghost text-xl text-primary-content">⚾ Drafter 🏈</Link>
-      </div>
-      <div className="navbar-end">
-        <UserDropdown />
-      </div>
-    </div>
+      {invitesCount > 0 && isHome && (
+        <div className="bg-accent p-2 text-center text-accent-content shadow-md">
+          {`You have ${invitesCount} league invite(s) `}
+          <a className="link" onClick={() => setInviteModalOpen(true)}>
+            View
+          </a>
+        </div>
+      )}
+      {defaultLeague && isHome && (
+        <div className="bg-accent p-2 text-center text-accent-content shadow-md">
+          {'Go to your league '}
+          <Link className="link" href={`/leagues/${defaultLeague.id}`}>
+            {defaultLeague.name}
+          </Link>
+        </div>
+      )}
+      {inviteModalOpen && <InviteModal onClose={() => setInviteModalOpen(false)} />}
+    </>
   )
 }
 

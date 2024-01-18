@@ -3,32 +3,37 @@ import { Prisma } from '@prisma/client'
 import { TeamArgs } from '@/types'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useSessionUser } from './user'
-import { useDraftData } from './draft'
 
 export const {
   useGetObject: useGetTeam,
   useGetObjects: useGetTeams,
   useAddObject: useAddTeam,
   useUpdateObject: useUpdateTeam,
-  useDeleteObject: useDeleteTeam
+  useDeleteObject: useDeleteTeam,
+  useInvalidateObject: useInvalidateTeam,
+  useInvalidateObjects: useInvalidateTeams
 } = getCrudHooks<TeamArgs & {
   inviteEmail?: string
 }, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput & {
+  oldInviteEmail?: string,
+  newInviteEmail?: string,
   acceptEmail?: string,
   declineEmail?: string
 }>(teamApi)
 
 export const useInviteTeams = () => {
   const { user } = useSessionUser()
-  const { data: inviteTeams, isLoading, isSuccess } = useGetTeams(
+  const { data, isLoading, isSuccess, refetch } = useGetTeams(
     {
       where: { teamUsers: { some: { inviteEmail: user?.email, userId: null } } },
-      include: { league: true }
+      include: { league: true, teamUsers: { where: { userId: user?.id } } }
     },
-    { skip: !user?.email }
+    { skip: !user || !user?.email }
   )
 
-  return { inviteTeams, isLoading, isSuccess }
+  const inviteTeams = data?.filter((team) => team.teamUsers.length === 0)
+
+  return { inviteTeams, isLoading, isSuccess, refetch }
 }
 
 export const useUserTeam = (leagueId: string, skip: boolean = false) => {
@@ -41,12 +46,6 @@ export const useUserTeam = (leagueId: string, skip: boolean = false) => {
   )
   const team = teams?.[0]
   return { team, isLoading, isSuccess, teamId: team?.id }
-}
-
-export const useUserDraftTeam = (draftId: string) => {
-  const { leagueId } = useDraftData(draftId)
-  const result = useUserTeam(leagueId, !leagueId)
-  return result
 }
 
 export const useLeagueTeams = (leagueId: string) => {

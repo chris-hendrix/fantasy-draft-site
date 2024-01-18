@@ -7,7 +7,7 @@ interface Props {
 }
 
 const Card: React.FC<Props> = ({ header, buttons, children }) => (
-  <div className="flex items-center text-center md:text-left justify-between bg-base-200 rounded-box p-4 mt-4 w-full relative">
+  <div className="flex items-center text-center md:text-left justify-between bg-base-300 rounded-box p-4 mt-4 w-full relative">
     {buttons && (
       <div className="absolute top-2 right-2 text-gray-500">
         {buttons}

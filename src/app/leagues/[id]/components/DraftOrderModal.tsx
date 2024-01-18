@@ -1,51 +1,60 @@
-import { useState } from 'react'
-import { DraftArgs, DraftTeamArgs } from '@/types'
-import { useUpdateDraft } from '@/hooks/draft'
+import { useState, useEffect } from 'react'
+import { DraftTeamArgs } from '@/types'
+import { useDraftData, useUpdateDraft } from '@/hooks/draft'
+import { useInvalidateDraftPicks } from '@/hooks/draftPick'
+import { useInvalidatePlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
 import MoveButtons from './MoveButtons'
 
 interface Props {
-  draft: Partial<DraftArgs>;
+  draftId: string;
   onClose: () => void;
 }
 
-const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
-  const initialSlots = draft.draftTeams || []
-  const [slots, setSlots] = useState<DraftTeamArgs[]>(initialSlots)
+const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
+  const { draftTeams, rounds } = useDraftData(draftId)
+  const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
+  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
+  const [editDraftTeams, setEditDraftTeams] = useState<DraftTeamArgs[]>([])
   const { updateObject: updateDraft } = useUpdateDraft()
   const [confirmSave, setConfirmSave] = useState(false)
   const [confirmGenerate, setConfirmGenerate] = useState(false)
 
-  const slotData = slots?.map((slot, i) => ({ teamId: String(slot.teamId), order: i }))
+  const draftTeamData = editDraftTeams?.map((slot, i) => ({
+    teamId: String(slot.teamId), order: i
+  }))
+
+  useEffect(() => { setEditDraftTeams(draftTeams) }, [draftTeams])
 
   const handleSave = async () => {
     const res = await updateDraft({
-      id: draft.id,
+      id: draftId,
       draftTeams: {
         deleteMany: {},
-        createMany: { data: slotData }
+        createMany: { data: draftTeamData }
       },
       draftPicks: {
         deleteMany: {}
       }
     })
     if ('error' in res) return
+    invalidateDraftPicks()
+    invalidatePlayers()
     setConfirmSave(false)
   }
 
   const handleGenerate = async () => {
-    const rounds = draft?.rounds || 0
     const pickData = Array.from(
       { length: rounds },
-      () => slotData.map((s) => (s.teamId))
+      () => draftTeamData.map((s) => (s.teamId))
     ).flat().map((teamId, i) => ({ teamId, overall: i + 1 }))
     const res = await updateDraft({
-      id: draft.id,
+      id: draftId,
       draftTeams: {
         deleteMany: {},
-        createMany: { data: slotData }
+        createMany: { data: draftTeamData }
       },
       draftPicks: {
         deleteMany: {},
@@ -53,6 +62,8 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
       }
     })
     if ('error' in res) return
+    invalidateDraftPicks()
+    invalidatePlayers()
     onClose()
   }
 
@@ -63,16 +74,16 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
       renderedValue: (slot) => (
         <>
           <MoveButtons
-            indexToMove={slots.findIndex((s) => s.id === slot.id)}
-            array={slots}
-            setArray={setSlots}
+            indexToMove={editDraftTeams.findIndex((s) => s.id === slot.id)}
+            array={editDraftTeams}
+            setArray={setEditDraftTeams}
           />
           {slot?.team?.name}
         </>)
     },
     {
       header: 'Order',
-      value: (slot) => 1 + slots.findIndex((s) => s.id === slot.id),
+      value: (slot) => 1 + editDraftTeams.findIndex((s) => s.id === slot.id),
     },
   ]
 
@@ -86,7 +97,7 @@ const DraftOrderModal: React.FC<Props> = ({ draft, onClose }) => {
 
   return (
     <Modal title="Edit draft order" onClose={onClose}>
-      <Table columns={columns} data={slots || []} />
+      <Table columns={columns} data={editDraftTeams || []} />
       <div className="flex justify-end mt-2">
         <button onClick={() => setConfirmGenerate(true)} className="btn btn-secondary w-32 mr-2">
           Generate draft

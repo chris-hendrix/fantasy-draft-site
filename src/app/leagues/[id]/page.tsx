@@ -1,6 +1,6 @@
 'use client'
 
-import { useGetLeague, useUserLeagues } from '@/hooks/league'
+import { useLeagueData } from '@/hooks/league'
 import Tabs from '@/components/Tabs'
 import NotFound from '@/app/not-found'
 import LeagueTab from './components/LeagueTab'
@@ -10,21 +10,8 @@ import PlayerTab from './components/PlayerTab'
 import KeeperTab from './components/KeeperTab'
 import CommissionerTab from './components/CommissionerTab'
 
-interface LeaguePageProps {
-  params: { id: string };
-}
-
-const LeaguePage: React.FC<LeaguePageProps> = ({ params }) => {
-  const { data: league, isLoading } = useGetLeague({
-    id: params.id,
-    queryParams: {
-      include: {
-        commissioners: { include: { user: true } },
-        teams: true
-      }
-    }
-  })
-  const { isCommissioner } = useUserLeagues(params.id)
+const LeaguePage: React.FC = () => {
+  const { league, isCommissioner, isLoading } = useLeagueData()
 
   if (!league && !isLoading) return <NotFound />
   if (!league) return <></>

@@ -15,7 +15,7 @@ const DraftYearTabs: React.FC<Props> = ({ leagueId, onSelect }) => {
     orderBy: { year: 'desc' }
   })
 
-  useEffect(() => drafts && onSelect(drafts[0].id), [isSuccess])
+  useEffect(() => drafts && onSelect(drafts?.[0]?.id), [isSuccess])
 
   const tabOptions = drafts?.map((d) => ({ value: d.id, label: String(d.year) }))
 

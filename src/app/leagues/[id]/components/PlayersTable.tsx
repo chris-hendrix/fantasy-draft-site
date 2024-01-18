@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useGetPlayers } from '@/hooks/player'
+import { useGetSortedPlayers, useInvalidatePlayer } from '@/hooks/player'
 import { useDraftData } from '@/hooks/draft'
+import { useSendBroadcast } from '@/hooks/supabase'
+import { useUpdateDraftPick } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
-import { PlayerArgs, TeamArgs } from '@/types'
+import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
 import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
 import ChipSelect from '@/components/ChipSelect'
+import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
 
 const MAX_ROUND_FILTER = 30
@@ -15,22 +18,37 @@ const MAX_ROUND_FILTER = 30
 interface Props {
   draftId: string;
   maxItemsPerPage?: number,
-  hideTeamColumn?: boolean
+  hideTeamColumn?: boolean,
+  draftingPick?: DraftPickArgs
 }
 
 type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
 
-const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTeamColumn }) => {
-  const { data: players } = useGetPlayers(
-    {
-      where: { draftId },
-      include: { draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } } }
-    },
-    { skip: !draftId }
-  )
+const PlayersTable: React.FC<Props> = ({
+  draftId,
+  maxItemsPerPage = 100,
+  hideTeamColumn,
+  draftingPick
+}) => {
+  const { teamsCount, sessionTeam, canEditDraft, disableUserDraft } = useDraftData(draftId)
+  const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
+  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+  const { send } = useSendBroadcast(draftId, 'draft')
+  const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
+  const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
+  const canDraft = draftingPick && sessionTeam && draftingPick.teamId === sessionTeam.id
 
-  const { teamsCount } = useDraftData(draftId)
+  const handleDraft = async () => {
+    if (!draftingPick || !playerToBeDrafted) return
+    const pickId = draftingPick.id
+    const newPlayerId = playerToBeDrafted.id
+    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
+    if ('error' in res) return
+    setPlayerToBeDrafted(null)
+    invalidatePlayer(newPlayerId)
+    await send({ pickId, oldPlayerId: null, newPlayerId })
+  }
 
   const getPlayerRound = (player: PlayerArgs) => {
     const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)
@@ -93,7 +111,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
           onMouseLeave={() => setHoveredPlayerId(null)}
         >
           {hoveredPlayerId === player.id && (
-            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-200 text-xs">
+            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-200 text-xs">
               {getPlayerData(player, 'Notes')}
             </div>
           )}
@@ -101,7 +119,20 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
         </div>
       ),
     },
-    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn }
+    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
+    {
+      header: '',
+      hidden: !canEditDraft || disableUserDraft,
+      renderedValue: (player) => (
+        <button
+          className="btn btn-xs btn-primary text-xs"
+          disabled={player?.draftPicks?.length > 0 || !canDraft}
+          onClick={() => draftingPick && setPlayerToBeDrafted(player)}
+        >
+          Draft
+        </button>
+      )
+    }
   ]
 
   if (!players) return null
@@ -113,7 +144,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
   return (
     <>
       <div className="flex gap-1">
-        <div className="w-24 card bg-base-200 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             label="Rank Round"
             items={[
@@ -132,7 +163,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
             }}
           />
         </div>
-        <div className="w-24 card bg-base-200 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             label="Position"
             items={POSITIONS.map((pos) => ({ value: pos, label: pos }))}
@@ -148,7 +179,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
             }}
           />
         </div>
-        <div className="flex-grow card bg-base-200 p-1">
+        <div className="flex-grow card bg-base-300 p-1">
           <SearchFilter
             label="Player"
             onSearch={(value) => {
@@ -163,7 +194,7 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
             }}
           />
         </div>
-        {!hideTeamColumn && <div className="w-60 card bg-base-200 p-1">
+        {!hideTeamColumn && <div className="w-60 card bg-base-300 p-1">
           <ChipSelect
             label="Team"
             items={getUniqueTeamOptions()}
@@ -184,9 +215,21 @@ const PlayersTable: React.FC<Props> = ({ draftId, maxItemsPerPage = 100, hideTea
         maxItemsPerPage={maxItemsPerPage}
         xs
         rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
-          className: 'bg-neutral-content'
+          className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
         })}
       />
+      {draftingPick && playerToBeDrafted && (
+        <ConfirmModal
+          onConfirm={handleDraft}
+          onClose={() => setPlayerToBeDrafted(null)}
+        >
+          Draft&nbsp;
+          <b>{getPlayerName(playerToBeDrafted)}</b>
+          &nbsp;in round&nbsp;
+          {getRound(draftingPick.overall, teamsCount)}
+          ?
+        </ConfirmModal>
+      )}
     </>
   )
 }

@@ -1,55 +1,59 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DraftArgs, DraftPickArgs } from '@/types'
+import { DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName, getRound } from '@/utils/draft'
-import { useUserLeagues } from '@/hooks/league'
 import { useInvalidatePlayer } from '@/hooks/player'
 import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
 import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
 import ChipSelect from '@/components/ChipSelect'
 import { getUnique } from '@/utils/array'
 import SearchFilter from '@/components/SearchFilter'
+import { useDraftData } from '@/hooks/draft'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
-  draft: DraftArgs;
-  edit?: boolean;
-  onOrderChange: (draftPicks: Partial<DraftPickArgs>[]) => void
+  draftId: string;
+  editOrder?: boolean;
+  onOrderChange: (draftPicks: DraftPickArgs[]) => void
+  onDraftPicksChanged?: (draftPicks: DraftPickArgs[]) => void
 }
 
 type FilterOptions = { [key: string]: (pick: DraftPickArgs) => boolean }
 
-const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }) => {
-  const { isCommissioner } = useUserLeagues(draft.leagueId)
-  const { data: draftPicks, refetch } = useGetDraftPicks(
+const DraftPicksTable: React.FC<Props> = ({
+  draftId,
+  editOrder = false,
+  onOrderChange,
+  onDraftPicksChanged
+}) => {
+  const { isCommissioner, teamsCount, rounds, canEditDraft } = useDraftData(draftId)
+  const { data: draftPicks } = useGetDraftPicks(
     {
-      where: { draftId: draft.id },
+      where: { draftId },
       include: { team: true, player: true },
       orderBy: { overall: 'asc' }
-    },
-    { skip: !draft.id }
+    }
   )
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
-  const [editedDraftPicks, setEditedDraftPicks] = useState<DraftPickArgs[]>([])
+  const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     round: () => true,
     team: () => true,
     playerSearch: () => true
   })
-  const teamsCount = (draft?.draftTeams?.length || 1)
 
-  const { send } = useSendBroadcast(draft.id as string, 'test')
-  const { latestPayload } = useReceiveBroadcast(draft.id as string, 'test')
+  const { send } = useSendBroadcast(draftId, 'draft')
+  const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
 
-  useEffect(() => { setEditedDraftPicks(draftPicks || []) }, [draftPicks])
-  useEffect(() => { onOrderChange(editedDraftPicks) }, [editedDraftPicks])
-  useEffect(() => { refetch() }, [draft?.draftPicks])
+  useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
+  useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
+  useEffect(() => { onDraftPicksChanged && onDraftPicksChanged(draftPicks) }, [draftPicks])
 
   useEffect(() => {
     const { pickId, oldPlayerId } = latestPayload || {}
@@ -67,60 +71,72 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
     await send({ pickId, oldPlayerId, newPlayerId })
   }
 
-  const picks = edit ? editedDraftPicks : draftPicks
+  const picks = editOrder ? editDraftPicks : draftPicks
   const columns: TableColumn<DraftPickArgs>[] = [
     {
       header: '',
-      hidden: !edit,
-      renderedValue: (pick) => <MoveButtons
-        indexToMove={editedDraftPicks.findIndex((p) => p.id === pick.id)}
-        array={editedDraftPicks}
-        setArray={setEditedDraftPicks}
-      />
+      hidden: !editOrder,
+      renderedValue: (pick) => (
+        <MoveButtons
+          indexToMove={editDraftPicks.findIndex((p) => p.id === pick.id)}
+          array={editDraftPicks}
+          setArray={setEditDraftPicks}
+        />)
     },
-    { header: 'Pick', value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount) },
-    { header: 'Team', value: (pick) => pick.team?.name },
+    {
+      header: 'Pick',
+      cellStyle: { maxWidth: '56px' },
+      value: (pick) => formatRoundPick(pick?.overall || 0, teamsCount)
+    },
+    {
+      header: 'Team',
+      value: (pick) => pick.team?.name
+    },
     {
       header: 'Player',
+      hidden: editOrder,
+      cellStyle: { maxWidth: '256px', width: '256px' },
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
-        if (!isCommissioner) return player && <div className="">{getPlayerName(player)}</div>
+        if (!isCommissioner || !canEditDraft) return player && <div className="">{getPlayerName(player)}</div>
         if (editPickId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+            className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
             onClick={() => setEditPickId(id || null)}
           >
             {player ? getPlayerName(player) : ''}
           </div>
         }
-        return draft?.id && <PlayerAutocomplete
-          draftId={draft.id}
-          onSelection={(newPlayerId) => {
-            handleSelection(String(id), String(player?.id), newPlayerId)
-          }}
-          size="xs"
-          initialId={player?.id}
-          excludeIds={draftPicks
-            ?.filter((dp) => dp.playerId && dp.playerId !== player?.id)
-            ?.map((dp) => dp.playerId || '') || []
-          }
-        />
+        return (
+          <PlayerAutocomplete
+            draftId={draftId}
+            onSelection={(newPlayerId) => {
+              handleSelection(String(id), String(player?.id), newPlayerId)
+            }}
+            size="xs"
+            initialId={player?.id}
+            excludeIds={draftPicks
+              ?.filter((dp) => dp.playerId && dp.playerId !== player?.id)
+              ?.map((dp) => dp.playerId || '') || []
+            }
+          />
+        )
       }
     }
   ]
 
   if (!picks) return null
 
-  const filteredPicks = draftPicks.filter((pick) => Object
+  const filteredPicks = (editDraftPicks || []).filter((pick) => Object
     .values(filterOptions)
     .every((filter) => filter(pick)))
 
   return (
     <>
       <div className="flex gap-1">
-        <div className="w-24 card bg-base-200 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
-            items={Array.from({ length: draft?.rounds || 0 })
+            items={Array.from({ length: rounds })
               .map((_, i) => ({ value: i + 1, label: i + 1 }))
             }
             onSelection={({ selectedValues }) => {
@@ -134,7 +150,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
             label="Round"
           />
         </div>
-        <div className="w-60 card bg-base-200 p-1">
+        <div className="w-60 card bg-base-300 p-1">
           <ChipSelect
             items={getUnique<DraftPickArgs>(
               draftPicks,
@@ -151,7 +167,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
             }}
           />
         </div>
-        <div className="flex-grow card bg-base-200 p-1">
+        <div className="flex-grow card bg-base-300 p-1">
           <SearchFilter
             label="Player"
             onSearch={(value) => {
@@ -173,7 +189,7 @@ const DraftPicksTable: React.FC<Props> = ({ draft, edit = false, onOrderChange }
         xs
         maxItemsPerPage={300}
         rowStyle={(pick: DraftPickArgs) => (!pick?.player ? {} : {
-          className: 'bg-neutral-content'
+          className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
         })}
       />
     </>

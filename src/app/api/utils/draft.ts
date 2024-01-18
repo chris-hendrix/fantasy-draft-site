@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { ApiError } from '@/app/api/utils/api'
 import { getRound } from '@/utils/draft'
 import { Player } from '@prisma/client'
+import { PlayerData } from '@/types'
 
 export const getAllDraftData = async (draftId: string) => {
   const draft = await prisma.draft.findUnique({
@@ -19,19 +20,46 @@ export const getAllDraftData = async (draftId: string) => {
 
   const previousDraft = await prisma.draft.findFirst({
     where: { leagueId: draft.leagueId, year: draft.year - 1 },
-    include: { draftTeams: true, draftPicks: { include: { team: true, player: true } } }
+    include: {
+      draftTeams: true,
+      draftPicks: { include: { team: true, player: true } },
+      keepers: { include: { player: true } }
+    }
   })
 
   if (!previousDraft) return draft
 
-  const { draftPicks, draftTeams } = previousDraft
+  const { draftPicks, draftTeams, keepers } = previousDraft
   const teamsCount = draftTeams.length
   const playerData = draft.players.map((player: Player) => {
     const draftPick = draftPicks.find((dp) => dp.player && dp.player.name === player?.name)
+    const keeper = keepers.find((k) => k.player && k.player.name === draftPick?.player?.name)
     const round = draftPick && getRound(draftPick.overall, teamsCount)
-    const previousDraftInfo = draftPick && { round, draftPick }
+    const previousDraftInfo = draftPick && { round, draftPick, keeper }
     return { ...player, previousDraftInfo }
   })
 
   return { ...draft, players: playerData }
+}
+
+export const updateDraftPlayerData = async (draftId: string, playerData: PlayerData[]) => {
+  const results: { [key: string]: number } = {}
+
+  await Promise.all(
+    playerData.map(async (pd) => {
+      const updateResult = await prisma.player.updateMany({
+        where: { draftId, name: pd.name },
+        data: { data: pd.data },
+      })
+      results[pd.name] = updateResult.count
+    })
+  )
+  return results
+}
+
+export const getNextPick = async (draftId: string, overall: number) => {
+  const picks = await prisma.draftPick.findMany({
+    where: { draftId, overall: { gt: overall }, playerId: null }
+  })
+  return picks?.[0] || null
 }

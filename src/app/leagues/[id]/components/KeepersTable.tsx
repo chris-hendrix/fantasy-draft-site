@@ -3,7 +3,7 @@
 import { useEffect, useState, ReactNode } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
-import { getPlayerName } from '@/utils/draft'
+import { getPlayerName, formatRoundPick, getPlayerData } from '@/utils/draft'
 import { useDraftData } from '@/hooks/draft'
 import { useGetKeepers } from '@/hooks/keeper'
 import PlayerAutocomplete from './PlayerAutocomplete'
@@ -13,16 +13,17 @@ interface Props {
   teamId?: string;
   edit?: boolean;
   notes?: string | ReactNode;
-  onKeepersChange: (keepers: KeeperArgs[]) => void
+  onKeepersChange: (keepers: KeeperArgs[]) => void,
+  showPlayerData?: boolean
 }
 
 const KeepersTable: React.FC<Props> = ({
-  draftId, teamId, edit = false, notes, onKeepersChange
+  draftId, teamId, edit = false, notes, onKeepersChange, showPlayerData
 }) => {
-  const { rounds, isCommissioner, players } = useDraftData(draftId)
+  const { rounds, isCommissioner, players, teamsCount } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
     {
-      where: { draftId, ...(teamId ? { teamId } : {}) },
+      where: { draftId },
       include: { team: true, player: true },
       orderBy: [{ team: { name: 'asc' } }, { id: 'asc' }],
       getPreviousPick: true
@@ -32,12 +33,18 @@ const KeepersTable: React.FC<Props> = ({
   const [editKeepers, setEditKeepers] = useState<KeeperArgs[]>([])
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
 
+  const displayKeepers = editKeepers?.filter((k) => !teamId || k.teamId === teamId) || []
+  const selectedPlayerIds = editKeepers
+    ?.filter((k) => k.playerId && k.id !== editKeeperId)
+    .map((k) => k.playerId || '') || []
+
   useEffect(() => { keepers?.length && setEditKeepers(keepers) }, [keepers])
   useEffect(() => { onKeepersChange(editKeepers) }, [editKeepers])
+  useEffect(() => { !edit && setEditKeepers(keepers) }, [edit])
 
   const handleEdit = async (
     keeperId: string,
-    data: { newPlayerId?: string, newRound?: number, newKeeps?: number }
+    data: { newPlayerId?: string | null, newRound?: number | null, newKeeps?: number | null }
   ) => {
     const { newPlayerId, newRound, newKeeps } = data
     const newPlayer = players.find((p) => p.id === newPlayerId)
@@ -61,7 +68,11 @@ const KeepersTable: React.FC<Props> = ({
   }
 
   const columns: TableColumn<KeeperArgs>[] = [
-    { header: 'Team', value: ({ team }) => team?.name },
+    {
+      header: 'Team',
+      cellStyle: { maxWidth: '160px', width: '160px' },
+      value: ({ team }) => team?.name
+    },
     {
       header: 'Player',
       value: ({ player }) => player && getPlayerName(player),
@@ -70,7 +81,7 @@ const KeepersTable: React.FC<Props> = ({
         if (!edit || !(isCommissioner || teamId)) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-200"
+            className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
             onClick={() => setEditKeeperId(id || null)}
           >
             {getPlayerName(player) || ''}
@@ -78,13 +89,10 @@ const KeepersTable: React.FC<Props> = ({
         }
         return draftId && <PlayerAutocomplete
           draftId={draftId}
-          onSelection={(playerId) => { handleEdit(String(id), { newPlayerId: playerId }) }}
+          onSelection={(playerId) => { handleEdit(String(id), { newPlayerId: playerId || null }) }}
           size="xs"
           initialId={player?.id}
-          excludeIds={keepers
-            ?.filter((k) => k.playerId && k.playerId !== player?.id)
-            ?.map((k) => k.playerId || '') || []
-          }
+          excludeIds={selectedPlayerIds}
         />
       },
     },
@@ -131,20 +139,35 @@ const KeepersTable: React.FC<Props> = ({
       value: ({ playerId }) => {
         const { previousDraftInfo } = players?.find((p) => p.id === playerId) || {}
         if (!previousDraftInfo) return ''
-        const { draftPick: { team }, round } = previousDraftInfo
+        const { draftPick: { team }, round, keeper: { keeps } } = previousDraftInfo
         if (!team || !round) return ''
-        return `Rd ${round} by ${team?.name}`
+        return `Rd ${round} by ${team?.name} (${keeps || 0} kps)`
       }
     },
+    {
+      header: 'Rank',
+      hidden: !showPlayerData,
+      value: ({ player }) => player && formatRoundPick(Number(getPlayerData(player, 'Rank')), teamsCount)
+    },
+    {
+      header: 'ADP',
+      hidden: !showPlayerData,
+      value: ({ player }) => player && formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
+    },
+    {
+      header: 'ADP',
+      hidden: !showPlayerData,
+      value: ({ player }) => player && getPlayerData(player, 'Projections')
+    }
   ]
 
-  if (!editKeepers?.length || !rounds) return null
+  if (!displayKeepers?.length || !rounds) return null
 
   return (
     <>
       <Table
         columns={columns}
-        data={editKeepers}
+        data={displayKeepers}
         xs
         maxItemsPerPage={300}
         minHeight="300px"

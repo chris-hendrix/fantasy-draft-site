@@ -23,7 +23,7 @@ const getPlayerData = async (): Promise<Player[]> => {
   const csvString = await readFileIntoString(PLAYER_DATA)
   const objects = await csv({ checkType: true }).fromString(csvString)
   const imported = objects.map((obj: any) => ({
-    name: String(obj?.name || obj?.Name),
+    name: String(obj?.ID || obj?.id || obj.Id || obj?.name || obj?.Name),
     data: obj
   }))
   return imported
@@ -112,7 +112,8 @@ export const generateSeedData = async () => {
           draftId: draft.id,
           teamId,
           playerId: players?.[i]?.id,
-          round: getRound(i + 1, teamsCount)
+          round: getRound(i + 1, teamsCount),
+          keeps: (i % 3) + 1
         }
       })))
   )

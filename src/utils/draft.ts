@@ -29,7 +29,7 @@ export const formatRoundPick = (overall: number, teamsCount: number) => {
   return `${round}:${roundPick}`
 }
 
-export const getPlayerData = (player: PlayerArgs, key: string) => {
+export const getPlayerData = (player: PlayerArgs | null, key: string) => {
   if (!player?.data) return ''
   const data = player?.data as JsonObject
   if (!(key in data)) return ''

@@ -11,7 +11,7 @@ const LOAD_INCREMENT = 5
 
 const UserCard: React.FC<{ user: Partial<User> }> = ({ user }) => (
   <Link href={`/users/${user.id}`}>
-    <div className="flex items-center text-center md:text-left justify-between bg-base-200 rounded-box p-4 mt-4 w-full">
+    <div className="flex items-center text-center md:text-left justify-between bg-base-300 rounded-box p-4 mt-4 w-full">
       <div className="flex items-center">
         <div className="hidden md:block mr-4"><Avatar user={user} size={64} /></div>
         <div>
