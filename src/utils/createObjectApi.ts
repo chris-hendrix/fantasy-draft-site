@@ -20,7 +20,7 @@ export const createObjectApi = <Object extends BaseObject, UpdateInput>(url: str
       getObjects: build.query<Object[], string>({
         query: (searchParams) => `${url}/?${searchParams}`,
         providesTags: (result) => [
-          ...(result || []).map(({ id }) => ({ type: url, id })),
+          ...(result?.map(({ id }) => ({ type: url, id })) || []),
           { type: url, id: 'LIST' },
         ],
       }),
