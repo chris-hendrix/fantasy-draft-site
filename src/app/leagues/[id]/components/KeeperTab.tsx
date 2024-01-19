@@ -45,7 +45,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     if (!draftId) return
     const res = await updateDraft({ id: draftId, keeperCount })
     if ('error' in res) return
-    // invalidateKeepers()
+    invalidateKeepers()
     handleClose()
   }
 
@@ -91,14 +91,6 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       id: draftId,
       keepersLockDate: canEditKeepers ? new Date() : null
     })
-  }
-
-  if (confirmGenerate) {
-    return <ConfirmModal
-      onConfirm={handleGenerate}
-      onClose={() => setConfirmGenerate(false)}>
-      This will delete existing keeper data. Continue?
-    </ConfirmModal>
   }
 
   return (
@@ -194,6 +186,11 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           </button>
         </div>
       </Modal>}
+      {confirmGenerate && <ConfirmModal
+        onConfirm={handleGenerate}
+        onClose={() => setConfirmGenerate(false)}>
+        This will delete existing keeper data. Continue?
+      </ConfirmModal>}
       {noteModalOpen && <Modal title="Edit keeper entry note" onClose={handleClose} size="xs">
         <textarea
           className="textarea textarea-bordered w-full font-mono min-h-[144px] textarea-sm mt-2 mb-2"
