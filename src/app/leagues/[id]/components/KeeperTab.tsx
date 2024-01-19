@@ -45,7 +45,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     if (!draftId) return
     const res = await updateDraft({ id: draftId, keeperCount })
     if ('error' in res) return
-    invalidateKeepers()
+    // invalidateKeepers()
     handleClose()
   }
 
