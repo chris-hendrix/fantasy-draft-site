@@ -93,14 +93,6 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     })
   }
 
-  if (confirmGenerate) {
-    return <ConfirmModal
-      onConfirm={handleGenerate}
-      onClose={() => setConfirmGenerate(false)}>
-      This will delete existing keeper data. Continue?
-    </ConfirmModal>
-  }
-
   return (
     <>
       <div className="flex flex-col items-center mt-8 mb-2">
@@ -194,6 +186,11 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           </button>
         </div>
       </Modal>}
+      {confirmGenerate && <ConfirmModal
+        onConfirm={handleGenerate}
+        onClose={() => setConfirmGenerate(false)}>
+        This will delete existing keeper data. Continue?
+      </ConfirmModal>}
       {noteModalOpen && <Modal title="Edit keeper entry note" onClose={handleClose} size="xs">
         <textarea
           className="textarea textarea-bordered w-full font-mono min-h-[144px] textarea-sm mt-2 mb-2"

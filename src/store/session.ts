@@ -5,7 +5,7 @@ import { BuiltInProviderType } from 'next-auth/providers'
 
 export const sessionApi = createApi({
   reducerPath: 'sessionApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'api/auth' }),
+  baseQuery: fetchBaseQuery({ baseUrl: '/api/auth' }),
   tagTypes: ['Session'],
   endpoints: (build) => ({
     getSession: build.query<Session, void>({

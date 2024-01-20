@@ -18,9 +18,9 @@ export const createObjectApi = <Object extends BaseObject, UpdateInput>(url: str
         providesTags: (_result, _err, params) => [{ type: url, id: params.id }],
       }),
       getObjects: build.query<Object[], string>({
-        query: (searchParams) => `${url}/?${searchParams}`,
+        query: (searchParams) => `${url}?${searchParams}`,
         providesTags: (result) => [
-          ...(result || []).map(({ id }) => ({ type: url, id })),
+          ...(result?.map(({ id }) => ({ type: url, id })) || []),
           { type: url, id: 'LIST' },
         ],
       }),
