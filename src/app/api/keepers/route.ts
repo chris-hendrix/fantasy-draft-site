@@ -49,3 +49,7 @@ export const GET = routeWrapper(
     return NextResponse.json(keepers)
   }
 )
+
+export const POST = routeWrapper(async (_req: NextRequest) => {
+  throw new ApiError('Route not found', 404)
+})
