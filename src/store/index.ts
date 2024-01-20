@@ -34,7 +34,7 @@ export const makeStore = () => configureStore({
     draftPickApi.middleware,
     keeperApi.middleware
   ]),
-  devTools: true // process.env.NODE_ENV !== 'production'
+  devTools: process.env.NODE_ENV !== 'production'
 })
 
 export const store = makeStore()
