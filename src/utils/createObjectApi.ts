@@ -19,13 +19,10 @@ export const createObjectApi = <Object extends BaseObject, UpdateInput>(url: str
       }),
       getObjects: build.query<Object[], string>({
         query: (searchParams) => `${url}?${searchParams}`,
-        providesTags: (result, error, args) => {
-          console.log({ result, error, args })
-          return [
-            ...(result?.map(({ id }) => ({ type: url, id })) || []),
-            { type: url, id: 'LIST' },
-          ]
-        },
+        providesTags: (result) => [
+          ...(result?.map(({ id }) => ({ type: url, id })) || []),
+          { type: url, id: 'LIST' },
+        ],
       }),
       addObject: build.mutation<Object, Partial<Object>>({
         query: (body) => ({
