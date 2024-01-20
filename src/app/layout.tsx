@@ -5,6 +5,8 @@ import Navbar from './navbar'
 import Footer from './footer'
 import AlertBox from './alert-box'
 
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ subsets: ['latin'] })
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
