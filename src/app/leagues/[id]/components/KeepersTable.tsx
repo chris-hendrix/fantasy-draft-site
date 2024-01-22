@@ -156,7 +156,7 @@ const KeepersTable: React.FC<Props> = ({
       value: ({ player }) => player && formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
     },
     {
-      header: 'ADP',
+      header: 'Projections',
       hidden: !showPlayerData,
       value: ({ player }) => player && getPlayerData(player, 'Projections')
     }
