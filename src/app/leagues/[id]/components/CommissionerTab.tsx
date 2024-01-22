@@ -1,36 +1,45 @@
 'use client'
 
 import { useState } from 'react'
-import { League } from '@prisma/client'
 import { useDeleteLeague } from '@/hooks/league'
 import Modal from '@/components/Modal'
+import DraftImportModal from './DraftImportModal'
 
 interface Props {
-  league: Partial<League>;
+  leagueId: string;
 }
 
-const CommissionerTab: React.FC<Props> = ({ league }) => {
+const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
   const { deleteObject: deleteLeague } = useDeleteLeague()
-  const [modalOpen, setModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
+
   const handleDelete = async () => {
-    const res = await deleteLeague(league.id as string)
+    const res = await deleteLeague(leagueId)
     if ('error' in res) return
     window.location.reload()
   }
 
   return (
-    <div className="flex flex-col items-center mt-8">
-      <button className="btn btn-error" onClick={() => setModalOpen(true)}>
+    <div className="flex flex-col items-center mt-8 gap-2">
+      <button className="btn btn-primary" onClick={() => setImportModalOpen(true)}>
+        Import drafts
+      </button>
+      <button className="btn btn-error" onClick={() => setDeleteModalOpen(true)}>
         Delete league
       </button>
-      {modalOpen &&
-        <Modal title="Are you sure?" size="xs" onClose={() => setModalOpen(false)}>
+      {deleteModalOpen && (
+        <Modal title="Are you sure?" size="xs" onClose={() => setDeleteModalOpen(false)}>
           <div>This cannot be undone.</div>
           <div className="flex justify-end mt-2">
             <button onClick={handleDelete} className="btn btn-error w-32 mr-2">Yes</button>
-            <button onClick={() => setModalOpen(false)} className="btn w-32">Cancel</button>
+            <button onClick={() => setDeleteModalOpen(false)} className="btn w-32">Cancel</button>
           </div>
-        </Modal>}
+        </Modal>
+      )}
+      {importModalOpen && (
+        <DraftImportModal leagueId={leagueId} onClose={() => setImportModalOpen(false)} />
+      )}
     </div>
   )
 }
