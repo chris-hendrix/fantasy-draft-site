@@ -1,17 +1,11 @@
 import { useState } from 'react'
 import csv from 'csvtojson'
 import Table, { TableColumn } from '@/components/Table'
+import { useUpdateLeague, useInvalidateLeague } from '@/hooks/league'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
 
-type ImportData = {
-  draftYear: number,
-  teamName: string,
-  playerName: string,
-  overall: number,
-  playerData: any,
-  keeps: number | null
-}
+import { ImportedDraftRecord } from '@/types'
 
 interface Props {
   leagueId: string
@@ -19,16 +13,21 @@ interface Props {
 }
 
 const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
-  const [data, setData] = useState<ImportData[]>([])
+  const [data, setData] = useState<ImportedDraftRecord[]>([])
+  const { updateObject: updateLeague } = useUpdateLeague()
+  const { invalidateObject: invalidateLeague } = useInvalidateLeague()
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
-  const [confirmUpdate, setConfirmUpdate] = useState(false)
+  const [confirmImport, setConfirmImport] = useState(false)
   const [csvString, setCsvString] = useState('')
 
-  const handleSave = async () => {
-    console.log('TODO')
+  const handleImport = async () => {
+    const res = await updateLeague({ id: leagueId, importedDraftRecords: data })
+    if ('error' in res) return
+    invalidateLeague(leagueId)
+    onClose()
   }
 
-  const columns: TableColumn<ImportData>[] = [
+  const columns: TableColumn<ImportedDraftRecord>[] = [
     { header: 'Year', value: ({ draftYear }) => draftYear },
     { header: 'Team', value: ({ teamName }) => teamName },
     { header: 'Player', value: ({ playerName }) => playerName },
@@ -37,21 +36,22 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     { header: 'Keeps', value: ({ keeps }) => keeps },
   ]
 
-  const handleImport = async () => {
+  const handleReadCsv = async () => {
     if (!leagueId) return
     const objects = await csv({ checkType: true }).fromString(csvString)
     const imported = objects.map((obj: any) => ({
-      ...obj
+      ...obj,
+      keeps: obj.keeps !== '' ? Number(obj.keeps) : null
     }))
     setData(imported)
   }
 
-  if (confirmOverwrite || confirmUpdate) {
+  if (confirmOverwrite || confirmImport) {
     return <ConfirmModal
-      onConfirm={handleSave}
+      onConfirm={handleImport}
       onClose={() => {
         setConfirmOverwrite(false)
-        setConfirmUpdate(false)
+        setConfirmImport(false)
       }}
     >
       {'TODO. Continue?'}
@@ -71,7 +71,7 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       />
       <div className="flex justify-end mb-2">
         <button
-          onClick={handleImport}
+          onClick={handleReadCsv}
           className="btn btn-secondary w-32 mr-2"
           disabled={!csvString.length}
         >

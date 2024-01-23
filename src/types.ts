@@ -67,3 +67,12 @@ export interface KeeperArgs extends Keeper {
 }
 
 export type PlayerData = { name: string, data: any } // for importing/updating players
+
+export type ImportedDraftRecord = {
+  draftYear: number,
+  teamName: string,
+  playerName: string,
+  overall: number,
+  playerData: any,
+  keeps: number | null
+}

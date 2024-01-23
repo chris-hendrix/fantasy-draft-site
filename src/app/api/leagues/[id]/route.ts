@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkLeagueCommissioner } from '@/app/api/utils/permissions'
+import { importDraftData } from '../../utils/draft'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
@@ -22,10 +23,13 @@ export const PUT = routeWrapper(
 
     await checkLeagueCommissioner(id) // must be commissioner of league
 
-    const updatedLeague = await prisma.league.update({
-      where: { id },
-      data: req.consumedBody,
-    })
+    const { importedDraftRecords, ...data } = req.consumedBody
+
+    if (importedDraftRecords?.length > 0) {
+      const drafts = await importDraftData(id, importedDraftRecords as any)
+      return NextResponse.json(drafts)
+    }
+    const updatedLeague = await prisma.league.update({ where: { id }, data })
     return NextResponse.json(updatedLeague)
   }
 )
