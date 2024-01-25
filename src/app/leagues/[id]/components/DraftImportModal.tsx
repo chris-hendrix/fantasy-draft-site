@@ -2,8 +2,10 @@ import { useState } from 'react'
 import csv from 'csvtojson'
 import Table, { TableColumn } from '@/components/Table'
 import { useUpdateLeague, useInvalidateLeague } from '@/hooks/league'
+import { useInvalidateDrafts } from '@/hooks/draft'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
+import { getUnique } from '@/utils/array'
 
 import { ImportedDraftRecord } from '@/types'
 
@@ -16,6 +18,7 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
   const [data, setData] = useState<ImportedDraftRecord[]>([])
   const { updateObject: updateLeague } = useUpdateLeague()
   const { invalidateObject: invalidateLeague } = useInvalidateLeague()
+  const { invalidateObjects: invalidateDrafts } = useInvalidateDrafts()
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [confirmImport, setConfirmImport] = useState(false)
   const [csvString, setCsvString] = useState('')
@@ -24,6 +27,7 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     const res = await updateLeague({ id: leagueId, importedDraftRecords: data })
     if ('error' in res) return
     invalidateLeague(leagueId)
+    invalidateDrafts()
     onClose()
   }
 
@@ -47,6 +51,7 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
   }
 
   if (confirmOverwrite || confirmImport) {
+    const years = getUnique<ImportedDraftRecord>(data, (r) => r.draftYear).map((r) => r.draftYear)
     return <ConfirmModal
       onConfirm={handleImport}
       onClose={() => {
@@ -54,7 +59,7 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
         setConfirmImport(false)
       }}
     >
-      {'TODO. Continue?'}
+      {`This will create or overwrite the following drafts: ${years.join(', ')}. Continue?`}
     </ConfirmModal>
   }
 
