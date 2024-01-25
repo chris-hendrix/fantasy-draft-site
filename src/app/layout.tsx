@@ -1,5 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
+
 import Providers from './providers'
 import Navbar from './navbar'
 import Footer from './footer'
@@ -22,6 +24,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
           <Footer />
         </div>
       </Providers>
+      <Analytics />
     </body>
   </html>
 )
