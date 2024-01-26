@@ -37,8 +37,8 @@ const CredentialsModal: React.FC<Props> = ({ onClose, signUp = false }) => {
 
   const onSubmit = async (data: { [x: string]: string }) => {
     const { email, password } = data
-    const signUpError = signUp && 'error' in await addUser({ email, password })
-    if (!signUp || !signUpError) await signIn('credentials', { email, password })
+    const signUpError = signUp && 'error' in await addUser({ email: email.toLocaleLowerCase(), password })
+    if (!signUp || !signUpError) await signIn('credentials', { email: email.toLocaleLowerCase(), password })
   }
 
   return (
