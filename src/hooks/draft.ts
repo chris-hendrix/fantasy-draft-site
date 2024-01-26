@@ -9,7 +9,8 @@ export const {
   useGetObjects: useGetDrafts,
   useAddObject: useAddDraft,
   useUpdateObject: useUpdateDraft,
-  useDeleteObject: useDeleteDraft
+  useDeleteObject: useDeleteDraft,
+  useInvalidateObjects: useInvalidateDrafts
 } = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs & {
   getAllData?: boolean
 }, Prisma.DraftUpdateInput & {

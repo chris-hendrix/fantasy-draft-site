@@ -90,7 +90,10 @@ const PlayersTable: React.FC<Props> = ({
     {
       header: 'Player',
       value: (player) => getPlayerData(player, 'PlayerInfo'),
-      renderedValue: (player) => (
+      renderedValue: (player) => {
+        const link = getPlayerData(player, 'Link')
+        if (!link) return getPlayerData(player, 'PlayerInfo')
+        return (
         <a
           className="link"
           href={getPlayerData(player, 'Link')}
@@ -99,7 +102,8 @@ const PlayersTable: React.FC<Props> = ({
         >
           {getPlayerData(player, 'PlayerInfo')}
         </a>
-      ),
+        )
+      },
     },
     {
       header: 'Projections',

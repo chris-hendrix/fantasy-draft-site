@@ -1,9 +1,15 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
+
 import Providers from './providers'
 import Navbar from './navbar'
 import Footer from './footer'
 import AlertBox from './alert-box'
+
+export const metadata = {
+  title: 'Drafter'
+}
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +28,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
           <Footer />
         </div>
       </Providers>
+      <Analytics />
     </body>
   </html>
 )

@@ -23,6 +23,7 @@ export interface UserArgs extends User {
 export interface LeagueArgs extends League {
   commissioners: CommissionerArgs[]
   teams: TeamArgs[]
+  drafts: DraftArgs[]
 }
 
 export interface TeamUserArgs extends TeamUser {
@@ -67,3 +68,12 @@ export interface KeeperArgs extends Keeper {
 }
 
 export type PlayerData = { name: string, data: any } // for importing/updating players
+
+export type ImportedDraftRecord = {
+  draftYear: number,
+  teamName: string,
+  playerName: string,
+  overall: number,
+  playerData: any,
+  keeps: number | null
+}

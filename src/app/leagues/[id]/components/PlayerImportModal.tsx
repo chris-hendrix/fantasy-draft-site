@@ -84,14 +84,7 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
           className="btn btn-secondary w-32 mr-2"
           disabled={!csvString.length}
         >
-          Import
-        </button>
-        <button
-          onClick={() => setConfirmOverwrite(true)}
-          className="btn btn-primary w-32 mr-2"
-          disabled={!players?.length}
-        >
-          Overwrite
+          Read CSV
         </button>
         <button
           onClick={() => setConfirmUpdate(true)}
@@ -99,6 +92,13 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
           disabled={!players?.length}
         >
           Update
+        </button>
+        <button
+          onClick={() => setConfirmOverwrite(true)}
+          className="btn btn-error w-32 mr-2"
+          disabled={!players?.length}
+        >
+          Overwrite
         </button>
         <button onClick={onClose} className="btn w-32">
           Cancel
