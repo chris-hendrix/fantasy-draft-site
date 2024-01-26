@@ -12,6 +12,7 @@ interface AlertState {
 
 interface AppState {
   alert: AlertState;
+  currentDraftId: string | null
 }
 
 interface ShowAlertPayload {
@@ -21,7 +22,8 @@ interface ShowAlertPayload {
 }
 
 const initialState: AppState = {
-  alert: { isVisible: false, message: null, type: null, duration: 5000 }
+  alert: { isVisible: false, message: null, type: null, duration: 5000 },
+  currentDraftId: null
 }
 
 export const showAlertAsync = createAsyncThunk<void, ShowAlertPayload>(
@@ -36,7 +38,11 @@ export const showAlertAsync = createAsyncThunk<void, ShowAlertPayload>(
 export const appSlice = createSlice({
   name: 'app',
   initialState,
-  reducers: {},
+  reducers: {
+    setCurrentDraftId: (state, action) => {
+      state.currentDraftId = action.payload
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(showAlertAsync.pending, (state, action) => {
       state.alert.isVisible = true
@@ -52,5 +58,7 @@ export const appSlice = createSlice({
     })
   },
 })
+
+export const { setCurrentDraftId } = appSlice.actions
 
 export default appSlice

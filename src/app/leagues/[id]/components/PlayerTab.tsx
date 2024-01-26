@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useUpdateDraft } from '@/hooks/draft'
 import { useInvalidatePlayers } from '@/hooks/player'
+import { useCurrentDraftId } from '@/hooks/app'
 import ConfirmModal from '@/components/ConfirmModal'
 import DraftYearTabs from './DraftYearTabs'
 import PlayersTable from './PlayersTable'
@@ -15,15 +16,14 @@ interface Props {
 const PlayerTab: React.FC<Props> = ({ leagueId }) => {
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
   const { updateObject: updateDraft } = useUpdateDraft()
-
-  const [draftId, setDraftId] = useState<string | null>(null)
+  const { currentDraftId } = useCurrentDraftId()
   const [importModalOpen, setImportModalOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const handleDelete = async () => {
-    if (!draftId) return
+    if (!currentDraftId) return
     const res = await updateDraft({
-      id: draftId,
+      id: currentDraftId,
       players: { deleteMany: {} }
     })
     if ('error' in res) return
@@ -33,7 +33,7 @@ const PlayerTab: React.FC<Props> = ({ leagueId }) => {
 
   return (
     <div className="flex flex-col items-start mt-8">
-      <DraftYearTabs leagueId={leagueId} onSelect={setDraftId} />
+      <DraftYearTabs leagueId={leagueId} />
       <div className="my-2 flex gap-2">
         <button
           className="btn btn-sm"
@@ -48,9 +48,9 @@ const PlayerTab: React.FC<Props> = ({ leagueId }) => {
           🗑️ Delete
         </button>
       </div>
-      {draftId && <PlayersTable draftId={draftId} />}
-      {draftId && importModalOpen && <PlayerImportModal
-        draftId={draftId}
+      {currentDraftId && <PlayersTable draftId={currentDraftId} />}
+      {currentDraftId && importModalOpen && <PlayerImportModal
+        draftId={currentDraftId}
         onClose={() => {
           setImportModalOpen(false)
         }} />}

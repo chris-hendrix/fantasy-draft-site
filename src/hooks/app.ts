@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { showAlertAsync, AlertType } from '@/store/app'
+import { showAlertAsync, AlertType, setCurrentDraftId as setCurrentDraftIdAction } from '@/store/app'
 import { RootState, AppDispatch } from '@/store'
 import { getErrorMessage } from '@/utils/error'
 
@@ -9,6 +9,14 @@ interface ShowAlertOptions {
   errorMessage?: string,
   error?: any
   duration?: number
+}
+
+export const useCurrentDraftId = () => {
+  const dispatch: AppDispatch = useDispatch()
+  const currentDraftId = useSelector((state: RootState) => state.app.currentDraftId)
+  const setCurrentDraftId = (draftId: string | null) => dispatch(setCurrentDraftIdAction(draftId))
+
+  return { currentDraftId, setCurrentDraftId }
 }
 
 export const useAlert = () => {

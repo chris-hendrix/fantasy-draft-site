@@ -44,15 +44,23 @@ export const getAllDraftData = async (draftId: string) => {
 }
 
 export const updateDraftPlayerData = async (draftId: string, playerData: PlayerData[]) => {
-  const results: { [key: string]: number } = {}
+  const results: { [key: string]: 'added' | 'updated' } = {}
 
   await Promise.all(
     playerData.map(async (pd) => {
-      const updateResult = await prisma.player.updateMany({
+      const { count } = await prisma.player.updateMany({
         where: { draftId, name: pd.name },
         data: { data: pd.data },
       })
-      results[pd.name] = updateResult.count
+
+      // add player if no match
+      if (count === 0) {
+        await prisma.player.create({
+          data: { draftId, name: pd.name, data: pd.data }
+        })
+      }
+
+      results[pd.name] = count === 0 ? 'added' : 'updated'
     })
   )
   return results

@@ -1,21 +1,25 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { useGetDrafts } from '@/hooks/draft'
 import TabSelect from '@/components/TabSelect'
+import { useCurrentDraftId } from '@/hooks/app'
+import { useLeagueData } from '@/hooks/league'
 
 interface Props {
   leagueId: string;
-  onSelect: (draftId: string) => void
 }
 
-const DraftYearTabs: React.FC<Props> = ({ leagueId, onSelect }) => {
-  const { data: drafts, isSuccess } = useGetDrafts({
-    where: { leagueId },
-    orderBy: { year: 'desc' }
-  })
+const DraftYearTabs: React.FC<Props> = ({ leagueId }) => {
+  const { data: { drafts }, isSuccess } = useLeagueData(leagueId)
+  const { currentDraftId, setCurrentDraftId } = useCurrentDraftId()
+  const currentDraft = drafts?.find((d) => d.id === currentDraftId)
+  const currentOption = currentDraft && { value: currentDraft.id, label: String(currentDraft.year) }
 
-  useEffect(() => drafts && onSelect(drafts?.[0]?.id), [isSuccess])
+  useEffect(() => { drafts && setCurrentDraftId(drafts?.[0]?.id || null) }, [isSuccess])
+
+  const handleSelect = ({ selectedValue }: { selectedValue: string | number }) => {
+    setCurrentDraftId(String(selectedValue))
+  }
 
   const tabOptions = drafts?.map((d) => ({ value: d.id, label: String(d.year) }))
 
@@ -23,7 +27,8 @@ const DraftYearTabs: React.FC<Props> = ({ leagueId, onSelect }) => {
 
   return <TabSelect
     tabOptions={tabOptions}
-    onSelect={({ selectedValue }) => onSelect(String(selectedValue))}
+    initialOption={currentOption}
+    onSelect={handleSelect}
   />
 }
 

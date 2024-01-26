@@ -4,6 +4,7 @@ import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
 import { useInvalidateKeepers } from '@/hooks/keeper'
 import { KeeperArgs } from '@/types'
+import { useCurrentDraftId } from '@/hooks/app'
 import DraftYearTabs from './DraftYearTabs'
 import KeepersTable from './KeepersTable'
 import KeeperInfo from './KeeperInfo'
@@ -17,11 +18,11 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const defaultKeeperCount = 5 // TODO add to league model
   const { updateObject: updateDraft } = useUpdateDraft({ errorMessage: 'Invalid keepers' })
   const { invalidateObjects: invalidateKeepers } = useInvalidateKeepers()
+  const { currentDraftId } = useCurrentDraftId()
   const [note, setNote] = useState('')
   const [generateModalOpen, setGenerateModalOpen] = useState(false)
   const [noteModalOpen, setNoteModalOpen] = useState(false)
   const [confirmGenerate, setConfirmGenerate] = useState(false)
-  const [draftId, setDraftId] = useState<string | null>(null)
   const [keeperCount, setKeeperCount] = useState(defaultKeeperCount)
   const [teamEdit, setTeamEdit] = useState(false)
   const [allEdit, setAllEdit] = useState(false)
@@ -33,7 +34,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     isCommissioner,
     canEditKeepers,
     keeperEntryNote,
-  } = useDraftData(draftId as string, !draftId)
+  } = useDraftData(currentDraftId as string, !currentDraftId)
 
   const handleClose = () => {
     setGenerateModalOpen(false)
@@ -42,18 +43,18 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   }
 
   const handleGenerate = async () => {
-    if (!draftId) return
-    const res = await updateDraft({ id: draftId, keeperCount })
+    if (!currentDraftId) return
+    const res = await updateDraft({ id: currentDraftId, keeperCount })
     if ('error' in res) return
     invalidateKeepers()
     handleClose()
   }
 
   const handleSaveTeamKeepers = async () => {
-    if (!draftId) return
+    if (!currentDraftId) return
 
     const res = await updateDraft({
-      id: draftId,
+      id: currentDraftId,
       teamKeepers: teamKeepers.filter((k) => k.teamId === sessionTeam.id)
     })
     if ('error' in res) return
@@ -62,12 +63,12 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   }
 
   const handleSaveAllKeepers = async () => {
-    if (!draftId) return
+    if (!currentDraftId) return
     const keeperData = allKeepers.map(({ teamId, playerId, round, keeps }) => ({
       teamId, playerId, round, keeps
     }))
     const res = await updateDraft({
-      id: draftId,
+      id: currentDraftId,
       keepers: {
         deleteMany: {},
         createMany: { data: keeperData }
@@ -79,16 +80,16 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   }
 
   const handleSaveNote = async () => {
-    if (!draftId) return
-    const res = await updateDraft({ id: draftId, keeperEntryNote: note })
+    if (!currentDraftId) return
+    const res = await updateDraft({ id: currentDraftId, keeperEntryNote: note })
     if ('error' in res) return
     handleClose()
   }
 
   const handleLock = async () => {
-    if (!draftId || !isCommissioner) return
+    if (!currentDraftId || !isCommissioner) return
     await updateDraft({
-      id: draftId,
+      id: currentDraftId,
       keepersLockDate: canEditKeepers ? new Date() : null
     })
   }
@@ -96,7 +97,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   return (
     <>
       <div className="flex flex-col items-center mt-8 mb-2">
-        <DraftYearTabs leagueId={leagueId} onSelect={setDraftId} />
+        <DraftYearTabs leagueId={leagueId} />
       </div>
       {isCommissioner &&
         <div className="mt-4 flex gap-2">
@@ -125,7 +126,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           </button>
         </div>
       }
-      {draftId && sessionTeam && canEditKeepers && (
+      {currentDraftId && sessionTeam && canEditKeepers && (
         <>
           <h2 className="text-lg font-bold my-6">📝 Keeper Entry</h2>
           <div className="flex gap-2 mb-2">
@@ -135,21 +136,21 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           </div>
           <div className="flex flex-row">
             <KeepersTable
-              draftId={draftId}
+              draftId={currentDraftId}
               teamId={sessionTeam.id}
               edit={teamEdit && canEditKeepers}
               onKeepersChange={setTeamKeepers}
               showPlayerData
               notes={<>
                 <div className="divider" />
-                <KeeperInfo draftId={draftId} />
+                <KeeperInfo draftId={currentDraftId} />
               </>}
             />
           </div>
           <div className="divider" />
         </>
       )}
-      {draftId &&
+      {currentDraftId &&
         <div className="flex flex-row h-full w-full">
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6">✅ Selected Keepers</h2>
@@ -159,14 +160,14 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
               {allEdit && <button className="btn btn-sm w-32 btn-error" onClick={() => setAllEdit(false)}>❌ Cancel</button>}
             </div>}
             <KeepersTable
-              draftId={draftId}
+              draftId={currentDraftId}
               edit={allEdit && canEditKeepers}
               onKeepersChange={setAllKeepers}
             />
           </div>
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6">👥 Player Pool</h2>
-            <PlayersTable draftId={draftId} hideTeamColumn />
+            <PlayersTable draftId={currentDraftId} hideTeamColumn />
           </div>
         </div>}
       {generateModalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">

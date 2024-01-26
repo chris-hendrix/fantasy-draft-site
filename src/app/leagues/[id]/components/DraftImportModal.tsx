@@ -84,10 +84,10 @@ const DraftImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
         </button>
         <button
           onClick={() => setConfirmOverwrite(true)}
-          className="btn btn-primary w-32 mr-2"
+          className="btn btn-error w-32 mr-2"
           disabled={!data?.length}
         >
-          Import
+          Overwrite
         </button>
         <button onClick={onClose} className="btn w-32">
           Cancel
