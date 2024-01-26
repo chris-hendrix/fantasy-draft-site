@@ -12,11 +12,9 @@ interface Props {
 const DraftTab: React.FC<Props> = ({ leagueId }) => {
   const { currentDraftId } = useCurrentDraftId()
   return (
-    <div className="flex flex-col items-center mt-8">
-      <div className="flex flex-col items-center mt-8 mb-2">
-        <DraftYearTabs leagueId={leagueId} />
-        {currentDraftId && <DraftPage draftId={currentDraftId} />}
-      </div>
+    <div className="flex flex-col items-center mt-8 mb-2">
+      <DraftYearTabs leagueId={leagueId} />
+      {currentDraftId && <DraftPage draftId={currentDraftId} />}
     </div>
   )
 }

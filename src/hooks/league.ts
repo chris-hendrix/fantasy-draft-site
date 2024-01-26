@@ -61,6 +61,7 @@ export const useLeagueData = (leagueId?: string) => {
   }, { skip: !id })
 
   const league = result.data
+  const defaultDraftId = league?.drafts[0]?.id || null
   const isCommissioner = Boolean(
     user && league?.commissioners.find((c) => c.userId === user?.id)
   )
@@ -68,5 +69,11 @@ export const useLeagueData = (leagueId?: string) => {
     user && league?.teams.some((t) => t.teamUsers.find((tu) => tu.userId === user.id))
   )
 
-  return { league, isCommissioner, isMember, ...result }
+  return {
+    league,
+    defaultDraftId,
+    isCommissioner,
+    isMember,
+    ...result
+  }
 }
