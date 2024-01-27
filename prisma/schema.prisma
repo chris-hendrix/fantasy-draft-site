@@ -98,7 +98,7 @@ model Team {
   updatedAt  DateTime    @updatedAt
   leagueId   String
   name       String
-  archived   Boolean     @default(false)
+  archivedAt DateTime?
   league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   teamUsers  TeamUser[]
   draftTeams DraftTeam[]

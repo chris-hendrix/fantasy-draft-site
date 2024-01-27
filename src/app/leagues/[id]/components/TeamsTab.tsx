@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
 import { League } from '@prisma/client'
-import { useGetTeams, useDeleteTeam, useUserTeam } from '@/hooks/team'
+import { useTeams, useUserTeam } from '@/hooks/team'
 import { useLeagueData } from '@/hooks/league'
 import TeamModal from '@/app/leagues/[id]/components/TeamModal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -18,17 +17,30 @@ interface Props {
 }
 
 const TeamsTab: React.FC<Props> = ({ league }) => {
-  const { data: teams, refetch } = useGetTeams({
-    where: { leagueId: league?.id },
-    include: { teamUsers: { include: { user: true } } },
-    orderBy: { name: 'asc' }
-  }, { skip: !league?.id })
+  const { teams, deleteTeam, updateTeam, refetch } = useTeams(league.id)
   const { team: userTeam } = useUserTeam(league.id as string)
-  const { deleteObject: deleteTeam } = useDeleteTeam()
   const { isCommissioner } = useLeagueData()
   const [modalOpen, setModalOpen] = useState(false)
   const [teamToDelete, setTeamToDelete] = useState<TeamArgs | null>(null)
   const [teamToEdit, setTeamToEdit] = useState<TeamArgs | null>(null)
+  const [teamToArchive, setTeamToArchive] = useState<TeamArgs | null>(null)
+
+  const handleArchiveTeam = async () => {
+    if (!teamToArchive) return
+    const res = await updateTeam({
+      id: teamToArchive.id,
+      archivedAt: teamToArchive.archivedAt ? null : new Date()
+    })
+    if ('error' in res) return
+    setTeamToArchive(null)
+  }
+
+  const handleDeleteTeam = async () => {
+    if (!teamToDelete) return
+    const res = await deleteTeam(teamToDelete.id)
+    if ('error' in res) return
+    setTeamToDelete(null)
+  }
 
   const columns: TableColumn<TeamArgs>[] = [
     {
@@ -44,22 +56,20 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
         const inviteEmails = team.teamUsers
           .filter((tu) => !tu.inviteDeclinedAt && !tu.userId)
           .map((tu) => tu.inviteEmail)
-        return <>
+        return <div className="flex gap-4">
           {users.map((u) => (
-            <div
-            key={u.id}
-            className="badge cursor-pointer"
-          >
-            ✅&nbsp;<Link href={`/users/${u.id}`}>{u.name || u.email}</Link>
-            </div>
+            <span key={u.id} >
+              ✅ {u.name || u.email}
+            </span>
           ))}
-          {inviteEmails.map((e) => <div key={e} className="badge">⚠️ {e}</div>)}
-        </>
+          {inviteEmails.map((email) => <span key={email}>⚠️ {email}</span>)}
+        </div>
       }
     },
     {
       renderedValue: ((team) => isCommissioner && <>
         <button className="btn btn-ghost btn-square btn-sm" onClick={() => setTeamToEdit(team)}>✏️</button>
+        <button className="btn btn-ghost btn-square btn-sm" onClick={() => setTeamToArchive(team)}>🗄️</button>
         <button className="btn btn-ghost btn-square btn-sm" onClick={() => setTeamToDelete(team)}>🗑️</button>
       </>)
     }
@@ -86,29 +96,43 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
       >
         ✉️ Invite team
       </button>}
-      {teams?.length > 0 && <Table columns={columns} data={teams} />}
+      <Table
+        columns={columns}
+        data={teams || []}
+        rowStyle={(team: TeamArgs) => (!team?.archivedAt ? {} : {
+          className: 'bg-gray-700 italic text-gray-500'
+        })}
+      />
       {modalOpen && (
         <InviteTeamModal
           leagueId={league.id}
           onClose={() => { setModalOpen(false); refetch() }}
         />
       )}
-      {teamToEdit && <TeamModal
-        teamId={teamToEdit.id}
-        onClose={() => {
-          setTeamToEdit(null)
-          refetch()
-        }} />}
-      {teamToDelete && <ConfirmModal
-        onClose={() => setTeamToDelete(null)}
-        onConfirm={async () => {
-          const res = await deleteTeam(teamToDelete.id)
-          if ('error' in res) return
-          setTeamToDelete(null)
-        }}
-      >
-        Are you sure you want to delete this team? This cannot be undone.
-      </ConfirmModal>}
+      {teamToEdit && (
+        <TeamModal
+          teamId={teamToEdit.id}
+          onClose={() => {
+            setTeamToEdit(null)
+            refetch()
+          }} />
+      )}
+      {teamToArchive && (
+        <ConfirmModal
+          onClose={() => setTeamToArchive(null)}
+          onConfirm={handleArchiveTeam}
+        >
+          Are you sure you want to archive this team?
+        </ConfirmModal>
+      )}
+      {teamToDelete && (
+        <ConfirmModal
+          onClose={() => setTeamToDelete(null)}
+          onConfirm={handleDeleteTeam}
+        >
+          Are you sure you want to delete this team? This cannot be undone.
+        </ConfirmModal>
+      )}
     </div>
   )
 }

@@ -56,12 +56,15 @@ export const useLeagueTeams = (leagueId: string) => {
 }
 
 export const useTeams = (leagueId: string) => {
-  const { data: team, ...rest } = useGetTeams({
+  const { data: teams, ...rest } = useGetTeams({
     where: { leagueId },
-    include: { teamUsers: { include: { user: true } } }
+    include: { teamUsers: { include: { user: true } } },
+    orderBy: { name: 'asc' }
   })
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
-  return { ...team, ...rest, updateTeam, isUpdating }
+  const { deleteObject: deleteTeam, isLoading: isDeleting } = useDeleteTeam()
+
+  return { teams, ...rest, updateTeam, isUpdating, deleteTeam, isDeleting }
 }
 
 export const useTeam = (teamId: string) => {
