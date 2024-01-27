@@ -45,12 +45,14 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
           .filter((tu) => !tu.inviteDeclinedAt && !tu.userId)
           .map((tu) => tu.inviteEmail)
         return <>
-          {users.map((u) => <div
+          {users.map((u) => (
+            <div
             key={u.id}
             className="badge cursor-pointer"
           >
             ✅&nbsp;<Link href={`/users/${u.id}`}>{u.name || u.email}</Link>
-          </div>)}
+            </div>
+          ))}
           {inviteEmails.map((e) => <div key={e} className="badge">⚠️ {e}</div>)}
         </>
       }
@@ -81,7 +83,8 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
       {isCommissioner && <button
         className="btn btn-sm mb-2"
         onClick={() => setModalOpen(true)}
-      >✉️ Invite team
+      >
+        ✉️ Invite team
       </button>}
       {teams?.length > 0 && <Table columns={columns} data={teams} />}
       {modalOpen && (
@@ -91,8 +94,7 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
         />
       )}
       {teamToEdit && <TeamModal
-        league={league}
-        team={teamToEdit}
+        teamId={teamToEdit.id}
         onClose={() => {
           setTeamToEdit(null)
           refetch()

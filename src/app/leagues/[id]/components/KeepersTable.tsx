@@ -10,7 +10,7 @@ import PlayerAutocomplete from './PlayerAutocomplete'
 
 interface Props {
   draftId: string;
-  teamId?: string;
+  teamIds?: string[];
   edit?: boolean;
   notes?: string | ReactNode;
   onKeepersChange: (keepers: KeeperArgs[]) => void,
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const KeepersTable: React.FC<Props> = ({
-  draftId, teamId, edit = false, notes, onKeepersChange, showPlayerData
+  draftId, teamIds, edit = false, notes, onKeepersChange, showPlayerData
 }) => {
   const { rounds, isCommissioner, players, teamsCount } = useDraftData(draftId)
   const { data: keepers } = useGetKeepers(
@@ -33,7 +33,7 @@ const KeepersTable: React.FC<Props> = ({
   const [editKeepers, setEditKeepers] = useState<KeeperArgs[]>([])
   const [editKeeperId, setEditKeeperId] = useState<string | null>(null)
 
-  const displayKeepers = editKeepers?.filter((k) => !teamId || k.teamId === teamId) || []
+  const displayKeepers = editKeepers?.filter((k) => !teamIds || teamIds.includes(k.teamId)) || []
   const selectedPlayerIds = editKeepers
     ?.filter((k) => k.playerId && k.id !== editKeeperId)
     .map((k) => k.playerId || '') || []
@@ -78,7 +78,7 @@ const KeepersTable: React.FC<Props> = ({
       value: ({ player }) => player && getPlayerName(player),
       cellStyle: { maxWidth: '256px', width: '256px', minHeight: '41px' },
       renderedValue: ({ id, player }) => {
-        if (!edit || !(isCommissioner || teamId)) return player && <div className="">{getPlayerName(player)}</div>
+        if (!edit || !(isCommissioner || teamIds)) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
           return <div
             className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
@@ -99,7 +99,7 @@ const KeepersTable: React.FC<Props> = ({
     {
       header: 'Round',
       value: ({ round }) => round,
-      hidden: Boolean(teamId),
+      hidden: Boolean(teamIds),
       cellStyle: { maxWidth: '64px', width: '64px' },
       renderedValue: ({ id, round }) => {
         if (!edit || !isCommissioner) return <>{round}</>
@@ -118,7 +118,7 @@ const KeepersTable: React.FC<Props> = ({
     {
       header: 'Keeps',
       value: ({ keeps }) => keeps,
-      hidden: Boolean(teamId),
+      hidden: Boolean(teamIds),
       cellStyle: { maxWidth: '64px', width: '64px' },
       renderedValue: ({ id, keeps }) => {
         if (!edit || !isCommissioner) return <>{keeps}</>

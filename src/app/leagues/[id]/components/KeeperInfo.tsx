@@ -11,10 +11,10 @@ interface Props {
 }
 
 const KeeperInfo: React.FC<Props> = ({ draftId }) => {
-  const { draftPicks, keepers, teamsCount, year, sessionTeam } = usePreviousDraftData(draftId)
+  const { draftPicks, keepers, teamsCount, year, isSessionTeam } = usePreviousDraftData(draftId)
   const { keeperEntryNote } = useDraftData(draftId)
-  const teamKeepers = keepers?.filter((k) => k.teamId === sessionTeam?.id)
-  const teamDraftPicks = draftPicks?.filter((dp) => dp.teamId === sessionTeam?.id)
+  const teamKeepers = keepers?.filter((k) => isSessionTeam(k.teamId))
+  const teamDraftPicks = draftPicks?.filter((dp) => isSessionTeam(dp.teamId))
   const teamDraftPickCols = teamDraftPicks &&
     getItemsInEqualColumns<DraftPickArgs>(teamDraftPicks, 3) // 2d array
 

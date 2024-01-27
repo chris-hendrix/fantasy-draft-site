@@ -19,27 +19,29 @@ export const PUT = routeWrapper(
     if (!id) throw new ApiError('Team id required', 400)
     const { user } = await checkTeamEdit(id)
     const {
-      oldInviteEmail,
-      newInviteEmail,
+      inviteEmails,
       acceptEmail,
       declineEmail,
       ...data
     }: any = req.consumedBody
 
-    // add invite to existing team
-    if (newInviteEmail && !oldInviteEmail) {
-      await prisma.teamUser.create({
-        data: { teamId: id, inviteEmail: newInviteEmail }
+    // add/edit new invites
+    if (inviteEmails?.length > 0) {
+      await checkTeamEdit(id, true) // commissioner only
+      const inviteData: { inviteEmail: string } = inviteEmails.map(
+        (email: string) => ({ inviteEmail: email })
+      )
+      await prisma.team.update({
+        where: { id },
+        data: {
+          teamUsers: {
+            deleteMany: { userId: null }, // delete and replace non-user invites
+            createMany: { data: inviteData }
+          }
+        }
       })
     }
-    // change invite email
-    if (oldInviteEmail && newInviteEmail) {
-      const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: oldInviteEmail } })
-      teamUser && await prisma.teamUser.update({
-        where: { id: teamUser.id },
-        data: { inviteEmail: newInviteEmail }
-      })
-    }
+
     // accepting invite
     if (acceptEmail) {
       const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: acceptEmail } })

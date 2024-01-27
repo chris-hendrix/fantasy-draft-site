@@ -41,10 +41,15 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
   )
 
-  const sessionTeam = draft?.draftTeams.filter(
+  const sessionTeamIds = draft?.draftTeams.filter(
     (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === userId))
-  )?.[0]?.team || null
+  )?.map((tu) => tu.team.id) || []
 
+  const isSessionTeam = (teamId: string | null | undefined) => {
+    if (!teamId) return false
+    const draftTeamUsers = draft?.draftTeams.flatMap((dt) => dt.team.teamUsers)
+    return draftTeamUsers?.some((tu) => Boolean(tu.userId === userId && tu.teamId === teamId))
+  }
   return {
     isLoading,
     isSuccess,
@@ -53,7 +58,8 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     canEditKeepers,
     canEditDraft,
     teamsCount: draft?.draftTeams?.length,
-    sessionTeam,
+    isSessionTeam,
+    sessionTeamIds,
     refetch,
     ...draft
   }

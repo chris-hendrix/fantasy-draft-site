@@ -15,8 +15,7 @@ export const {
 } = getCrudHooks<TeamArgs & {
   inviteEmail?: string
 }, Prisma.TeamFindManyArgs, Prisma.TeamUpdateInput & {
-  oldInviteEmail?: string,
-  newInviteEmail?: string,
+  inviteEmails?: string[],
   acceptEmail?: string,
   declineEmail?: string
 }>(teamApi)
@@ -54,4 +53,25 @@ export const useLeagueTeams = (leagueId: string) => {
   )
   const teamsCount = teams?.length || 0
   return { teams, teamsCount, isLoading, isSuccess }
+}
+
+export const useTeams = (leagueId: string) => {
+  const { data: team, ...rest } = useGetTeams({
+    where: { leagueId },
+    include: { teamUsers: { include: { user: true } } }
+  })
+  const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
+  return { ...team, ...rest, updateTeam, isUpdating }
+}
+
+export const useTeam = (teamId: string) => {
+  const { data: team, ...rest } = useGetTeam({
+    id: teamId,
+    queryParams: {
+      include: { teamUsers: { include: { user: true } } }
+    }
+  })
+
+  const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
+  return { team, ...rest, updateTeam, isUpdating }
 }

@@ -30,14 +30,14 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
   draftingPick
 }) => {
-  const { teamsCount, sessionTeam, canEditDraft, disableUserDraft } = useDraftData(draftId)
+  const { teamsCount, canEditDraft, disableUserDraft, isSessionTeam } = useDraftData(draftId)
   const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
-  const canDraft = draftingPick && sessionTeam && draftingPick.teamId === sessionTeam.id
+  const canDraft = draftingPick && isSessionTeam(draftingPick.teamId)
 
   const handleDraft = async () => {
     if (!draftingPick || !playerToBeDrafted) return
