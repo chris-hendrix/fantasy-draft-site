@@ -74,6 +74,7 @@ export const useLeagueData = (leagueId?: string) => {
     defaultDraftId,
     isCommissioner,
     isMember,
-    ...result
+    ...result,
+    ...league // TDOD
   }
 }

@@ -11,9 +11,10 @@ import Table, { TableColumn } from '@/components/Table'
 import Card from '@/components/Card'
 import { TeamArgs } from '@/types'
 import { formatDate } from '@/utils/date'
+import InviteTeamModal from '@/components/InviteTeamModal'
 
 interface Props {
-  league: Partial<League>;
+  league: League;
 }
 
 const TeamsTab: React.FC<Props> = ({ league }) => {
@@ -83,13 +84,12 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
       >✉️ Invite team
       </button>}
       {teams?.length > 0 && <Table columns={columns} data={teams} />}
-      {modalOpen && <TeamModal
-        invite
-        league={league}
-        onClose={() => {
-          setModalOpen(false)
-          refetch()
-        }} />}
+      {modalOpen && (
+        <InviteTeamModal
+          leagueId={league.id}
+          onClose={() => { setModalOpen(false); refetch() }}
+        />
+      )}
       {teamToEdit && <TeamModal
         league={league}
         team={teamToEdit}

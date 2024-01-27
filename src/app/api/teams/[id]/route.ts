@@ -26,6 +26,12 @@ export const PUT = routeWrapper(
       ...data
     }: any = req.consumedBody
 
+    // add invite to existing team
+    if (newInviteEmail && !oldInviteEmail) {
+      await prisma.teamUser.create({
+        data: { teamId: id, inviteEmail: newInviteEmail }
+      })
+    }
     // change invite email
     if (oldInviteEmail && newInviteEmail) {
       const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: oldInviteEmail } })
