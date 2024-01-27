@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useDeleteDraft, useDraftData, useUpdateDraft } from '@/hooks/draft'
+import { useDeleteDraft, useDraft, useUpdateDraft } from '@/hooks/draft'
 import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
-  const { isCommissioner, canEditDraft, disableUserDraft } = useDraftData(draftId)
+  const { isCommissioner, canEditDraft, disableUserDraft } = useDraft(draftId)
   const { deleteObject: deleteLeague } = useDeleteDraft()
   const { updateObject: updateDraft } = useUpdateDraft()
   const [draftPicks, setDraftPicks] = useState<DraftPickArgs[]>([])

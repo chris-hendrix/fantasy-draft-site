@@ -1,6 +1,6 @@
 'use client'
 
-import { usePreviousDraftData, useDraftData } from '@/hooks/draft'
+import { usePreviousDraftData, useDraft } from '@/hooks/draft'
 import { getPlayerName, getRound } from '@/utils/draft'
 import { getItemsInEqualColumns } from '@/utils/array'
 import { DraftPickArgs } from '@/types'
@@ -12,7 +12,7 @@ interface Props {
 
 const KeeperInfo: React.FC<Props> = ({ draftId }) => {
   const { draftPicks, keepers, teamsCount, year, isSessionTeam } = usePreviousDraftData(draftId)
-  const { keeperEntryNote } = useDraftData(draftId)
+  const { keeperEntryNote } = useDraft(draftId)
   const teamKeepers = keepers?.filter((k) => isSessionTeam(k.teamId))
   const teamDraftPicks = draftPicks?.filter((dp) => isSessionTeam(dp.teamId))
   const teamDraftPickCols = teamDraftPicks &&

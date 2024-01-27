@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useGetSortedPlayers, useInvalidatePlayer } from '@/hooks/player'
-import { useDraftData } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import { useSendBroadcast } from '@/hooks/supabase'
 import { useUpdateDraftPick } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
-import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
+import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS, getPlayerPositions } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
 import ChipSelect from '@/components/ChipSelect'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -30,7 +30,7 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
   draftingPick
 }) => {
-  const { teamsCount, canEditDraft, disableUserDraft, isSessionTeam } = useDraftData(draftId)
+  const { teamsCount, canEditDraft, disableUserDraft, isSessionTeam } = useDraft(draftId)
   const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
@@ -53,11 +53,6 @@ const PlayersTable: React.FC<Props> = ({
   const getPlayerRound = (player: PlayerArgs) => {
     const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)
     return Math.min(round, MAX_ROUND_FILTER)
-  }
-
-  const getPlayerPositions = (player: PlayerArgs) => {
-    const positions = String(getPlayerData(player, 'Positions'))
-    return positions.split(',')
   }
 
   const getUniqueTeamOptions = () => {

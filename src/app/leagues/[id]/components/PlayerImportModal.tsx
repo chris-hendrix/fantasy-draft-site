@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import csv from 'csvtojson'
-import { useDraftData, useUpdateDraft } from '@/hooks/draft'
+import { useDraft, useUpdateDraft } from '@/hooks/draft'
 import { useInvalidatePlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
-  const { year } = useDraftData(draftId)
+  const { year } = useDraft(draftId)
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
   const [players, setPlayers] = useState<PlayerData[]>([])
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)

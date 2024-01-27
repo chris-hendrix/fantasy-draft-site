@@ -1,4 +1,4 @@
-import { useUpdateDraft, useDraftData } from '@/hooks/draft'
+import { useUpdateDraft, useDraft } from '@/hooks/draft'
 import { useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -35,7 +35,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     isCommissioner,
     canEditKeepers,
     keeperEntryNote,
-  } = useDraftData(currentDraftId as string, !currentDraftId)
+  } = useDraft(currentDraftId as string, !currentDraftId)
 
   const handleClose = () => {
     setGenerateModalOpen(false)

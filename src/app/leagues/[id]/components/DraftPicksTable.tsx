@@ -5,14 +5,15 @@ import { DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName, getRound } from '@/utils/draft'
 import { useInvalidatePlayer } from '@/hooks/player'
-import { useGetDraftPicks, useUpdateDraftPick, useInvalidateDraftPick } from '@/hooks/draftPick'
+import { useDraftPicks } from '@/hooks/draftPick'
 import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
 import ChipSelect from '@/components/ChipSelect'
 import { getUnique } from '@/utils/array'
 import SearchFilter from '@/components/SearchFilter'
-import { useDraftData } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
+import PositionsTable from './PositionsTable'
 
 interface Props {
   draftId: string;
@@ -29,18 +30,11 @@ const DraftPicksTable: React.FC<Props> = ({
   onOrderChange,
   onDraftPicksChanged
 }) => {
-  const { isCommissioner, teamsCount, rounds, canEditDraft } = useDraftData(draftId)
-  const { data: draftPicks } = useGetDraftPicks(
-    {
-      where: { draftId },
-      include: { team: true, player: true },
-      orderBy: { overall: 'asc' }
-    }
-  )
-  const { updateObject: updateDraftPick } = useUpdateDraftPick()
-  const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
+  const { isCommissioner, teamsCount, rounds, canEditDraft } = useDraft(draftId)
+  const { draftPicks, updateDraftPick, invalidateDraftPick } = useDraftPicks(draftId)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
+  const [hoveredPickId, setHoveredPickId] = useState<string | null>(null)
   const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     round: () => true,
@@ -90,7 +84,21 @@ const DraftPicksTable: React.FC<Props> = ({
     },
     {
       header: 'Team',
-      value: (pick) => pick.team?.name
+      value: (pick) => pick.team?.name,
+      renderedValue: (pick) => (
+        <div
+          className="cursor-pointer w-40"
+          onMouseEnter={() => setHoveredPickId(pick.id)}
+          onMouseLeave={() => setHoveredPickId(null)}
+        >
+          {hoveredPickId === pick.id && (
+            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-200 text-xs">
+              <PositionsTable draftId={pick.draftId} teamId={pick.teamId} />
+            </div>
+          )}
+          {pick.team?.name}
+        </div>
+      )
     },
     {
       header: 'Player',

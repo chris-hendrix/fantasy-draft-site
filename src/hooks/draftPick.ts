@@ -13,3 +13,23 @@ export const {
 } & Prisma.DraftPickUncheckedUpdateInput>(
   draftPickApi
 )
+
+export const useDraftPicks = (draftId: string) => {
+  const { data: draftPicks, ...rest } = useGetDraftPicks(
+    {
+      where: { draftId },
+      include: { team: true, player: true },
+      orderBy: { overall: 'asc' }
+    }
+  )
+  const { updateObject: updateDraftPick, isLoading: isUpdating } = useUpdateDraftPick()
+  const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
+
+  return {
+    draftPicks,
+    ...rest,
+    updateDraftPick,
+    isUpdating,
+    invalidateDraftPick
+  }
+}

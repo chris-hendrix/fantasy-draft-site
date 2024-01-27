@@ -21,7 +21,7 @@ export const {
   startDraft?: boolean;
 }>(draftApi)
 
-export const useDraftData = (draftId: string, skip: boolean = false) => {
+export const useDraft = (draftId: string, skip: boolean = false) => {
   const { user } = useSessionUser()
   const userId = user?.id
   const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
@@ -61,17 +61,18 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     isSessionTeam,
     sessionTeamIds,
     refetch,
+    draft, // TODO
     ...draft
   }
 }
 
 export const usePreviousDraftData = (currentDraftId: string) => {
-  const { leagueId, year } = useDraftData(currentDraftId)
+  const { leagueId, year } = useDraft(currentDraftId)
   const { data: drafts } = useGetDrafts(
     { where: { leagueId: String(leagueId), year: Number(year) - 1 } },
     { skip: !leagueId || !year }
   )
   const draftId = drafts?.[0]?.id
-  const result = useDraftData(draftId as string, !draftId)
+  const result = useDraft(draftId as string, !draftId)
   return result
 }

@@ -4,7 +4,7 @@ import { useEffect, useState, ReactNode } from 'react'
 import { KeeperArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { getPlayerName, formatRoundPick, getPlayerData } from '@/utils/draft'
-import { useDraftData } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import { useGetKeepers } from '@/hooks/keeper'
 import PlayerAutocomplete from './PlayerAutocomplete'
 
@@ -20,7 +20,7 @@ interface Props {
 const KeepersTable: React.FC<Props> = ({
   draftId, teamIds, edit = false, notes, onKeepersChange, showPlayerData
 }) => {
-  const { rounds, isCommissioner, players, teamsCount } = useDraftData(draftId)
+  const { rounds, isCommissioner, players, teamsCount } = useDraft(draftId)
   const { data: keepers } = useGetKeepers(
     {
       where: { draftId },

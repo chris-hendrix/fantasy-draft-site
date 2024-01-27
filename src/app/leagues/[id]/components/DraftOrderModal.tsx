@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { DraftTeamArgs } from '@/types'
-import { useDraftData, useUpdateDraft } from '@/hooks/draft'
+import { useDraft, useUpdateDraft } from '@/hooks/draft'
 import { useInvalidateDraftPicks } from '@/hooks/draftPick'
 import { useInvalidatePlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
-  const { draftTeams, rounds } = useDraftData(draftId)
+  const { draftTeams, rounds } = useDraft(draftId)
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
   const [editDraftTeams, setEditDraftTeams] = useState<DraftTeamArgs[]>([])

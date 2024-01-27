@@ -46,6 +46,19 @@ export const getPlayerTeam = (player: PlayerArgs) => {
   return teams?.[0]
 }
 
+export const getPlayerPositions = (player: PlayerArgs) => {
+  const positions = String(getPlayerData(player, 'Positions'))
+  return positions.split(',')
+}
+
+export const getPlayersByPosition = (players: PlayerArgs[]) => {
+  const data: { [x: string]: PlayerArgs[] } = {}
+  POSITIONS.forEach((position) => {
+    data[position] = players.filter((player) => getPlayerPositions(player)?.includes(position))
+  })
+  return data
+}
+
 export const createTeamIdArray = (teamIds: string[], repeats: number) => Array
   .from({ length: repeats }, () => teamIds)
   .flat()
