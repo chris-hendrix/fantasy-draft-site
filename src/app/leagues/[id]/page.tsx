@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useLeagueData } from '@/hooks/league'
+import { useLeague } from '@/hooks/league'
 import Tabs from '@/components/Tabs'
 import NotFound from '@/app/not-found'
 import { useCurrentDraftId } from '@/hooks/app'
@@ -13,7 +13,7 @@ import KeeperTab from './components/KeeperTab'
 import CommissionerTab from './components/CommissionerTab'
 
 const LeaguePage: React.FC = () => {
-  const { league, isCommissioner, isLoading, defaultDraftId } = useLeagueData()
+  const { league, isCommissioner, isLoading, defaultDraftId } = useLeague()
   const { setCurrentDraftId } = useCurrentDraftId()
 
   useEffect(() => { setCurrentDraftId(defaultDraftId) }, [])

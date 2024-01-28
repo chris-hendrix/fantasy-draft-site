@@ -3,14 +3,14 @@
 import React, { useEffect } from 'react'
 import TabSelect from '@/components/TabSelect'
 import { useCurrentDraftId } from '@/hooks/app'
-import { useLeagueData } from '@/hooks/league'
+import { useLeague } from '@/hooks/league'
 
 interface Props {
   leagueId: string;
 }
 
 const DraftYearTabs: React.FC<Props> = ({ leagueId }) => {
-  const { data: { drafts }, isSuccess, defaultDraftId } = useLeagueData(leagueId)
+  const { league: { drafts }, isSuccess, defaultDraftId } = useLeague(leagueId)
   const { currentDraftId, setCurrentDraftId } = useCurrentDraftId()
   const currentDraft = drafts?.find((d) => d.id === currentDraftId)
   const currentOption = currentDraft && { value: currentDraft.id, label: String(currentDraft.year) }

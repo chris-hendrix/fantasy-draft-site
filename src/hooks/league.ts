@@ -46,7 +46,12 @@ export const useUserLeagues = () => {
   }
 }
 
-export const useLeagueData = (leagueId?: string) => {
+type UseLeagueOptions = {
+  skip?: boolean
+}
+
+export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => {
+  const { skip } = { skip: false, ...options }
   const { id } = useParams()
   const { user } = useSessionUser()
   const result = useGetLeague({
@@ -58,7 +63,7 @@ export const useLeagueData = (leagueId?: string) => {
         teams: { include: { teamUsers: true } }
       }
     }
-  }, { skip: !id })
+  }, { skip: !id || skip })
 
   const league = result.data
   const defaultDraftId = league?.drafts[0]?.id || null
@@ -69,12 +74,18 @@ export const useLeagueData = (leagueId?: string) => {
     user && league?.teams.some((t) => t.teamUsers.find((tu) => tu.userId === user.id))
   )
 
+  const { addObject: addLeague, isLoading: isAdding } = useAddLeague()
+  const { updateObject: updateLeague, isLoading: isUpdating } = useUpdateLeague()
+
   return {
-    league,
+    league: league || {},
     defaultDraftId,
     isCommissioner,
     isMember,
+    addLeague,
+    isAdding,
+    updateLeague,
+    isUpdating,
     ...result,
-    ...league // TDOD
   }
 }

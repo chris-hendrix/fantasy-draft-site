@@ -5,7 +5,7 @@ import { useTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
 import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
-import { useLeagueData } from '@/hooks/league'
+import { useLeague } from '@/hooks/league'
 
 interface FormProps {
   teamId: string
@@ -15,7 +15,7 @@ interface FormProps {
 const TEAM_USER_LIMIT = 5
 const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
   const { user } = useSessionUser()
-  const { isCommissioner } = useLeagueData()
+  const { isCommissioner } = useLeague()
   const { team, isLoading, updateTeam, isUpdating } = useTeam(teamId)
   const [invitesEnabled, setInvitesEnabled] = useState(false)
   const acceptedTeamUsers = team?.teamUsers?.filter((tu) => tu.userId)

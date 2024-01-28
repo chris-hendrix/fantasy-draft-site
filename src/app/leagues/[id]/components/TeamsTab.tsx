@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { League } from '@prisma/client'
 import { useTeams, useUserTeam } from '@/hooks/team'
-import { useLeagueData } from '@/hooks/league'
+import { useLeague } from '@/hooks/league'
 import TeamModal from '@/app/leagues/[id]/components/TeamModal'
 import ConfirmModal from '@/components/ConfirmModal'
 import Table, { TableColumn } from '@/components/Table'
@@ -19,7 +19,7 @@ interface Props {
 const TeamsTab: React.FC<Props> = ({ league }) => {
   const { teams, deleteTeam, updateTeam, refetch } = useTeams(league.id)
   const { team: userTeam } = useUserTeam(league.id as string)
-  const { isCommissioner } = useLeagueData()
+  const { isCommissioner } = useLeague()
   const [modalOpen, setModalOpen] = useState(false)
   const [teamToDelete, setTeamToDelete] = useState<TeamArgs | null>(null)
   const [teamToEdit, setTeamToEdit] = useState<TeamArgs | null>(null)

@@ -31,7 +31,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
   const { skip, previousYear } = { skip: false, previousYear: false, ...options }
   const { user } = useSessionUser()
   const userId = user?.id
-  const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
+  const { data: draft, isSuccess, ...rest } = useGetDraft({
     id: draftId,
     queryParams: { getAllData: true, previousYear }
   }, { skip })
@@ -62,19 +62,17 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
   const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
   return {
     draft: draft || {},
-    isLoading,
     isSuccess,
-    error,
     isCommissioner,
     canEditKeepers,
     canEditDraft,
     teamsCount: draft?.draftTeams?.length,
     isSessionTeam,
     sessionTeamIds,
-    refetch,
     updateDraft,
     isUpdating,
     deleteDraft,
-    isDeleting
+    isDeleting,
+    ...rest
   }
 }
