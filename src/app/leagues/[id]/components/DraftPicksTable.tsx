@@ -44,6 +44,7 @@ const DraftPicksTable: React.FC<Props> = ({
 
   const { send } = useSendBroadcast(draftId, 'draft')
   const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
+  const draftingPick = draftPicks?.filter((p) => p.playerId === null)?.[0]
 
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
   useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
@@ -196,9 +197,12 @@ const DraftPicksTable: React.FC<Props> = ({
         data={filteredPicks}
         xs
         maxItemsPerPage={300}
-        rowStyle={(pick: DraftPickArgs) => (!pick?.player ? {} : {
-          className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
-        })}
+        rowStyle={(pick: DraftPickArgs) => {
+          if (!canEditDraft) return { className: '' }
+          if (pick.id === draftingPick?.id) return { className: 'bg-primary bold text-primary-content' }
+          if (pick?.player && canEditDraft) return { className: 'bg-gray-700 italic text-gray-500' }
+          return { className: '' }
+        }}
       />
     </>
   )
