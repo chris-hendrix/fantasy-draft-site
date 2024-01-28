@@ -13,7 +13,7 @@ interface Props {
 type PositionRecord = { position: string, players: PlayerArgs[] }
 
 const PositionsTable: React.FC<Props> = ({ draftId, teamId }) => {
-  const { draftPicks } = useDraftPicks(draftId)
+  const { draft: { draftPicks } } = useDraftPicks(draftId)
   const teamPicks = draftPicks?.filter((dp) => dp.teamId === teamId) || []
   const teamPlayers = teamPicks.flatMap((dp) => (dp.player ? [dp.player] : []))
   const positionMap = getPlayersByPosition(teamPlayers)

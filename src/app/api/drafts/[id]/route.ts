@@ -9,14 +9,22 @@ import { getAllDraftData, updateDraftPlayerData } from '../../utils/draft'
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
-    const { getAllData, ...queryParams }: any = getParsedParams(req.nextUrl) || {}
+    const { getAllData, previousYear, ...queryParams }: any = getParsedParams(req.nextUrl) || {}
     if (!id) throw new ApiError('Draft id required', 400)
 
+    let draftId = id
+    if (previousYear) {
+      const currentDraft = previousYear && await prisma.draft.findUnique({ where: { id: draftId } })
+      const previousDraft = currentDraft && await prisma.draft.findFirst({
+        where: { leagueId: currentDraft?.leagueId, year: currentDraft.year - 1 }
+      })
+      draftId = previousDraft.id
+    }
     if (getAllData) {
-      const draft = await getAllDraftData(id)
+      const draft = await getAllDraftData(draftId)
       return NextResponse.json(draft)
     }
-    const draft = await prisma.draft.findUnique({ ...queryParams, where: { id } })
+    const draft = await prisma.draft.findUnique({ ...queryParams, where: { id: draftId } })
     if (!draft) throw new ApiError('Draft not found', 400)
     return NextResponse.json(draft)
   }

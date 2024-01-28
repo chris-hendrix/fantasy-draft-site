@@ -1,4 +1,4 @@
-import { useUpdateDraft, useDraft } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import { useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -16,7 +16,6 @@ interface Props {
 
 const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const defaultKeeperCount = 5 // TODO add to league model
-  const { updateObject: updateDraft } = useUpdateDraft({ errorMessage: 'Invalid keepers' })
   const { invalidateObjects: invalidateKeepers } = useInvalidateKeepers()
   const { currentDraftId } = useCurrentDraftId()
   const [note, setNote] = useState('')
@@ -34,8 +33,9 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     sessionTeamIds,
     isCommissioner,
     canEditKeepers,
-    keeperEntryNote,
-  } = useDraft(currentDraftId as string, !currentDraftId)
+    updateDraft,
+    draft: { keeperEntryNote },
+  } = useDraft(currentDraftId as string, { skip: !currentDraftId })
 
   const handleClose = () => {
     setGenerateModalOpen(false)

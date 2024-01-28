@@ -12,7 +12,8 @@ export const {
   useDeleteObject: useDeleteDraft,
   useInvalidateObjects: useInvalidateDrafts
 } = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs & {
-  getAllData?: boolean
+  getAllData?: boolean,
+  previousYear?: boolean,
 }, Prisma.DraftUpdateInput & {
   keeperCount?: number,
   setKeepers?: boolean,
@@ -21,12 +22,18 @@ export const {
   startDraft?: boolean;
 }>(draftApi)
 
-export const useDraft = (draftId: string, skip: boolean = false) => {
+type UseDraftOptions = {
+  skip?: boolean
+  previousYear?: boolean
+}
+
+export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
+  const { skip, previousYear } = { skip: false, previousYear: false, ...options }
   const { user } = useSessionUser()
   const userId = user?.id
   const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
     id: draftId,
-    queryParams: { getAllData: true }
+    queryParams: { getAllData: true, previousYear }
   }, { skip })
 
   const keepersLockDate = draft?.keepersLockDate
@@ -50,7 +57,11 @@ export const useDraft = (draftId: string, skip: boolean = false) => {
     const draftTeamUsers = draft?.draftTeams.flatMap((dt) => dt.team.teamUsers)
     return draftTeamUsers?.some((tu) => Boolean(tu.userId === userId && tu.teamId === teamId))
   }
+
+  const { updateObject: updateDraft, isLoading: isUpdating } = useUpdateDraft()
+  const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
   return {
+    draft: draft || {},
     isLoading,
     isSuccess,
     error,
@@ -61,18 +72,9 @@ export const useDraft = (draftId: string, skip: boolean = false) => {
     isSessionTeam,
     sessionTeamIds,
     refetch,
-    draft, // TODO
-    ...draft
+    updateDraft,
+    isUpdating,
+    deleteDraft,
+    isDeleting
   }
-}
-
-export const usePreviousDraftData = (currentDraftId: string) => {
-  const { leagueId, year } = useDraft(currentDraftId)
-  const { data: drafts } = useGetDrafts(
-    { where: { leagueId: String(leagueId), year: Number(year) - 1 } },
-    { skip: !leagueId || !year }
-  )
-  const draftId = drafts?.[0]?.id
-  const result = useDraft(draftId as string, !draftId)
-  return result
 }

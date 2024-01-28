@@ -20,7 +20,7 @@ interface Props {
 const KeepersTable: React.FC<Props> = ({
   draftId, teamIds, edit = false, notes, onKeepersChange, showPlayerData
 }) => {
-  const { rounds, isCommissioner, players, teamsCount } = useDraft(draftId)
+  const { draft: { rounds, players }, isCommissioner, teamsCount } = useDraft(draftId)
   const { data: keepers } = useGetKeepers(
     {
       where: { draftId },

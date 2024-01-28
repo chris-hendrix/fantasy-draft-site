@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useDeleteDraft, useDraft, useUpdateDraft } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -16,9 +16,13 @@ interface Props {
 }
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
-  const { isCommissioner, canEditDraft, disableUserDraft } = useDraft(draftId)
-  const { deleteObject: deleteLeague } = useDeleteDraft()
-  const { updateObject: updateDraft } = useUpdateDraft()
+  const {
+    draft: { disableUserDraft },
+    isCommissioner,
+    canEditDraft,
+    updateDraft,
+    deleteDraft
+  } = useDraft(draftId)
   const [draftPicks, setDraftPicks] = useState<DraftPickArgs[]>([])
   const [editOrder, setEditOrder] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
@@ -47,7 +51,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   }
 
   const handleDelete = async () => {
-    const res = await deleteLeague(draftId)
+    const res = await deleteDraft(draftId)
     if ('error' in res) return
     window.location.reload()
   }

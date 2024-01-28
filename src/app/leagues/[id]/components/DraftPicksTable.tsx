@@ -30,7 +30,7 @@ const DraftPicksTable: React.FC<Props> = ({
   onOrderChange,
   onDraftPicksChanged
 }) => {
-  const { isCommissioner, teamsCount, rounds, canEditDraft } = useDraft(draftId)
+  const { isCommissioner, teamsCount, draft: { rounds }, canEditDraft } = useDraft(draftId)
   const { draftPicks, updateDraftPick, invalidateDraftPick } = useDraftPicks(draftId)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
