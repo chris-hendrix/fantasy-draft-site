@@ -94,6 +94,9 @@ const DraftPicksTable: React.FC<Props> = ({
         >
           {hoveredPickId === pick.id && (
             <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-200 text-xs">
+              <label className="text-xs w-fit p-0.5 text-neutral-content bold" >
+                {pick?.team?.name || ''}
+              </label>
               <PositionsTable draftId={pick.draftId} teamId={pick.teamId} />
             </div>
           )}

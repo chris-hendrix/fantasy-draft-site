@@ -1,6 +1,5 @@
 'use client'
 
-import { useDraft } from '@/hooks/draft'
 import { PlayerArgs } from '@/types'
 import { getPlayersByPosition } from '@/utils/draft'
 import Table, { TableColumn } from '@/components/Table'
@@ -14,9 +13,7 @@ interface Props {
 type PositionRecord = { position: string, players: PlayerArgs[] }
 
 const PositionsTable: React.FC<Props> = ({ draftId, teamId }) => {
-  const { draft } = useDraft(draftId)
   const { draftPicks } = useDraftPicks(draftId)
-  const team = draft?.draftTeams.find((dt) => dt.teamId === teamId)?.team
   const teamPicks = draftPicks?.filter((dp) => dp.teamId === teamId) || []
   const teamPlayers = teamPicks.flatMap((dp) => (dp.player ? [dp.player] : []))
   const positionMap = getPlayersByPosition(teamPlayers)
@@ -44,12 +41,7 @@ const PositionsTable: React.FC<Props> = ({ draftId, teamId }) => {
   ]
 
   return (
-    <div>
-      {team && (
-        <label className="text-xs w-fit p-0.5" >
-          {team.name}
-        </label>
-      )}
+    <div className="text-neutral-content">
       <Table columns={columns} data={data} xs minHeight={'0px'} />
     </div>
   )

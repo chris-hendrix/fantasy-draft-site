@@ -121,7 +121,7 @@ const PlayersTable: React.FC<Props> = ({
     { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
     {
       header: '',
-      hidden: !canEditDraft || disableUserDraft,
+      hidden: !canEditDraft || disableUserDraft || !draftingPick,
       renderedValue: (player) => (
         <button
           className="btn btn-xs btn-primary text-xs"

@@ -59,7 +59,7 @@ export const useTeams = (leagueId: string) => {
   const { data: teams, ...rest } = useGetTeams({
     where: { leagueId },
     include: { teamUsers: { include: { user: true } } },
-    orderBy: { name: 'asc' }
+    orderBy: [{ archivedAt: 'desc' }, { name: 'asc' }]
   })
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
   const { deleteObject: deleteTeam, isLoading: isDeleting } = useDeleteTeam()
