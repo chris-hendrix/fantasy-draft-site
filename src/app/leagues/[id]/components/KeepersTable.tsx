@@ -20,8 +20,13 @@ interface Props {
 const KeepersTable: React.FC<Props> = ({
   draftId, teamIds, edit = false, notes, onKeepersChange, showPlayerData
 }) => {
-  const { draft: { rounds, players }, isCommissioner, teamsCount } = useDraft(draftId)
-  const { data: keepers } = useGetKeepers(
+  const {
+    draft: { players },
+    isCommissioner, teamsCount,
+    isLoading:
+    isDraftLoading
+  } = useDraft(draftId)
+  const { data: keepers, isLoading: isKeepersLoading } = useGetKeepers(
     {
       where: { draftId },
       include: { team: true, player: true },
@@ -37,6 +42,8 @@ const KeepersTable: React.FC<Props> = ({
   const selectedPlayerIds = editKeepers
     ?.filter((k) => k.playerId && k.id !== editKeeperId)
     .map((k) => k.playerId || '') || []
+
+  const isLoading = isDraftLoading || isKeepersLoading
 
   useEffect(() => { keepers?.length && setEditKeepers(keepers) }, [keepers])
   useEffect(() => { onKeepersChange(editKeepers) }, [editKeepers])
@@ -162,8 +169,6 @@ const KeepersTable: React.FC<Props> = ({
     }
   ]
 
-  if (!displayKeepers?.length || !rounds) return null
-
   return (
     <>
       <Table
@@ -173,6 +178,7 @@ const KeepersTable: React.FC<Props> = ({
         maxItemsPerPage={300}
         minHeight="300px"
         notes={notes}
+        isLoading={isLoading}
       />
     </>
   )

@@ -19,6 +19,7 @@ interface Props<T> {
   minHeight?: string;
   notes?: string | ReactNode;
   rowStyle?: CssWithClassName | ((rowData: T) => CssWithClassName)
+  isLoading?: boolean
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -52,9 +53,10 @@ const Table = <T extends {}>({
   data,
   xs = false,
   maxItemsPerPage = 50,
-  minHeight = '600px',
+  minHeight = '200px',
   notes,
   rowStyle,
+  isLoading,
 }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -109,6 +111,14 @@ const Table = <T extends {}>({
   const getRowStyle = (rowData: T): CssWithClassName => {
     if (typeof rowStyle === 'function') return rowStyle(rowData)
     return rowStyle || {}
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        <div className="skeleton w-full m-2" style={{ height: minHeight }} />
+      </>
+    )
   }
 
   return (

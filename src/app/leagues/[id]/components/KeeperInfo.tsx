@@ -14,15 +14,22 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
   const {
     draft: { draftPicks, keepers, year },
     teamsCount,
-    isSessionTeam
+    isSessionTeam,
+    isLoading: isPreviousDraftLoading
   } = useDraft(draftId, { previousYear: true })
-  const { draft: { keeperEntryNote } } = useDraft(draftId)
+  const { draft: { keeperEntryNote }, isLoading: isDraftLoading } = useDraft(draftId)
   const teamKeepers = keepers?.filter((k) => isSessionTeam(k.teamId))
   const teamDraftPicks = draftPicks?.filter((dp) => isSessionTeam(dp.teamId))
   const teamDraftPickCols = teamDraftPicks &&
     getItemsInEqualColumns<DraftPickArgs>(teamDraftPicks, 3) // 2d array
 
-  if (!draftPicks || !keepers) return null
+  const isLoading = isPreviousDraftLoading || isDraftLoading
+
+  if (isLoading) {
+    return (
+      <div className="skeleton w-full h-[200px]" />
+    )
+  }
 
   return (
     <div className="text-xs flex gap-3">

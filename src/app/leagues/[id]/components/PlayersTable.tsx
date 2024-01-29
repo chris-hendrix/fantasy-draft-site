@@ -30,14 +30,21 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
   draftingPick
 }) => {
-  const { teamsCount, canEditDraft, draft: { disableUserDraft }, isSessionTeam } = useDraft(draftId)
-  const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
+  const {
+    draft: { disableUserDraft },
+    isLoading: isDraftLoading,
+    teamsCount,
+    canEditDraft,
+    isSessionTeam
+  } = useDraft(draftId)
+  const { players, isLoading: isPlayersLoading } = useGetSortedPlayers(draftId, 'Rank', 9999)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const canDraft = draftingPick && isSessionTeam(draftingPick.teamId)
+  const isLoading = isDraftLoading || isPlayersLoading
 
   const handleDraft = async () => {
     if (!draftingPick || !playerToBeDrafted) return
@@ -134,8 +141,6 @@ const PlayersTable: React.FC<Props> = ({
     }
   ]
 
-  if (!players) return null
-
   const filteredPlayers = players.filter((player) => Object
     .values(filterOptions)
     .every((filter) => filter(player)))
@@ -216,6 +221,8 @@ const PlayersTable: React.FC<Props> = ({
         rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
           className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
         })}
+        isLoading={isLoading}
+        minHeight="600px"
       />
       {draftingPick && playerToBeDrafted && (
         <ConfirmModal

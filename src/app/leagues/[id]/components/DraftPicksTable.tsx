@@ -30,8 +30,19 @@ const DraftPicksTable: React.FC<Props> = ({
   onOrderChange,
   onDraftPicksChanged
 }) => {
-  const { isCommissioner, teamsCount, draft: { rounds }, canEditDraft } = useDraft(draftId)
-  const { draftPicks, updateDraftPick, invalidateDraftPick } = useDraftPicks(draftId)
+  const {
+    draft: { rounds },
+    isLoading: isDraftLoading,
+    isCommissioner,
+    teamsCount,
+    canEditDraft
+  } = useDraft(draftId)
+  const {
+    draftPicks,
+    isLoading: isDraftPicksLoading,
+    updateDraftPick,
+    invalidateDraftPick
+  } = useDraftPicks(draftId)
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const [editPickId, setEditPickId] = useState<string | null>(null)
   const [hoveredPickId, setHoveredPickId] = useState<string | null>(null)
@@ -45,6 +56,7 @@ const DraftPicksTable: React.FC<Props> = ({
   const { send } = useSendBroadcast(draftId, 'draft')
   const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
   const draftingPick = draftPicks?.filter((p) => p.playerId === null)?.[0]
+  const isLoading = isDraftLoading || isDraftPicksLoading
 
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
   useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
@@ -66,7 +78,6 @@ const DraftPicksTable: React.FC<Props> = ({
     await send({ pickId, oldPlayerId, newPlayerId })
   }
 
-  const picks = editOrder ? editDraftPicks : draftPicks
   const columns: TableColumn<DraftPickArgs>[] = [
     {
       header: '',
@@ -137,8 +148,6 @@ const DraftPicksTable: React.FC<Props> = ({
     }
   ]
 
-  if (!picks) return null
-
   const filteredPicks = (editDraftPicks || []).filter((pick) => Object
     .values(filterOptions)
     .every((filter) => filter(pick)))
@@ -165,7 +174,7 @@ const DraftPicksTable: React.FC<Props> = ({
         <div className="w-60 card bg-base-300 p-1">
           <ChipSelect
             items={getUnique<DraftPickArgs>(
-              draftPicks,
+              draftPicks || [],
               (p) => p.teamId
             ).map((p) => ({ value: p.teamId, label: p.team.name }))}
             label="Team"
@@ -197,7 +206,7 @@ const DraftPicksTable: React.FC<Props> = ({
       </div>
       <Table
         columns={columns}
-        data={filteredPicks}
+        data={filteredPicks || []}
         xs
         maxItemsPerPage={300}
         rowStyle={(pick: DraftPickArgs) => {
@@ -206,6 +215,8 @@ const DraftPicksTable: React.FC<Props> = ({
           if (pick?.player && canEditDraft) return { className: 'bg-gray-700 italic text-gray-500' }
           return { className: '' }
         }}
+        minHeight="600px"
+        isLoading={isLoading}
       />
     </>
   )

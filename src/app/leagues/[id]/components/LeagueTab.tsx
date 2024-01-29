@@ -1,16 +1,20 @@
 'use client'
 
-import { League } from '@prisma/client'
+import { useLeague } from '@/hooks/league'
 import LeagueCard from '@/components/LeagueCard'
 
 interface LeagueTabProps {
-  league: Partial<League>;
+  leagueId: string;
 }
 
-const LeagueTab: React.FC<LeagueTabProps> = ({ league }) => (
-  <div>
-    <LeagueCard league={league} />
-  </div>
-)
+const LeagueTab: React.FC<LeagueTabProps> = ({ leagueId }) => {
+  const { league, isLoading } = useLeague(leagueId)
+  if (isLoading) return
+  return (
+    <div>
+      <LeagueCard league={league} />
+    </div>
+  )
+}
 
 export default LeagueTab

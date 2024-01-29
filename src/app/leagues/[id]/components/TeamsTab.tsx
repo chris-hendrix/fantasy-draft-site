@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { League } from '@prisma/client'
 import { useTeams, useUserTeam } from '@/hooks/team'
 import { useLeague } from '@/hooks/league'
 import TeamModal from '@/app/leagues/[id]/components/TeamModal'
@@ -13,12 +12,12 @@ import { formatDate } from '@/utils/date'
 import InviteTeamModal from '@/components/InviteTeamModal'
 
 interface Props {
-  league: League;
+  leagueId: string;
 }
 
-const TeamsTab: React.FC<Props> = ({ league }) => {
-  const { teams, deleteTeam, updateTeam, refetch } = useTeams(league.id)
-  const { team: userTeam } = useUserTeam(league.id as string)
+const TeamsTab: React.FC<Props> = ({ leagueId }) => {
+  const { teams, deleteTeam, updateTeam, refetch, isLoading } = useTeams(leagueId)
+  const { team: userTeam } = useUserTeam(leagueId)
   const { isCommissioner } = useLeague()
   const [modalOpen, setModalOpen] = useState(false)
   const [teamToDelete, setTeamToDelete] = useState<TeamArgs | null>(null)
@@ -102,10 +101,11 @@ const TeamsTab: React.FC<Props> = ({ league }) => {
         rowStyle={(team: TeamArgs) => (!team?.archivedAt ? {} : {
           className: 'bg-gray-700 italic text-gray-500'
         })}
+        isLoading={isLoading}
       />
       {modalOpen && (
         <InviteTeamModal
-          leagueId={league.id}
+          leagueId={leagueId}
           onClose={() => { setModalOpen(false); refetch() }}
         />
       )}
