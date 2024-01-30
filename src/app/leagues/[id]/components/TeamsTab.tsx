@@ -122,7 +122,7 @@ const TeamsTab: React.FC<Props> = ({ leagueId }) => {
           onClose={() => setTeamToArchive(null)}
           onConfirm={handleArchiveTeam}
         >
-          Are you sure you want to archive this team?
+          {`Are you sure you want to ${teamToArchive.archivedAt ? 'unarchive' : 'archive'} ${teamToArchive.name}?`}
         </ConfirmModal>
       )}
       {teamToDelete && (

@@ -25,7 +25,7 @@ export const PUT = routeWrapper(
     }: any = req.consumedBody
 
     // add/edit new invites
-    if (inviteEmails?.length) {
+    if (inviteEmails) {
       await checkTeamEdit(id, { commissionerOnly: true }) // commissioner only
       const inviteData: { inviteEmail: string } = inviteEmails.map(
         (email: string) => ({ inviteEmail: email })

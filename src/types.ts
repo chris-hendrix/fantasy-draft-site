@@ -28,6 +28,7 @@ export interface LeagueArgs extends League {
 
 export interface TeamUserArgs extends TeamUser {
   user: User
+  team: TeamArgs
 }
 
 export interface TeamArgs extends Team {

@@ -4,8 +4,10 @@ import { useSessionUser } from '@/hooks/user'
 import { useTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
 import Form from '@/components/Form'
+import ConfirmModal from '@/components/ConfirmModal'
 import TextInput from '@/components/TextInput'
 import { useLeague } from '@/hooks/league'
+import { TeamUserArgs } from '@/types'
 
 interface FormProps {
   teamId: string
@@ -17,6 +19,7 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
   const { user } = useSessionUser()
   const { isCommissioner } = useLeague()
   const { team, isLoading, updateTeam, isUpdating } = useTeam(teamId)
+  const [teamUserToDelete, setTeamUserToDelete] = useState<TeamUserArgs | null>(null)
   const [invitesEnabled, setInvitesEnabled] = useState(false)
   const acceptedTeamUsers = team?.teamUsers?.filter((tu) => tu.userId)
   const invitedTeamUsers = team?.teamUsers?.filter((tu) => !tu.userId)
@@ -44,13 +47,23 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
     }
   }, [invitesEnabled])
 
+  const handleDeleteTeamUser = async () => {
+    if (!teamUserToDelete) return
+    const res = await updateTeam({
+      id: teamId,
+      teamUsers: { deleteMany: { id: teamUserToDelete.id } }
+    })
+    if ('error' in res) return
+    setTeamUserToDelete(null)
+  }
+
   const onSubmit = async (data: { [x: string]: any }) => {
     const { name, inviteEmails } = data
 
     const res = await updateTeam({
       id: teamId,
       name: String(name),
-      inviteEmails: invitesEnabled ? (inviteEmails || undefined) : undefined
+      inviteEmails: invitesEnabled ? (inviteEmails || []) : undefined
     })
 
     if ('error' in res) return
@@ -58,6 +71,16 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
   }
 
   if (!user || isLoading) return <></>
+
+  if (teamUserToDelete) {
+    const { user: userToDelete, team: teamToDelete } = teamUserToDelete
+    return <ConfirmModal
+      onConfirm={handleDeleteTeamUser}
+      onClose={() => setTeamUserToDelete(null)}
+    >
+      {`Remove ${userToDelete.name || userToDelete.email} from ${teamToDelete.name}?`}
+    </ConfirmModal >
+  }
 
   return (
     <Modal title={'Edit team'} onClose={onClose}>
@@ -73,8 +96,16 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
               Users
             </label>
             {acceptedTeamUsers.map((tu) => (
-              <div key={tu.id} className="" >
-                ✅&nbsp;{tu.user.name || tu.user.email}
+              <div key={tu.id} className="flex gap-2 items-center" >
+                <span>✅ {tu.user.name || tu.user.email}</span>
+                {isCommissioner && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-square btn-sm"
+                    onClick={() => setTeamUserToDelete(tu)}
+                  >🗑️
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -84,7 +115,7 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
           required
           validate={(value: string) => value.length > 1 || 'Too short'}
         />
-        {invitesEnabled && fieldArray.fields.map((item, index) => (
+        {isCommissioner && invitesEnabled && fieldArray.fields.map((item, index) => (
           <div key={item.id}>
             <TextInput
               name={`inviteEmails[${index}]`}
@@ -93,16 +124,16 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
               typeOverride="email"
               disabled={isUpdating}
             />
-            <div className="flex gap-2 -mt-4 justify-end">
+            <div className="flex gap-1 -mt-4 justify-end">
               <button
-                disabled={index === TEAM_USER_LIMIT}
-                className="btn btn-xs btn-primary"
-                onClick={() => { fieldArray.append('') }}>
+                disabled={index !== fieldArray.fields.length - 1 || index === TEAM_USER_LIMIT}
+                className="btn btn-xs btn-ghost"
+                onClick={() => fieldArray.append('')}>
                 ➕
               </button>
               <button
-                disabled={index === 0}
-                className="btn btn-xs btn-error"
+                disabled={!acceptedTeamUsers?.length && index === 0}
+                className="btn btn-xs btn-ghost"
                 onClick={() => fieldArray.remove(index)}
               >
                 ➖
@@ -113,7 +144,7 @@ const TeamModal: React.FC<FormProps> = ({ teamId, onClose }) => {
         {isCommissioner && (
           <div className="mb-2">
             <button
-              className="btn btn-xs btn-secondary mb-2 w-24"
+              className="btn btn-sm btn-secondary mb-2 w-24"
               type="button"
               onClick={() => setInvitesEnabled(!invitesEnabled)}
             >

@@ -58,7 +58,7 @@ export const useLeagueTeams = (leagueId: string) => {
 export const useTeams = (leagueId: string) => {
   const { data: teams, ...rest } = useGetTeams({
     where: { leagueId },
-    include: { teamUsers: { include: { user: true } } },
+    include: { teamUsers: { include: { user: true, team: true } } },
     orderBy: [{ archivedAt: 'desc' }, { name: 'asc' }]
   })
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
@@ -71,7 +71,7 @@ export const useTeam = (teamId: string) => {
   const { data: team, ...rest } = useGetTeam({
     id: teamId,
     queryParams: {
-      include: { teamUsers: { include: { user: true } } }
+      include: { teamUsers: { include: { user: true, team: true } } }
     }
   })
 
