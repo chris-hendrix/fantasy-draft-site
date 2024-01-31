@@ -15,16 +15,23 @@ export const checkLeagueMember = async (leagueId: string) => {
   if (!commissioner || !team) throw new ApiError('Unauthorized', 401)
 }
 
-export const checkTeamEdit = async (teamId: string, commissionerOnly: boolean = false) => {
+type CheckTeamEditOptions = {
+  commissionerOnly?: boolean
+  inviteEmail?: string
+}
+export const checkTeamEdit = async (teamId: string, options: CheckTeamEditOptions = {}) => {
+  const { commissionerOnly, inviteEmail } = { ...options }
   const session = await getServerSession(authOptions)
   if (!session) throw new ApiError('Unauthorized', 401)
   const userId = session.user.id
-  const team = !commissionerOnly && await prisma.team.findFirst({
-    where: { id: teamId, teamUsers: { every: { userId: String(userId) } } }
+
+  const teamUser = !commissionerOnly && await prisma.teamUser.findFirst({
+    where: { teamId, OR: [{ userId }, { inviteEmail }] },
+    include: { team: true }
   })
 
   // check for commissioner
-  if (!team) {
+  if (!teamUser) {
     const league = await prisma.league.findFirst({
       where: { teams: { some: { id: teamId } } }
     })
@@ -33,7 +40,7 @@ export const checkTeamEdit = async (teamId: string, commissionerOnly: boolean = 
     })
     if (!commissioner) throw new ApiError('Unauthorized', 401)
   }
-  return { user: session.user, team }
+  return { user: session.user, team: teamUser ? teamUser.team : null }
 }
 
 export const checkLeagueCommissioner = async (leagueId: string) => {

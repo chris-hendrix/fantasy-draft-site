@@ -93,17 +93,18 @@ model Commissioner {
 }
 
 model Team {
-  id         String      @id @default(cuid())
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  leagueId   String
-  name       String
-  archived   Boolean     @default(false)
-  league     League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  teamUsers  TeamUser[]
-  draftTeams DraftTeam[]
-  draftPicks DraftPick[]
-  keeper     Keeper[]
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  leagueId     String
+  name         String
+  archivedAt   DateTime?
+  league       League        @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  teamUsers    TeamUser[]
+  draftTeams   DraftTeam[]
+  draftPicks   DraftPick[]
+  keeper       Keeper[]
+  savedPlayers SavedPlayer[]
 
   @@unique([leagueId, name])
 }
@@ -177,15 +178,16 @@ model DraftPick {
 }
 
 model Player {
-  id         String      @id @default(cuid())
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  draftId    String      @map("draft_id")
-  name       String
-  data       Json?
-  draft      Draft       @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  draftPicks DraftPick[]
-  keeper     Keeper[]
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  draftId      String        @map("draft_id")
+  name         String
+  data         Json?
+  draft        Draft         @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  draftPicks   DraftPick[]
+  keepers      Keeper[]
+  savedPlayers SavedPlayer[]
 }
 
 model Keeper {
@@ -202,6 +204,21 @@ model Keeper {
   player    Player?  @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
 
   @@unique([draftId, playerId])
+}
+
+model SavedPlayer {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  teamId      String   @map("team_id")
+  playerId    String?  @map("player_id")
+  order       Int?
+  isDraftable Boolean?
+  notes       String?
+  team        Team     @relation(fields: [teamId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  player      Player?  @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  @@unique([teamId, playerId])
 }
 
 enum Sport {

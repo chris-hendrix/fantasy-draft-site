@@ -6,7 +6,7 @@ export interface TableColumn<T> {
   value?: (rowData: T) => string | number | null | undefined;
   hidden?: boolean;
   sort?: (a: T, b: T) => number;
-  cellStyle?: CSSProperties
+  cellStyle?: CssWithClassName
 }
 
 type CssWithClassName = CSSProperties & { className?: string }
@@ -19,6 +19,7 @@ interface Props<T> {
   minHeight?: string;
   notes?: string | ReactNode;
   rowStyle?: CssWithClassName | ((rowData: T) => CssWithClassName)
+  isLoading?: boolean
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -52,9 +53,10 @@ const Table = <T extends {}>({
   data,
   xs = false,
   maxItemsPerPage = 50,
-  minHeight = '600px',
+  minHeight = '200px',
   notes,
   rowStyle,
+  isLoading,
 }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -111,6 +113,14 @@ const Table = <T extends {}>({
     return rowStyle || {}
   }
 
+  if (isLoading) {
+    return (
+      <>
+        <div className="skeleton w-full m-2" style={{ height: minHeight }} />
+      </>
+    )
+  }
+
   return (
     <div className="overflow-x-auto w-full" style={{ minHeight }}>
       <table className={`table-zebra table${xs ? ' table-xs' : ''}`}>
@@ -135,15 +145,18 @@ const Table = <T extends {}>({
         <tbody>
           {visibleData?.map((row, rowIndex) => (
             <tr key={rowIndex} className={'hover'}>
-              {visibleColumns.map((column, colIndex) => (
-                <td
-                  className={getRowStyle(row)?.className}
-                  key={colIndex}
-                  style={{ ...column.cellStyle, ...getRowStyle(row) }}
-                >
-                  {renderCell(row, column)}
-                </td>
-              ))}
+              {visibleColumns.map((column, colIndex) => {
+                const { className, ...style } = column.cellStyle || {}
+                return (
+                  <td
+                    className={className || getRowStyle(row)?.className || ''}
+                    key={colIndex}
+                    style={{ ...style, ...getRowStyle(row) }}
+                  >
+                    {renderCell(row, column)}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>

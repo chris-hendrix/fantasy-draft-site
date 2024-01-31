@@ -1,31 +1,32 @@
 import { useForm } from 'react-hook-form'
-import { useLeague } from '@/hooks/league'
 import { useSessionUser } from '@/hooks/user'
+import { useAddTeam } from '@/hooks/team'
 import Modal from '@/components/Modal'
 import Form from '@/components/Form'
 import TextInput from '@/components/TextInput'
 
 interface FormProps {
+  leagueId: string
   onClose: () => void;
-  leagueId?: string
 }
 
-const LeagueModal: React.FC<FormProps> = ({ onClose, leagueId }) => {
+const InviteTeamModal: React.FC<FormProps> = ({ leagueId, onClose }) => {
   const { user } = useSessionUser()
-  const { league, addLeague, isAdding, updateLeague, isUpdating } = useLeague()
+  const { addObject: addTeam, isLoading } = useAddTeam()
 
   const form = useForm({
     mode: 'onChange',
-    defaultValues: { name: league?.name || '' },
+    defaultValues: { name: '', email: '' },
   })
-  const isLoading = isAdding || isUpdating
 
   const onSubmit = async (data: { [x: string]: unknown }) => {
-    const { name } = data
+    const { name, email } = data
 
-    const res = leagueId
-      ? await updateLeague({ id: leagueId, name: name as string })
-      : await addLeague({ name: name as string, sport: 'baseball' }) // TODO add multi sport
+    const res = await addTeam({
+      name: name as string,
+      leagueId,
+      inviteEmail: email as string,
+    })
 
     if ('error' in res) return
     onClose()
@@ -34,7 +35,7 @@ const LeagueModal: React.FC<FormProps> = ({ onClose, leagueId }) => {
   if (!user) return <></>
 
   return (
-    <Modal title={'Create league'} onClose={onClose}>
+    <Modal title={'Invite team'} onClose={onClose}>
       <Form
         form={form}
         onSubmit={onSubmit}
@@ -43,11 +44,13 @@ const LeagueModal: React.FC<FormProps> = ({ onClose, leagueId }) => {
       >
         <TextInput
           name="name" form={form} disabled={isLoading}
-          required validate={(value: string) => value.length > 4 || 'Too short'}
+          required
+          validate={(value: string) => value.length > 1 || 'Too short'}
         />
+        <TextInput name="email" form={form} disabled={isLoading} labelOverride="Invite email" />
       </Form>
     </Modal>
   )
 }
 
-export default LeagueModal
+export default InviteTeamModal

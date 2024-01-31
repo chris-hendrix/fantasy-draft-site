@@ -12,7 +12,8 @@ export const {
   useDeleteObject: useDeleteDraft,
   useInvalidateObjects: useInvalidateDrafts
 } = getCrudHooks<DraftArgs, Prisma.DraftFindManyArgs & {
-  getAllData?: boolean
+  getAllData?: boolean,
+  previousYear?: boolean,
 }, Prisma.DraftUpdateInput & {
   keeperCount?: number,
   setKeepers?: boolean,
@@ -21,18 +22,24 @@ export const {
   startDraft?: boolean;
 }>(draftApi)
 
-export const useDraftData = (draftId: string, skip: boolean = false) => {
+type UseDraftOptions = {
+  skip?: boolean
+  previousYear?: boolean
+}
+
+export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
+  const { skip, previousYear } = { skip: false, previousYear: false, ...options }
   const { user } = useSessionUser()
   const userId = user?.id
-  const { data: draft, isLoading, isSuccess, error, refetch } = useGetDraft({
+  const { data: draft, isSuccess, ...rest } = useGetDraft({
     id: draftId,
-    queryParams: { getAllData: true }
+    queryParams: { getAllData: true, previousYear }
   }, { skip })
 
   const keepersLockDate = draft?.keepersLockDate
   const draftLockDate = draft?.draftLockDate
   const isCommissioner = Boolean(
-    user && draft?.league.commissioners.find((c) => c.userId === user?.id)
+    user && draft?.league?.commissioners.find((c) => c.userId === user?.id)
   )
   const canEditDraft = Boolean(
     (isSuccess && !draftLockDate) || (draftLockDate && draftLockDate > new Date())
@@ -41,31 +48,31 @@ export const useDraftData = (draftId: string, skip: boolean = false) => {
     (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
   )
 
-  const sessionTeam = draft?.draftTeams.filter(
+  const sessionTeamIds = draft?.draftTeams?.filter(
     (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === userId))
-  )?.[0]?.team || null
+  )?.map((tu) => tu.team.id) || []
 
+  const isSessionTeam = (teamId: string | null | undefined) => {
+    if (!teamId) return false
+    const draftTeamUsers = draft?.draftTeams?.flatMap((dt) => dt.team.teamUsers)
+    return draftTeamUsers?.some((tu) => Boolean(tu.userId === userId && tu.teamId === teamId))
+  }
+
+  const { updateObject: updateDraft, isLoading: isUpdating } = useUpdateDraft()
+  const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
   return {
-    isLoading,
+    draft: draft || {},
     isSuccess,
-    error,
     isCommissioner,
     canEditKeepers,
     canEditDraft,
     teamsCount: draft?.draftTeams?.length,
-    sessionTeam,
-    refetch,
-    ...draft
+    isSessionTeam,
+    sessionTeamIds,
+    updateDraft,
+    isUpdating,
+    deleteDraft,
+    isDeleting,
+    ...rest
   }
-}
-
-export const usePreviousDraftData = (currentDraftId: string) => {
-  const { leagueId, year } = useDraftData(currentDraftId)
-  const { data: drafts } = useGetDrafts(
-    { where: { leagueId: String(leagueId), year: Number(year) - 1 } },
-    { skip: !leagueId || !year }
-  )
-  const draftId = drafts?.[0]?.id
-  const result = useDraftData(draftId as string, !draftId)
-  return result
 }

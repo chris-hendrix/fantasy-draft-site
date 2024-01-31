@@ -1,19 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { useGetSortedPlayers, useInvalidatePlayer } from '@/hooks/player'
-import { useDraftData } from '@/hooks/draft'
+import { useSortedPlayers } from '@/hooks/player'
+import { useDraft } from '@/hooks/draft'
 import { useSendBroadcast } from '@/hooks/supabase'
 import { useUpdateDraftPick } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
-import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS } from '@/utils/draft'
+import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS, getPlayerPositions } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
 import ChipSelect from '@/components/ChipSelect'
 import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
 
 const MAX_ROUND_FILTER = 30
+
+const ICONS = {
+  true: '🟢',
+  false: '🔴',
+  null: '⚫'
+}
 
 interface Props {
   draftId: string;
@@ -30,14 +36,22 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
   draftingPick
 }) => {
-  const { teamsCount, sessionTeam, canEditDraft, disableUserDraft } = useDraftData(draftId)
-  const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
-  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+  const {
+    draft: { disableUserDraft },
+    isLoading: isDraftLoading,
+    teamsCount,
+    canEditDraft,
+    sessionTeamIds,
+    isSessionTeam
+  } = useDraft(draftId)
+  const { players, isLoading: isPlayersLoading, invalidatePlayer, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
-  const canDraft = draftingPick && sessionTeam && draftingPick.teamId === sessionTeam.id
+  const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
+  const canDraft = draftingPick && isSessionTeam(draftingPick.teamId)
+  const isLoading = isDraftLoading || isPlayersLoading
 
   const handleDraft = async () => {
     if (!draftingPick || !playerToBeDrafted) return
@@ -50,14 +64,24 @@ const PlayersTable: React.FC<Props> = ({
     await send({ pickId, oldPlayerId: null, newPlayerId })
   }
 
+  const handleSavePlayer = async (player: PlayerArgs) => {
+    const savedPlayer = player.savedPlayers.find((sp) => isSessionTeam(sp.teamId))
+    const isDraftable = savedPlayer?.isDraftable
+    if (!sessionTeamId) return
+    await updatePlayer({
+      id: player.id,
+      savedPlayers: {
+        delete: savedPlayer ? { id: savedPlayer.id } : undefined,
+        create: isDraftable === false
+          ? { teamId: sessionTeamId, isDraftable: null }
+          : { teamId: sessionTeamId, isDraftable: !isDraftable }
+      }
+    })
+  }
+
   const getPlayerRound = (player: PlayerArgs) => {
     const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)
     return Math.min(round, MAX_ROUND_FILTER)
-  }
-
-  const getPlayerPositions = (player: PlayerArgs) => {
-    const positions = String(getPlayerData(player, 'Positions'))
-    return positions.split(',')
   }
 
   const getUniqueTeamOptions = () => {
@@ -72,13 +96,34 @@ const PlayersTable: React.FC<Props> = ({
   }
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    saved: () => true,
     round: () => true,
     team: () => true,
     position: () => true,
     playerSearch: () => true
   })
 
+  const getIcon = (isDraftable: boolean | undefined | null) => {
+    if (isDraftable === undefined || isDraftable === null) return ICONS.null
+    return isDraftable ? ICONS.true : ICONS.false
+  }
+
+  const getIsDraftable = (player: PlayerArgs) => {
+    const savedPlayer = player?.savedPlayers?.find((sp) => isSessionTeam(sp.teamId))
+    return !savedPlayer ? null : savedPlayer.isDraftable
+  }
+
   const columns: TableColumn<PlayerArgs>[] = [
+    {
+      header: '',
+      hidden: !sessionTeamId,
+      value: (player) => getIcon(getIsDraftable(player)),
+      renderedValue: (player) => (
+        <div onClick={() => handleSavePlayer(player)} className="text-[0.5rem] flex text-center cursor-pointer">
+          {getIcon(getIsDraftable(player))}
+        </div>
+      )
+    },
     {
       header: 'Rank',
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'Rank')), teamsCount)
@@ -126,7 +171,7 @@ const PlayersTable: React.FC<Props> = ({
     { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
     {
       header: '',
-      hidden: !canEditDraft || disableUserDraft,
+      hidden: !canEditDraft || disableUserDraft || !draftingPick,
       renderedValue: (player) => (
         <button
           className="btn btn-xs btn-primary text-xs"
@@ -139,8 +184,6 @@ const PlayersTable: React.FC<Props> = ({
     }
   ]
 
-  if (!players) return null
-
   const filteredPlayers = players.filter((player) => Object
     .values(filterOptions)
     .every((filter) => filter(player)))
@@ -148,6 +191,24 @@ const PlayersTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex gap-1">
+        {sessionTeamId && <div className="w-16 card bg-base-300 p-1">
+          <ChipSelect
+            label="Saved"
+            items={[
+              { label: ICONS.true, value: true },
+              { label: ICONS.false, value: false },
+              { label: ICONS.null, value: null }
+            ]}
+            onSelection={({ selectedValues }) => {
+              setFilterOptions({
+                ...filterOptions,
+                saved: selectedValues?.length
+                  ? (player) => selectedValues.includes(getIsDraftable(player))
+                  : () => true
+              })
+            }}
+          />
+        </div>}
         <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             label="Rank Round"
@@ -221,6 +282,8 @@ const PlayersTable: React.FC<Props> = ({
         rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
           className: canEditDraft ? 'bg-gray-700 italic text-gray-500' : ''
         })}
+        isLoading={isLoading}
+        minHeight="600px"
       />
       {draftingPick && playerToBeDrafted && (
         <ConfirmModal

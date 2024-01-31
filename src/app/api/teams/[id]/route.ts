@@ -17,25 +17,33 @@ export const PUT = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
     if (!id) throw new ApiError('Team id required', 400)
-    const { user } = await checkTeamEdit(id)
     const {
-      oldInviteEmail,
-      newInviteEmail,
+      inviteEmails,
       acceptEmail,
       declineEmail,
       ...data
     }: any = req.consumedBody
 
-    // change invite email
-    if (oldInviteEmail && newInviteEmail) {
-      const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: oldInviteEmail } })
-      teamUser && await prisma.teamUser.update({
-        where: { id: teamUser.id },
-        data: { inviteEmail: newInviteEmail }
+    // add/edit new invites
+    if (inviteEmails) {
+      await checkTeamEdit(id, { commissionerOnly: true }) // commissioner only
+      const inviteData: { inviteEmail: string } = inviteEmails.map(
+        (email: string) => ({ inviteEmail: email })
+      )
+      await prisma.team.update({
+        where: { id },
+        data: {
+          teamUsers: {
+            deleteMany: { userId: null }, // delete and replace non-user invites
+            createMany: { data: inviteData }
+          }
+        }
       })
     }
+
     // accepting invite
     if (acceptEmail) {
+      const { user } = await checkTeamEdit(id, { inviteEmail: acceptEmail })
       const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: acceptEmail } })
       teamUser && await prisma.teamUser.update({
         where: { id: teamUser.id },
@@ -45,6 +53,7 @@ export const PUT = routeWrapper(
 
     // declining invite
     if (declineEmail) {
+      const { user } = await checkTeamEdit(id, { inviteEmail: declineEmail })
       const teamUser = await prisma.teamUser.findFirst({ where: { inviteEmail: declineEmail } })
       teamUser && await prisma.teamUser.update({
         where: { id: teamUser.id },
@@ -52,6 +61,7 @@ export const PUT = routeWrapper(
       })
     }
 
+    await checkTeamEdit(id)
     const updatedTeam = await prisma.team.update({
       where: { id },
       data,
@@ -64,7 +74,7 @@ export const DELETE = routeWrapper(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
     const { id } = params
     if (!id) throw new ApiError('Team id required', 400)
-    await checkTeamEdit(id, true) // commissioner only
+    await checkTeamEdit(id, { commissionerOnly: true }) // commissioner only
     const deletedTeam = await prisma.team.delete({ where: { id } })
     return NextResponse.json(deletedTeam)
   }

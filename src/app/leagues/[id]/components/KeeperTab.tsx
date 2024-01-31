@@ -1,4 +1,4 @@
-import { useUpdateDraft, useDraftData } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import { useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -16,7 +16,6 @@ interface Props {
 
 const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const defaultKeeperCount = 5 // TODO add to league model
-  const { updateObject: updateDraft } = useUpdateDraft({ errorMessage: 'Invalid keepers' })
   const { invalidateObjects: invalidateKeepers } = useInvalidateKeepers()
   const { currentDraftId } = useCurrentDraftId()
   const [note, setNote] = useState('')
@@ -30,11 +29,13 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
   const [allKeepers, setAllKeepers] = useState<KeeperArgs[]>([])
 
   const {
-    sessionTeam,
+    isSessionTeam,
+    sessionTeamIds,
     isCommissioner,
     canEditKeepers,
-    keeperEntryNote,
-  } = useDraftData(currentDraftId as string, !currentDraftId)
+    updateDraft,
+    draft: { keeperEntryNote },
+  } = useDraft(currentDraftId as string, { skip: !currentDraftId })
 
   const handleClose = () => {
     setGenerateModalOpen(false)
@@ -55,7 +56,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
 
     const res = await updateDraft({
       id: currentDraftId,
-      teamKeepers: teamKeepers.filter((k) => k.teamId === sessionTeam.id)
+      teamKeepers: teamKeepers.filter((k) => isSessionTeam(k.teamId))
     })
     if ('error' in res) return
     invalidateKeepers()
@@ -126,7 +127,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           </button>
         </div>
       }
-      {currentDraftId && sessionTeam && canEditKeepers && (
+      {currentDraftId && sessionTeamIds && canEditKeepers && (
         <>
           <h2 className="text-lg font-bold my-6">📝 Keeper Entry</h2>
           <div className="flex gap-2 mb-2">
@@ -137,7 +138,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           <div className="flex flex-row">
             <KeepersTable
               draftId={currentDraftId}
-              teamId={sessionTeam.id}
+              teamIds={sessionTeamIds}
               edit={teamEdit && canEditKeepers}
               onKeepersChange={setTeamKeepers}
               showPlayerData

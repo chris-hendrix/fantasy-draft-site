@@ -14,6 +14,7 @@ import { useSignOut } from '@/hooks/session'
 import { useAlert } from '@/hooks/app'
 import InviteModal from '@/components/InviteModal'
 import { useInviteTeams } from '@/hooks/team'
+import { NODE_ENV } from '@/config'
 
 import Menu from '@/icons/Menu'
 
@@ -133,6 +134,7 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
         <div className="navbar-end">
+          {NODE_ENV !== 'production' && <div className="badge badge-error badge-lg">{NODE_ENV}</div>}
           <UserDropdown />
         </div>
       </div>

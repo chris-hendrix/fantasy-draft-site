@@ -2,7 +2,7 @@
 
 import { useState, ChangeEvent } from 'react'
 import { useAddDraft, useInvalidateDrafts } from '@/hooks/draft'
-import { useDeleteLeague, useLeagueData } from '@/hooks/league'
+import { useDeleteLeague, useLeague } from '@/hooks/league'
 import { useCurrentDraftId } from '@/hooks/app'
 import Modal from '@/components/Modal'
 import DraftImportModal from './DraftImportModal'
@@ -15,7 +15,7 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
   const currentYear = new Date().getFullYear()
   const defaultRounds = 22 // TODO add to league model
 
-  const { data: league } = useLeagueData()
+  const { data: league } = useLeague()
   const { addObject: addDraft } = useAddDraft()
   const { deleteObject: deleteLeague } = useDeleteLeague()
   const { invalidateObjects: invalidateDrafts } = useInvalidateDrafts()

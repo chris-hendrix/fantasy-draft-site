@@ -1,6 +1,6 @@
 'use client'
 
-import { usePreviousDraftData, useDraftData } from '@/hooks/draft'
+import { useDraft } from '@/hooks/draft'
 import { getPlayerName, getRound } from '@/utils/draft'
 import { getItemsInEqualColumns } from '@/utils/array'
 import { DraftPickArgs } from '@/types'
@@ -11,14 +11,27 @@ interface Props {
 }
 
 const KeeperInfo: React.FC<Props> = ({ draftId }) => {
-  const { draftPicks, keepers, teamsCount, year, sessionTeam } = usePreviousDraftData(draftId)
-  const { keeperEntryNote } = useDraftData(draftId)
-  const teamKeepers = keepers?.filter((k) => k.teamId === sessionTeam?.id)
-  const teamDraftPicks = draftPicks?.filter((dp) => dp.teamId === sessionTeam?.id)
+  const {
+    draft: { draftPicks, keepers, year },
+    teamsCount,
+    isSessionTeam,
+    isLoading: isPreviousDraftLoading
+  } = useDraft(draftId, { previousYear: true })
+  const { draft: { keeperEntryNote }, isLoading: isDraftLoading } = useDraft(draftId)
+  const teamKeepers = keepers?.filter((k) => isSessionTeam(k.teamId))
+  const teamDraftPicks = draftPicks?.filter((dp) => isSessionTeam(dp.teamId))
   const teamDraftPickCols = teamDraftPicks &&
     getItemsInEqualColumns<DraftPickArgs>(teamDraftPicks, 3) // 2d array
 
-  if (!draftPicks || !keepers) return null
+  const isLoading = isPreviousDraftLoading || isDraftLoading
+
+  if (isLoading) {
+    return (
+      <div className="skeleton w-full h-[200px]" />
+    )
+  }
+
+  if (!isLoading && !teamDraftPickCols) return null
 
   return (
     <div className="text-xs flex gap-3">
@@ -31,7 +44,7 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
       <div className="card flex flex-col items-center bg-base-300 p-4">
         <h2 className="font-bold mb-2">{`${year} Keepers`}</h2>
         <div>
-          {teamKeepers.map((k) => (
+          {teamKeepers?.map((k) => (
             <div key={k.id}>
               {`Rd ${k.round} - ${getPlayerName(k.player) || ''} - ${k.keeps} kps`}
             </div>
@@ -41,7 +54,7 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
       <div className="card flex flex-col items-center bg-base-300 p-4">
         <h2 className="font-bold mb-2">{`${year} Draft`}</h2>
         <div className="text-xs flex gap-2">
-          {teamDraftPickCols.map((col, i) => (
+          {teamDraftPickCols?.map((col, i) => (
             <div key={`$col-${i}`}>
               {col.map((dp) => (
                 <div key={dp.id}>

@@ -8,15 +8,17 @@ type Props = {
   disabled?: boolean,
   multiline?: boolean,
   validate?: ((value: string) => any) | null,
-  labelOverride?: string
+  labelOverride?: string,
+  typeOverride?: string
   required?: boolean
 }
 
 const TextInput: React.FC<Props> = ({
-  name, form, disabled = false, multiline = false,
-  validate = null, labelOverride = null, required = false
+  name, form, disabled = false, multiline = false, validate = null,
+  labelOverride = null, required = false, typeOverride = null
 }) => {
   const { register, getValues, formState: { errors } } = form
+  const type = typeOverride || name
 
   const registerHelper = (options?: RegisterOptions) => {
     if (!register) return {}
@@ -34,7 +36,7 @@ const TextInput: React.FC<Props> = ({
     ...registerHelper()
   }
 
-  if (name === 'username') {
+  if (type === 'username') {
     inputProps = {
       ...inputProps,
       label: 'Username*',
@@ -46,7 +48,7 @@ const TextInput: React.FC<Props> = ({
     }
   }
 
-  if (name === 'email') {
+  if (type === 'email') {
     inputProps = {
       ...inputProps,
       label: 'Email*',
@@ -59,7 +61,7 @@ const TextInput: React.FC<Props> = ({
     }
   }
 
-  if (name === 'password') {
+  if (type === 'password') {
     inputProps = {
       ...inputProps,
       label: 'Password*',
@@ -72,7 +74,7 @@ const TextInput: React.FC<Props> = ({
     }
   }
 
-  if (name === 'confirmPassword') {
+  if (type === 'confirmPassword') {
     inputProps = {
       ...inputProps,
       label: 'Password confirmation*',
@@ -85,7 +87,7 @@ const TextInput: React.FC<Props> = ({
     }
   }
 
-  if (name === 'currentPassword') {
+  if (type === 'currentPassword') {
     inputProps = {
       ...inputProps,
       label: 'Current password*',

@@ -2,7 +2,7 @@ import React from 'react'
 import { useCombobox, useMultipleSelection } from 'downshift'
 
 interface ChipSelectOption {
-  value: string | number;
+  value: string | number | boolean | null;
   label: string | number;
 }
 // https://www.downshift-js.com/use-multiple-selection
@@ -12,7 +12,7 @@ interface Props {
   onSelection: (selection: {
     selectedItems?: ChipSelectOption[],
     selectedItem?: ChipSelectOption | null,
-    selectedValues?: (string | number)[]
+    selectedValues?: (string | number | boolean | null)[]
   }) => void;
   label?: string
   initialSelectedItems?: ChipSelectOption[];

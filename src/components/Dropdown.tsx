@@ -51,7 +51,9 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children, align = 'left-0' }
       <label tabIndex={0} onClick={handleClick}>
         {label}
       </label>
-      <ul className={`absolute ${align} menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52`}>
+      <ul
+        className={`absolute ${align} menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52`}
+      >
         {childrenWithProps}
       </ul>
     </div>
