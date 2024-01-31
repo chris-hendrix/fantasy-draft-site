@@ -54,7 +54,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
   const { skip } = { skip: false, ...options }
   const { id } = useParams()
   const { user } = useSessionUser()
-  const result = useGetLeague({
+  const { data: league, ...rest } = useGetLeague({
     id: leagueId || String(id),
     queryParams: {
       include: {
@@ -65,7 +65,6 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
     }
   }, { skip: !id || skip })
 
-  const league = result.data
   const defaultDraftId = league?.drafts[0]?.id || null
   const isCommissioner = Boolean(
     user && league?.commissioners.find((c) => c.userId === user?.id)
@@ -86,6 +85,6 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
     isAdding,
     updateLeague,
     isUpdating,
-    ...result,
+    ...rest,
   }
 }

@@ -10,6 +10,7 @@ import TeamsTab from './components/TeamsTab'
 import DraftTab from './components/DraftTab'
 import PlayerTab from './components/PlayerTab'
 import KeeperTab from './components/KeeperTab'
+import RulesTab from './components/RulesTab'
 import CommissionerTab from './components/CommissionerTab'
 
 const LeaguePage: React.FC = () => {
@@ -27,6 +28,7 @@ const LeaguePage: React.FC = () => {
     { hash: 'draft', name: 'Draft', component: <DraftTab leagueId={league.id} /> },
     { hash: 'keepers', name: 'Keepers', component: <KeeperTab leagueId={league.id} /> },
     { hash: 'history', name: 'History', component: <div className="p-5">Coming Soon!</div> },
+    { hash: 'rules', name: 'Rules', component: <RulesTab leagueId={league.id} /> },
     ...(isCommissioner && league ? [{ hash: 'players', name: 'Players', component: <PlayerTab leagueId={league.id} /> }] : []),
     ...(isCommissioner && league ? [{ hash: 'commissioner', name: 'Commissioner', component: <CommissionerTab leagueId={league.id} /> }] : []),
   ]

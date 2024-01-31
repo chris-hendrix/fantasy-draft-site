@@ -15,7 +15,7 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
   const currentYear = new Date().getFullYear()
   const defaultRounds = 22 // TODO add to league model
 
-  const { data: league } = useLeague()
+  const { league } = useLeague()
   const { addObject: addDraft } = useAddDraft()
   const { deleteObject: deleteLeague } = useDeleteLeague()
   const { invalidateObjects: invalidateDrafts } = useInvalidateDrafts()

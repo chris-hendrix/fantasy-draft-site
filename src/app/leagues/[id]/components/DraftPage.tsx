@@ -90,7 +90,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   }
 
   return (
-    <div className="flex flex-col items-start mt-2">
+    <div className="flex flex-col items-start mt-2 w-full">
       {isCommissioner &&
         <div className="flex gap-2 my-2 w-full">
           {!editOrder && <>
