@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useGetSortedPlayers, useInvalidatePlayer } from '@/hooks/player'
+import { useSortedPlayers } from '@/hooks/player'
 import { useDraft } from '@/hooks/draft'
 import { useSendBroadcast } from '@/hooks/supabase'
 import { useUpdateDraftPick } from '@/hooks/draftPick'
@@ -14,6 +14,12 @@ import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
 
 const MAX_ROUND_FILTER = 30
+
+const ICONS = {
+  true: '🟢',
+  false: '🔴',
+  null: '⚫'
+}
 
 interface Props {
   draftId: string;
@@ -35,14 +41,15 @@ const PlayersTable: React.FC<Props> = ({
     isLoading: isDraftLoading,
     teamsCount,
     canEditDraft,
+    sessionTeamIds,
     isSessionTeam
   } = useDraft(draftId)
-  const { players, isLoading: isPlayersLoading } = useGetSortedPlayers(draftId, 'Rank', 9999)
-  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+  const { players, isLoading: isPlayersLoading, invalidatePlayer, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const { send } = useSendBroadcast(draftId, 'draft')
   const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
+  const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
   const canDraft = draftingPick && isSessionTeam(draftingPick.teamId)
   const isLoading = isDraftLoading || isPlayersLoading
 
@@ -55,6 +62,21 @@ const PlayersTable: React.FC<Props> = ({
     setPlayerToBeDrafted(null)
     invalidatePlayer(newPlayerId)
     await send({ pickId, oldPlayerId: null, newPlayerId })
+  }
+
+  const handleSavePlayer = async (player: PlayerArgs) => {
+    const savedPlayer = player.savedPlayers.find((sp) => isSessionTeam(sp.teamId))
+    const isDraftable = savedPlayer?.isDraftable
+    if (!sessionTeamId) return
+    await updatePlayer({
+      id: player.id,
+      savedPlayers: {
+        delete: savedPlayer ? { id: savedPlayer.id } : undefined,
+        create: isDraftable === false
+          ? { teamId: sessionTeamId, isDraftable: null }
+          : { teamId: sessionTeamId, isDraftable: !isDraftable }
+      }
+    })
   }
 
   const getPlayerRound = (player: PlayerArgs) => {
@@ -74,13 +96,34 @@ const PlayersTable: React.FC<Props> = ({
   }
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    saved: () => true,
     round: () => true,
     team: () => true,
     position: () => true,
     playerSearch: () => true
   })
 
+  const getIcon = (isDraftable: boolean | undefined | null) => {
+    if (isDraftable === undefined || isDraftable === null) return ICONS.null
+    return isDraftable ? ICONS.true : ICONS.false
+  }
+
+  const getIsDraftable = (player: PlayerArgs) => {
+    const savedPlayer = player?.savedPlayers?.find((sp) => isSessionTeam(sp.teamId))
+    return !savedPlayer ? null : savedPlayer.isDraftable
+  }
+
   const columns: TableColumn<PlayerArgs>[] = [
+    {
+      header: '',
+      hidden: !sessionTeamId,
+      value: (player) => getIcon(getIsDraftable(player)),
+      renderedValue: (player) => (
+        <div onClick={() => handleSavePlayer(player)} className="text-[0.5rem] flex text-center cursor-pointer">
+          {getIcon(getIsDraftable(player))}
+        </div>
+      )
+    },
     {
       header: 'Rank',
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'Rank')), teamsCount)
@@ -148,6 +191,24 @@ const PlayersTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex gap-1">
+        {sessionTeamId && <div className="w-16 card bg-base-300 p-1">
+          <ChipSelect
+            label="Saved"
+            items={[
+              { label: ICONS.true, value: true },
+              { label: ICONS.false, value: false },
+              { label: ICONS.null, value: null }
+            ]}
+            onSelection={({ selectedValues }) => {
+              setFilterOptions({
+                ...filterOptions,
+                saved: selectedValues?.length
+                  ? (player) => selectedValues.includes(getIsDraftable(player))
+                  : () => true
+              })
+            }}
+          />
+        </div>}
         <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
             label="Rank Round"

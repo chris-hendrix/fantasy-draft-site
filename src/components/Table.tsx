@@ -6,7 +6,7 @@ export interface TableColumn<T> {
   value?: (rowData: T) => string | number | null | undefined;
   hidden?: boolean;
   sort?: (a: T, b: T) => number;
-  cellStyle?: CSSProperties
+  cellStyle?: CssWithClassName
 }
 
 type CssWithClassName = CSSProperties & { className?: string }
@@ -145,15 +145,18 @@ const Table = <T extends {}>({
         <tbody>
           {visibleData?.map((row, rowIndex) => (
             <tr key={rowIndex} className={'hover'}>
-              {visibleColumns.map((column, colIndex) => (
-                <td
-                  className={getRowStyle(row)?.className}
-                  key={colIndex}
-                  style={{ ...column.cellStyle, ...getRowStyle(row) }}
-                >
-                  {renderCell(row, column)}
-                </td>
-              ))}
+              {visibleColumns.map((column, colIndex) => {
+                const { className, ...style } = column.cellStyle || {}
+                return (
+                  <td
+                    className={className || getRowStyle(row)?.className || ''}
+                    key={colIndex}
+                    style={{ ...style, ...getRowStyle(row) }}
+                  >
+                    {renderCell(row, column)}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>

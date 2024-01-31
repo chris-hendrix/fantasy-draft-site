@@ -14,11 +14,14 @@ export const {
   useInvalidateObjects: useInvalidatePlayers
 } = getCrudHooks<PlayerArgs, Prisma.PlayerFindManyArgs, Prisma.PlayerUpdateInput>(playerApi)
 
-export const useGetSortedPlayers = (draftId: string, dataKey?: string, nullValue?: any) => {
+export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: any) => {
   const result = useGetPlayers(
     {
       where: { draftId },
-      include: { draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } } }
+      include: {
+        draftPicks: { include: { team: true }, orderBy: { overall: 'asc' } },
+        savedPlayers: { include: { team: true } }
+      }
     }
   )
 
@@ -31,5 +34,8 @@ export const useGetSortedPlayers = (draftId: string, dataKey?: string, nullValue
     return String(aValue).localeCompare(String(bValue))
   }) || []
 
-  return { players, ...result }
+  const { updateObject: updatePlayer, isLoading: isUpdating } = useUpdatePlayer()
+  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+
+  return { players, updatePlayer, isUpdating, invalidatePlayer, ...result }
 }

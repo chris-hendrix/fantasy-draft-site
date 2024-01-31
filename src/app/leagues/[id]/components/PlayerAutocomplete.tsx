@@ -1,6 +1,6 @@
 'use client'
 
-import { useGetSortedPlayers } from '@/hooks/player'
+import { useSortedPlayers } from '@/hooks/player'
 import { getPlayerData } from '@/utils/draft'
 import Autocomplete from '@/components/Autocomplete'
 
@@ -19,7 +19,7 @@ const PlayerAutocomplete: React.FC<Props> = ({
   initialId,
   excludeIds = []
 }) => {
-  const { players } = useGetSortedPlayers(draftId, 'Rank', 9999)
+  const { players } = useSortedPlayers(draftId, 'Rank', 9999)
 
   const options = players?.filter((p) => !excludeIds.includes(p.id)).map((player) => ({
     label: getPlayerData(player, 'PlayerInfo'),

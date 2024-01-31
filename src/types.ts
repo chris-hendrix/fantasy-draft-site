@@ -7,6 +7,7 @@ import {
   Keeper,
   League,
   Player,
+  SavedPlayer,
   Team,
   TeamUser,
 } from '@prisma/client'
@@ -27,7 +28,7 @@ export interface LeagueArgs extends League {
 }
 
 export interface TeamUserArgs extends TeamUser {
-  user: User
+  user: UserArgs
   team: TeamArgs
 }
 
@@ -58,6 +59,7 @@ export interface DraftPickArgs extends DraftPick {
 export interface PlayerArgs extends Player {
   league: LeagueArgs,
   draftPicks: DraftPickArgs[]
+  savedPlayers: SavedPlayerArgs[]
   previousDraftInfo?: { round: Number, draftPick: DraftPickArgs, keeper: KeeperArgs }
 }
 
@@ -66,6 +68,11 @@ export interface KeeperArgs extends Keeper {
   team: TeamArgs
   player: PlayerArgs | null,
   previousDraftInfo?: { round: Number, draftPick: DraftPickArgs, keeper: KeeperArgs }
+}
+
+export interface SavedPlayerArgs extends SavedPlayer {
+  team: TeamArgs
+  player: PlayerArgs,
 }
 
 export type PlayerData = { name: string, data: any } // for importing/updating players
