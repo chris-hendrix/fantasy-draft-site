@@ -16,16 +16,21 @@ const LeagueModal: React.FC<FormProps> = ({ onClose, leagueId }) => {
 
   const form = useForm({
     mode: 'onChange',
-    defaultValues: { name: league?.name || '' },
+    defaultValues: { name: league?.name || '', url: league?.url || '' },
   })
   const isLoading = isAdding || isUpdating
 
   const onSubmit = async (data: { [x: string]: unknown }) => {
-    const { name } = data
+    const { name, url } = data
+
+    const payload = {
+      name: String(name),
+      url: url ? String(url) : null,
+    }
 
     const res = leagueId
-      ? await updateLeague({ id: leagueId, name: name as string })
-      : await addLeague({ name: name as string, sport: 'baseball' }) // TODO add multi sport
+      ? await updateLeague({ id: leagueId, ...payload })
+      : await addLeague({ ...payload, sport: 'baseball' }) // TODO add multi sport
 
     if ('error' in res) return
     onClose()
@@ -34,7 +39,7 @@ const LeagueModal: React.FC<FormProps> = ({ onClose, leagueId }) => {
   if (!user) return <></>
 
   return (
-    <Modal title={'Create league'} onClose={onClose}>
+    <Modal title={leagueId ? 'Edit league' : 'Create league'} onClose={onClose}>
       <Form
         form={form}
         onSubmit={onSubmit}
@@ -43,6 +48,10 @@ const LeagueModal: React.FC<FormProps> = ({ onClose, leagueId }) => {
       >
         <TextInput
           name="name" form={form} disabled={isLoading}
+          required validate={(value: string) => value.length > 4 || 'Too short'}
+        />
+        <TextInput
+          name="url" labelOverride="League URL" form={form} disabled={isLoading}
           required validate={(value: string) => value.length > 4 || 'Too short'}
         />
       </Form>

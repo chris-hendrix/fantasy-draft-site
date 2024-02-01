@@ -40,6 +40,7 @@ const PlayersTable: React.FC<Props> = ({
     draft: { disableUserDraft },
     isLoading: isDraftLoading,
     teamsCount,
+    isComplete,
     canEditDraft,
     sessionTeamIds,
     isSessionTeam
@@ -116,7 +117,7 @@ const PlayersTable: React.FC<Props> = ({
   const columns: TableColumn<PlayerArgs>[] = [
     {
       header: '',
-      hidden: !sessionTeamId,
+      hidden: !sessionTeamId || isComplete,
       value: (player) => getIcon(getIsDraftable(player)),
       renderedValue: (player) => (
         <div onClick={() => handleSavePlayer(player)} className="text-[0.5rem] flex text-center cursor-pointer">

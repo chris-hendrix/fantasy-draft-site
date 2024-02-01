@@ -14,7 +14,7 @@ import RulesTab from './components/RulesTab'
 import CommissionerTab from './components/CommissionerTab'
 
 const LeaguePage: React.FC = () => {
-  const { league, isCommissioner, isLoading, defaultDraftId } = useLeague()
+  const { league, isCommissioner, isLoading, latestDraftId: defaultDraftId } = useLeague()
   const { setCurrentDraftId } = useCurrentDraftId()
 
   useEffect(() => { setCurrentDraftId(defaultDraftId) }, [])

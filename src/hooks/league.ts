@@ -65,7 +65,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
     }
   }, { skip: !id || skip })
 
-  const defaultDraftId = league?.drafts[0]?.id || null
+  const latestDraftId = league?.drafts[0]?.id || null
   const isCommissioner = Boolean(
     user && league?.commissioners.find((c) => c.userId === user?.id)
   )
@@ -78,7 +78,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
 
   return {
     league: league || {},
-    defaultDraftId,
+    latestDraftId,
     isCommissioner,
     isMember,
     addLeague,
