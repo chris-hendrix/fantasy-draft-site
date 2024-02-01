@@ -129,7 +129,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       }
       {currentDraftId && sessionTeamIds && canEditKeepers && (
         <>
-          <h2 className="text-lg font-bold my-6">📝 Keeper Entry</h2>
+          <h2 className="text-lg font-bold my-6 mx-2">📝 Keeper Entry</h2>
           <div className="flex gap-2 mb-2">
             {!teamEdit && <button className="btn btn-sm w-32" onClick={() => setTeamEdit(true)}>📝 Edit</button>}
             {teamEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveTeamKeepers}>💾 Save</button>}
@@ -154,7 +154,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       {currentDraftId &&
         <div className="flex flex-row h-full w-full">
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
-            <h2 className="text-lg font-bold my-6">✅ Selected Keepers</h2>
+            <h2 className="text-lg font-bold my-6 mx-2">✅ Selected Keepers</h2>
             {isCommissioner && <div className="flex gap-2 mb-2">
               {!allEdit && <button className="btn btn-sm w-32" onClick={() => setAllEdit(true)}>📝 Edit</button>}
               {allEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveAllKeepers}>💾 Save</button>}
@@ -167,7 +167,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
             />
           </div>
           <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
-            <h2 className="text-lg font-bold my-6">👥 Player Pool</h2>
+            <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
             <PlayersTable draftId={currentDraftId} hideTeamColumn />
           </div>
         </div>}

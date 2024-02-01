@@ -158,6 +158,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       }
       <div className="flex flex-row h-full w-full">
         <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
+          <h2 className="text-lg font-bold my-6 mx-2">📝 Draft</h2>
           <DraftPicksTable
             draftId={draftId}
             editOrder={editOrder}
@@ -166,6 +167,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           />
         </div>
         <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
+          <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
           <PlayersTable draftId={draftId} draftingPick={draftingPick || undefined} hideTeamColumn />
         </div>
       </div>
