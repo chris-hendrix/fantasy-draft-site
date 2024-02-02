@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URI")
+  provider  = "postgresql"
+  url       = env("DATABASE_URI")
+  directUrl = env("DIRECT_URI")
 }
 
 model Account {
