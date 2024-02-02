@@ -47,10 +47,14 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
   const canEditKeepers = Boolean(
     (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
   )
-
   const sessionTeamIds = draft?.draftTeams?.filter(
     (dt) => Boolean(dt.team.teamUsers.find((tu) => tu.userId === userId))
   )?.map((tu) => tu.team.id) || []
+
+  const isComplete = Boolean(
+    draft?.draftPicks?.length
+    && draft.draftPicks.length === draft.draftPicks.filter((dp) => Boolean(dp.playerId)).length
+  )
 
   const isSessionTeam = (teamId: string | null | undefined) => {
     if (!teamId) return false
@@ -67,6 +71,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     canEditKeepers,
     canEditDraft,
     teamsCount: draft?.draftTeams?.length,
+    isComplete,
     isSessionTeam,
     sessionTeamIds,
     updateDraft,

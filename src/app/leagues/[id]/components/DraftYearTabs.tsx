@@ -10,7 +10,7 @@ interface Props {
 }
 
 const DraftYearTabs: React.FC<Props> = ({ leagueId }) => {
-  const { league: { drafts }, isSuccess, defaultDraftId } = useLeague(leagueId)
+  const { league: { drafts }, isSuccess, latestDraftId: defaultDraftId } = useLeague(leagueId)
   const { currentDraftId, setCurrentDraftId } = useCurrentDraftId()
   const currentDraft = drafts?.find((d) => d.id === currentDraftId)
   const currentOption = currentDraft && { value: currentDraft.id, label: String(currentDraft.year) }

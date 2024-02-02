@@ -9,9 +9,17 @@ interface LeagueTabProps {
 
 const LeagueTab: React.FC<LeagueTabProps> = ({ leagueId }) => {
   const { league, isLoading } = useLeague(leagueId)
+  const { url } = league
   if (isLoading) return
   return (
-    <div>
+    <div className="flex flex-col w-full mt-8">
+      {url && <div className="bg-primary p-2 text-center text-primary-content shadow-md">
+        {'Go to your '}
+        <a className="link" href={url} target="_blank">
+          season home
+        </a>
+        {' after your draft'}
+      </div>}
       <LeagueCard league={league} />
     </div>
   )
