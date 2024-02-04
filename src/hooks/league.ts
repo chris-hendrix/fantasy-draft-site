@@ -60,7 +60,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
       include: {
         drafts: { orderBy: { year: 'desc' } },
         commissioners: { include: { user: true } },
-        teams: { include: { teamUsers: true } }
+        teams: { include: { teamUsers: true, draftTeams: true } }
       }
     }
   }, { skip: !id || skip })

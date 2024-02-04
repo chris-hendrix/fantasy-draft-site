@@ -34,7 +34,8 @@ export interface TeamUserArgs extends TeamUser {
 
 export interface TeamArgs extends Team {
   teamUsers: TeamUserArgs[]
-  league: LeagueArgs
+  league: LeagueArgs,
+  draftTeams: DraftTeamArgs[]
 }
 
 export interface DraftArgs extends Draft {
@@ -84,4 +85,10 @@ export type ImportedDraftRecord = {
   overall: number,
   playerData: any,
   keeps: number | null
+}
+
+export type ImportedResultsRecord = {
+  draftYear: number,
+  teamName: string,
+  data?: any
 }
