@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import csv from 'csvtojson'
+import { useLeague } from '@/hooks/league'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -11,15 +12,11 @@ interface Props {
 }
 
 const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
-  const [results, setResults] = useState<ImportedResultsRecord[]>([])
+  const { updateLeague, invalidateLeague } = useLeague(leagueId)
+  const [records, setRecords] = useState<ImportedResultsRecord[]>([])
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [confirmUpdate, setConfirmUpdate] = useState(false)
   const [csvString, setCsvString] = useState('')
-
-  const handleSave = async () => {
-    console.log(leagueId)
-    onClose()
-  }
 
   const columns: TableColumn<ImportedResultsRecord>[] = [
     { header: 'Year', value: ({ draftYear }) => draftYear },
@@ -27,7 +24,7 @@ const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     { header: 'Data', value: ({ data }) => JSON.stringify(data || '') },
   ]
 
-  const handleImport = async () => {
+  const handleReadCsv = async () => {
     if (!leagueId) return
     const objects = await csv({ checkType: true }).fromString(csvString)
     const imported = objects.map((obj: any) => ({
@@ -35,12 +32,19 @@ const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       draftYear: Number(obj?.draftYear || obj?.Year || ''),
       data: obj
     }))
-    setResults(imported)
+    setRecords(imported)
+  }
+
+  const handleImport = async () => {
+    const res = await updateLeague({ id: leagueId, importedResultsRecords: records })
+    if ('error' in res) return
+    invalidateLeague(leagueId)
+    onClose()
   }
 
   if (confirmOverwrite || confirmUpdate) {
     return <ConfirmModal
-      onConfirm={handleSave}
+      onConfirm={handleImport}
       onClose={() => {
         setConfirmOverwrite(false)
         setConfirmUpdate(false)
@@ -63,7 +67,7 @@ const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
       />
       <div className="flex justify-end mb-2">
         <button
-          onClick={handleImport}
+          onClick={handleReadCsv}
           className="btn btn-secondary w-32 mr-2"
           disabled={!csvString.length}
         >
@@ -72,14 +76,14 @@ const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
         <button
           onClick={() => setConfirmUpdate(true)}
           className="btn btn-primary w-32 mr-2"
-          disabled={!results?.length}
+          disabled={!records?.length}
         >
           Update
         </button>
         <button
           onClick={() => setConfirmOverwrite(true)}
           className="btn btn-error w-32 mr-2"
-          disabled={!results?.length}
+          disabled={!records?.length}
         >
           Overwrite
         </button>
@@ -87,7 +91,7 @@ const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
           Cancel
         </button>
       </div>
-      {results?.length > 0 && <Table columns={columns} data={results} />}
+      {records?.length > 0 && <Table columns={columns} data={records} />}
     </Modal>
   )
 }

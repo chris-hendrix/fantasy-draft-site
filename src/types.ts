@@ -49,6 +49,7 @@ export interface DraftArgs extends Draft {
 export interface DraftTeamArgs extends DraftTeam {
   league: LeagueArgs
   team: TeamArgs
+  draft: DraftArgs
 }
 
 export interface DraftPickArgs extends DraftPick {

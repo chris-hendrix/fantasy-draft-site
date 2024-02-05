@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma'
 import { ApiError } from '@/app/api/utils/api'
 import { getRound } from '@/utils/draft'
 import { Player } from '@prisma/client'
-import { PlayerData, ImportedDraftRecord } from '@/types'
+import { PlayerData, ImportedDraftRecord, ImportedResultsRecord } from '@/types'
 import { getUnique } from '@/utils/array'
 
 export const getAllDraftData = async (draftId: string) => {
@@ -130,4 +130,27 @@ export const importDraftData = async (leagueId: string, data: ImportedDraftRecor
 
   const result = await Promise.all(years.map((y) => createDraft(y)))
   return result
+}
+
+export const importResultsData = async (leagueId: string, records: ImportedResultsRecord[]) => {
+  const draftTeams = await prisma.draftTeam.findMany({
+    where: { draft: { leagueId } },
+    include: { draft: true, team: true }
+  })
+
+  const results = await Promise.all(records.map(({ draftYear, teamName, data }) => {
+    const draftTeam = draftTeams.find(
+      (dt) => dt.team.name === teamName && dt.draft.year === draftYear
+    )
+    if (!draftTeam) return null
+    return prisma.draftTeam.update({
+      where: { id: draftTeam.id },
+      data: {
+        seasonData: data || null,
+        seasonFinish: data?.Rank || null
+      }
+    })
+  }))
+
+  return results
 }

@@ -1,4 +1,4 @@
-import { PlayerArgs } from '@/types'
+import { DraftTeamArgs, PlayerArgs } from '@/types'
 import { JsonObject } from '@prisma/client/runtime/library'
 
 const NAME_KEY = 'PlayerInfo'
@@ -62,3 +62,12 @@ export const getPlayersByPosition = (players: PlayerArgs[]) => {
 export const createTeamIdArray = (teamIds: string[], repeats: number) => Array
   .from({ length: repeats }, () => teamIds)
   .flat()
+
+export const getDraftTeamData = (draftTeam: DraftTeamArgs | null, key: string) => {
+  if (!draftTeam?.seasonData) return ''
+  const data = draftTeam?.seasonData as JsonObject
+  if (!(key in data)) return ''
+  const value: any = data[key]
+  if (!Number.isNaN(Number(value))) return Number(value) as any
+  return value
+}

@@ -1,5 +1,5 @@
 import { leagueApi } from '@/store/league'
-import { LeagueArgs, ImportedDraftRecord } from '@/types'
+import { LeagueArgs, ImportedDraftRecord, ImportedResultsRecord } from '@/types'
 import { Prisma } from '@prisma/client'
 import { useParams } from 'next/navigation'
 import { getCrudHooks } from '@/utils/getCrudHooks'
@@ -14,7 +14,8 @@ export const {
   useInvalidateObject: useInvalidateLeague,
   useInvalidateObjects: useInvalidateLeagues
 } = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs, Prisma.LeagueUpdateInput & {
-  importedDraftRecords?: ImportedDraftRecord[]
+  importedDraftRecords?: ImportedDraftRecord[],
+  importedResultsRecords?: ImportedResultsRecord[]
 }>(leagueApi)
 
 export const useUserLeagues = () => {
@@ -75,6 +76,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
 
   const { addObject: addLeague, isLoading: isAdding } = useAddLeague()
   const { updateObject: updateLeague, isLoading: isUpdating } = useUpdateLeague()
+  const { invalidateObject: invalidateLeague } = useInvalidateLeague()
 
   return {
     league: league || {},
@@ -85,6 +87,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
     isAdding,
     updateLeague,
     isUpdating,
+    invalidateLeague,
     ...rest,
   }
 }
