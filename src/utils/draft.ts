@@ -15,6 +15,15 @@ export const POSITIONS = [
   'RP'
 ]
 
+export const getMedal = (place?: number | null) => {
+  switch (place) {
+    case 1: return '🥇'
+    case 2: return '🥈'
+    case 3: return '🥉'
+    default: return ''
+  }
+}
+
 export const getRound = (overall: number, teamsCount: number, noOverallValue: number = 99) => (
   overall ? Math.floor((overall - 1) / teamsCount) + 1 : noOverallValue
 )

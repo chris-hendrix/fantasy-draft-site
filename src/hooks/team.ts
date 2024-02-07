@@ -68,8 +68,21 @@ export const useTeams = (leagueId: string) => {
   const { deleteObject: deleteTeam, isLoading: isDeleting } = useDeleteTeam()
 
   const draftTeams = teams?.flatMap((t) => t.draftTeams) || []
+  const statDraftTeams = draftTeams
+    ?.filter((dt) => dt.seasonFinish !== null)
+    ?.sort((a, b) => ((a.seasonFinish || 99) < (b.seasonFinish || 99) ? 1 : -1))
+    ?.sort((a, b) => (a.draft.year < b.draft.year ? 1 : -1))
 
-  return { teams, ...rest, updateTeam, isUpdating, deleteTeam, isDeleting, draftTeams }
+  return {
+    teams,
+    draftTeams,
+    statDraftTeams,
+    updateTeam,
+    isUpdating,
+    deleteTeam,
+    isDeleting,
+    ...rest
+  }
 }
 
 export const useTeam = (teamId: string) => {
