@@ -33,6 +33,12 @@ const StatsTable: React.FC<Props> = ({ leagueId }) => {
     )
   }
 
+  const createColumn = (columnName: string, sortOrder: 'desc' | 'asc' = 'desc') => ({
+    header: columnName,
+    value: (draftTeam: DraftTeamArgs) => getDraftTeamData(draftTeam, columnName),
+    renderedValue: (draftTeam: DraftTeamArgs) => renderValue(draftTeam, columnName, sortOrder)
+  })
+
   const columns: TableColumn<DraftTeamArgs>[] = [
     {
       header: 'Year',
@@ -42,86 +48,22 @@ const StatsTable: React.FC<Props> = ({ leagueId }) => {
       header: 'Team',
       value: ({ team }) => team?.name || '',
     },
-    {
-      header: 'Finish',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'Rank'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'Rank', 'asc')
-    },
-    {
-      header: 'Wins',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'Wins'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'Wins')
-    },
-    {
-      header: 'Losses',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'Losses'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'Losses', 'desc')
-    },
-    {
-      header: 'Ties',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'Ties'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'Ties')
-    },
-    {
-      header: 'Pct',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'Pct'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'Pct')
-    },
-    {
-      header: 'AVG',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'AVG'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'AVG'),
-    },
-    {
-      header: 'R',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'R'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'R')
-    },
-    {
-      header: 'HR',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'HR'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'HR'),
-    },
-    {
-      header: 'RBI',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'RBI'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'RBI'),
-    },
-    {
-      header: 'SB',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'SB'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'SB'),
-    },
-    {
-      header: 'K',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'K'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'K'),
-    },
-    {
-      header: 'W',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'W'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'W'),
-    },
-    {
-      header: 'SV',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'SV'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'SV'),
-    },
-    {
-      header: 'ERA',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'ERA'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'ERA', 'asc'),
-    },
-    {
-      header: 'WHIP',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'WHIP'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'WHIP', 'asc'),
-    },
-    {
-      header: 'Moves',
-      value: (draftTeam) => getDraftTeamData(draftTeam, 'Moves'),
-      renderedValue: (draftTeam) => renderValue(draftTeam, 'Moves', 'desc'),
-    },
+    createColumn('Rank', 'asc'),
+    createColumn('Wins'),
+    createColumn('Losses', 'desc'),
+    createColumn('Ties'),
+    createColumn('Pct'),
+    createColumn('AVG'),
+    createColumn('R'),
+    createColumn('HR'),
+    createColumn('RBI'),
+    createColumn('SB'),
+    createColumn('K'),
+    createColumn('W'),
+    createColumn('SV'),
+    createColumn('ERA', 'asc'),
+    createColumn('WHIP', 'asc'),
+    createColumn('Moves', 'desc'),
   ]
 
   return (
