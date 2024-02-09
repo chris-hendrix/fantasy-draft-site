@@ -54,4 +54,20 @@ export const getItemsInEqualColumns = <T>(items: T[], numCols: number): T[][] =>
   return indices.map(({ start, end }) => items.slice(start, end + 1))
 }
 
-export default getItemsInEqualColumns
+interface TopValueOptions {
+  sortOrder?: 'asc' | 'desc';
+  count?: number;
+}
+type GetValueFunction<T> = (item: T) => number
+
+export const getTopValues = <T>(
+  list: T[],
+  getValue: GetValueFunction<T>,
+  options: TopValueOptions = {}
+): number[] => {
+  const { sortOrder = 'desc', count = 3 } = options
+  if (!list || list.length === 0) return []
+  const uniqueValues = Array.from(new Set(list.map(getValue)))
+  uniqueValues.sort((a, b) => (sortOrder === 'asc' ? a - b : b - a))
+  return uniqueValues.slice(0, count)
+}
