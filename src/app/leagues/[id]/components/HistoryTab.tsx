@@ -12,8 +12,8 @@ interface Props {
 
 const HistoryTab: React.FC<Props> = ({ leagueId }) => {
   const { isCommissioner } = useLeague(leagueId)
-  const [resultsModalOpen, setResultsModalOpen] = useState(true)
-  const [isSeason, setIsSeason] = useState(false)
+  const [resultsModalOpen, setResultsModalOpen] = useState(false)
+  const [isSeason, setIsSeason] = useState(true)
   const [isOverall, setIsOverall] = useState(false)
 
   const clearOptions = () => {
