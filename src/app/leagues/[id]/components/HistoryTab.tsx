@@ -50,18 +50,14 @@ const HistoryTab: React.FC<Props> = ({ leagueId }) => {
         >
           📊 Overall Totals
         </button>
-        <button
-          className="btn btn-sm"
-          onClick={() => console.log('TODO')}
-        >
-          📏 Season Average
-        </button>
       </div>
       <div className="w-full">
         {isSeason && <StatsTable leagueId={leagueId} />}
         {isOverall && (
           <div>
+            <h2 className="text-lg font-bold my-6 mx-2">Totals</h2>
             <AggregateStatsTable leagueId={leagueId} />
+            <h2 className="text-lg font-bold my-6 mx-2">Season Averages</h2>
             <AggregateStatsTable leagueId={leagueId} average />
           </div>
         )}

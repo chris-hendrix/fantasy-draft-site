@@ -4,6 +4,8 @@ import { useTeams } from '@/hooks/team'
 import Table, { TableColumn } from '@/components/Table'
 import { Prisma } from '@prisma/client'
 
+const PLAYOFF_TEAMS = 4 // TODO
+
 const AGGREGATE_FIELDS = [
   { name: 'K', operation: 'sum' },
   { name: 'R', operation: 'sum' },
@@ -41,6 +43,20 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
       return updatedCounts
     }, {} as { [key: string]: number })
 
+  const teamChampionships: { [key: string]: number } = statDraftTeams
+    .reduce((counts, { team: { name }, seasonFinish }) => {
+      const updatedCounts = { ...counts }
+      updatedCounts[name] = (counts[name] || 0) + Number((seasonFinish || 99) === 1)
+      return updatedCounts
+    }, {} as { [key: string]: number })
+
+  const teamPlayoffs: { [key: string]: number } = statDraftTeams
+    .reduce((counts, { team: { name }, seasonFinish }) => {
+      const updatedCounts = { ...counts }
+      updatedCounts[name] = (counts[name] || 0) + Number((seasonFinish || 99) <= PLAYOFF_TEAMS)
+      return updatedCounts
+    }, {} as { [key: string]: number })
+
   type AggregatedData = {
     [key: string]: {
       [key: string]: number;
@@ -57,6 +73,8 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
     }), {})
 
     updatedAggData[teamName].Seasons = seasons
+    updatedAggData[teamName].Championships = teamChampionships?.[teamName]
+    updatedAggData[teamName].Playoffs = teamPlayoffs?.[teamName]
 
     AGGREGATE_FIELDS.forEach((field) => {
       const seasonData = obj?.seasonData as Prisma.JsonObject
@@ -105,7 +123,15 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
     },
     {
       header: 'Seasons',
-      value: (record) => record?.Seasons || '',
+      value: (record) => record?.Seasons || 0,
+    },
+    {
+      header: 'Ships',
+      value: (record) => record?.Championships || 0,
+    },
+    {
+      header: 'Playoffs',
+      value: (record) => record?.Playoffs || 0,
     },
     createColumn('Wins'),
     createColumn('Losses'),
