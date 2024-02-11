@@ -13,7 +13,7 @@ type AggregateRecord = { [key: string]: string | number }
 const AggregateStatsTable: React.FC<Props> = ({ leagueId }) => {
   const { statDraftTeams } = useTeams(leagueId)
 
-  const teamNameCounts: { [key: string]: number } = statDraftTeams
+  const teamSeasons: { [key: string]: number } = statDraftTeams
     .reduce((counts, { team: { name } }) => {
       const updatedCounts = { ...counts }
       updatedCounts[name] = (counts[name] || 0) + 1
@@ -28,8 +28,9 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId }) => {
 
   const aggregatedData: AggregatedData = statDraftTeams?.reduce((aggData: AggregatedData, obj) => {
     if (!statDraftTeams?.length) return {}
-    const updatedAggData = { ...aggData }
     const teamName = obj.team.name
+    const seasons = teamSeasons[teamName]
+    const updatedAggData = { ...aggData }
 
     // Add numeric fields from seasonData
     const numericFields = [
@@ -56,15 +57,17 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId }) => {
       ...dt, [field.name]: 0
     }), {})
 
+    updatedAggData[teamName].Seasons = seasons
+
     numericFields.forEach((field) => {
       const seasonData = obj?.seasonData as Prisma.JsonObject
       if (typeof seasonData?.[field.name] === 'number') {
         const value = updatedAggData[teamName][field.name]
         if (field.operation === 'sum') {
           updatedAggData[teamName][field.name] = value + Number(seasonData?.[field.name])
-        } else if (field.operation === 'avg' && teamName in teamNameCounts) {
+        } else if (field.operation === 'avg' && seasons > 0) {
           updatedAggData[teamName][field.name] = value +
-            Number(seasonData?.[field.name]) / teamNameCounts[teamName]
+            Number(seasonData?.[field.name]) / seasons
         }
       }
     })
@@ -72,12 +75,18 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId }) => {
     return updatedAggData
   }, {})
 
+  console.log(aggregatedData)
+
   const data = Object.keys(aggregatedData).map((k) => ({ teamName: k, ...aggregatedData[k] }))
 
   const columns: TableColumn<AggregateRecord>[] = [
     {
       header: 'Team',
       value: (record) => record?.teamName || '',
+    },
+    {
+      header: 'Seasons',
+      value: (record) => record?.Seasons || '',
     },
     {
       header: 'Wins',
@@ -93,7 +102,14 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId }) => {
     },
     {
       header: 'Pct',
-      value: (record) => Number(record?.Pct || 0).toFixed(3)
+      value: (record) => {
+        const wins = Number(record?.Wins)
+        const losses = Number(record?.Losses)
+        const ties = Number(record?.Ties)
+        const total = wins + losses + ties
+        if (total === 0) return ''
+        return Number((wins + 0.5 * ties) / total).toFixed(3)
+      }
     },
     {
       header: 'AVG',
