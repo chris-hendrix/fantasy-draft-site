@@ -59,7 +59,12 @@ const HistoryTab: React.FC<Props> = ({ leagueId }) => {
       </div>
       <div className="w-full">
         {isSeason && <StatsTable leagueId={leagueId} />}
-        {isOverall && <AggregateStatsTable leagueId={leagueId} />}
+        {isOverall && (
+          <div>
+            <AggregateStatsTable leagueId={leagueId} />
+            <AggregateStatsTable leagueId={leagueId} average />
+          </div>
+        )}
       </div>
       {resultsModalOpen && (
         <ResultsImportModal leagueId={leagueId} onClose={() => setResultsModalOpen(false)} />
