@@ -3,6 +3,8 @@
 import { useTeams } from '@/hooks/team'
 import Table, { TableColumn } from '@/components/Table'
 import { Prisma } from '@prisma/client'
+import { getMedal } from '@/utils/draft'
+import { getTopValues } from '@/utils/array'
 
 const PLAYOFF_TEAMS = 4 // TODO
 
@@ -31,7 +33,7 @@ interface Props {
   average?: boolean
 }
 
-type AggregateRecord = { [key: string]: string | number }
+type AggregateRecord = { [key: string]: string | number | null }
 
 const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
   const { statDraftTeams } = useTeams(leagueId)
@@ -72,9 +74,9 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
       ...dt, [field.name]: 0
     }), {})
 
-    updatedAggData[teamName].Seasons = seasons
-    updatedAggData[teamName].Championships = teamChampionships?.[teamName]
-    updatedAggData[teamName].Playoffs = teamPlayoffs?.[teamName]
+    updatedAggData[teamName].Seasons = seasons || 0
+    updatedAggData[teamName].Championships = teamChampionships?.[teamName] || 0
+    updatedAggData[teamName].Playoffs = teamPlayoffs?.[teamName] || 0
 
     AGGREGATE_FIELDS.forEach((field) => {
       const seasonData = obj?.seasonData as Prisma.JsonObject
@@ -94,26 +96,58 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
 
   const getValue = (record: AggregateRecord, columnName: string, isAverage: boolean = false) => {
     const field = AGGREGATE_FIELDS.find((f) => f.name === columnName)
-    if (!record?.[columnName]) return ''
-    if (!field) return record[columnName]
+    if (!(columnName in record)) return null
+    if (!field) return Number(record[columnName])
     const value = Number(record?.[columnName])
-    if (field.operation === 'avg') return value.toFixed(3)
+    if (field.operation === 'avg') return value
     const seasons = Number(record?.Seasons)
-    if (isAverage && average) return (value / seasons).toFixed(0)
+    if (isAverage && average) return (value / seasons)
     return value
   }
 
-  const createColumn = (columnName: string) => ({
-    header: columnName,
-    value: (record: AggregateRecord) => getValue(record, columnName),
-  })
-  const data = Object.keys(aggregatedData).map((k) => ({ teamName: k, ...aggregatedData[k] }))
-  const averageData = data.map((record) => {
+  const totalData = Object.keys(aggregatedData).map((k) => ({ teamName: k, ...aggregatedData[k] }))
+  const averageData = totalData.map((record) => {
     const newRecord: AggregateRecord = { ...record }
     Object.keys(newRecord).forEach((fieldName) => {
-      newRecord[fieldName] = getValue(record, fieldName, true)
+      const value = newRecord[fieldName]
+      newRecord[fieldName] = typeof value === 'number' ? getValue(record, fieldName, true) : value
     })
     return newRecord
+  })
+  const data = average ? averageData : totalData
+
+  const formatValue = (value: number | null, columnName: string) => {
+    const field = AGGREGATE_FIELDS.find((f) => f.name === columnName)
+    if (!field) return value === null ? '' : value.toFixed(0)
+    if (field.operation === 'avg') return value?.toFixed(3) || ''
+    return value?.toFixed(0) || ''
+  }
+
+  const renderValue = (record: AggregateRecord, columnName: string, sortOrder: 'desc' | 'asc' = 'desc') => {
+    const topValues = getTopValues<AggregateRecord>(
+      data,
+      (r: AggregateRecord) => Number(getValue(r, columnName)),
+      { sortOrder }
+    )
+
+    const value = getValue(record, columnName)
+    const position = topValues.findIndex((v) => v === value) + 1
+    const medal = value ? getMedal(position) : ''
+
+    return (
+      <div
+        className="w-full text-center"
+      >
+        {formatValue(value, columnName)}
+        {medal && ` ${medal}`}
+      </div>
+    )
+  }
+
+  const createColumn = (columnName: string, sortOrder: 'desc' | 'asc' = 'desc') => ({
+    header: columnName,
+    value: (record: AggregateRecord) => getValue(record, columnName),
+    renderedValue: (record: AggregateRecord) => renderValue(record, columnName, sortOrder)
   })
 
   const columns: TableColumn<AggregateRecord>[] = [
@@ -126,40 +160,31 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
       value: (record) => record?.Seasons || 0,
     },
     {
+      ...createColumn('Championships'),
       header: 'Ships',
-      value: (record) => record?.Championships || 0,
+      hidden: average
     },
     {
-      header: 'Playoffs',
-      value: (record) => record?.Playoffs || 0,
+      ...createColumn('Playoffs'),
+      hidden: average
     },
     createColumn('Wins'),
     createColumn('Losses'),
     createColumn('Ties'),
-    {
-      header: 'Pct',
-      value: (record) => {
-        const wins = Number(record?.Wins)
-        const losses = Number(record?.Losses)
-        const ties = Number(record?.Ties)
-        const total = wins + losses + ties
-        if (total === 0) return ''
-        return Number((wins + 0.5 * ties) / total).toFixed(3)
-      }
-    },
+    createColumn('Pct'),
     createColumn('R'),
     createColumn('HR'),
     createColumn('RBI'),
     createColumn('K'),
     createColumn('W'),
     createColumn('SV'),
-    createColumn('ERA'),
-    createColumn('WHIP'),
+    createColumn('ERA', 'desc'),
+    createColumn('WHIP', 'desc'),
     createColumn('Moves'),
   ]
 
   return (
-    <Table columns={columns} data={average ? averageData : data} xs />
+    <Table columns={columns} data={data} xs />
   )
 }
 
