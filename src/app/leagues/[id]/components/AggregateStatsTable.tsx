@@ -115,6 +115,7 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
     return newRecord
   })
   const data = average ? averageData : totalData
+  data?.sort((a, b) => (String(a.teamName) < String(b.teamName) ? -1 : 1))
 
   const formatValue = (value: number | null, columnName: string) => {
     const field = AGGREGATE_FIELDS.find((f) => f.name === columnName)
@@ -162,11 +163,9 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
     {
       ...createColumn('Championships'),
       header: 'Ships',
-      hidden: average
     },
     {
       ...createColumn('Playoffs'),
-      hidden: average
     },
     createColumn('Wins'),
     createColumn('Losses'),
