@@ -9,5 +9,8 @@ export const formatDate = (dateString: string, options: Intl.DateTimeFormatOptio
   const formattedDate = new Date(dateString).toLocaleDateString('en-US', mergedOptions)
   return formattedDate
 }
-
-export default formatDate
+export const toLocaleISOString = (date: Date): string => {
+  const offset = date.getTimezoneOffset()
+  const localDate = new Date(date.getTime() - (offset * 60 * 1000))
+  return localDate.toISOString().slice(0, 16)
+}

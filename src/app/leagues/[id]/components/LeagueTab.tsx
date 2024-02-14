@@ -21,6 +21,7 @@ const LeagueTab: React.FC<LeagueTabProps> = ({ leagueId }) => {
         {' after your draft'}
       </div>}
       <LeagueCard league={league} />
+      <h2 className="text-lg font-bold my-6 mx-2">Next draft</h2>
     </div>
   )
 }
