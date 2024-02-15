@@ -4,9 +4,12 @@ import { toLocaleISOString } from '@/utils/date'
 interface DateTimePickerProps {
   initialDate?: Date;
   onChange: (date: Date) => void;
+  disabled?: boolean
 }
 
-const DateTimePicker: React.FC<DateTimePickerProps> = ({ initialDate = new Date(), onChange }) => {
+const DateTimePicker: React.FC<DateTimePickerProps> = ({
+  initialDate = new Date(), onChange, disabled = false
+}) => {
   const [date, setDate] = useState<Date>(initialDate)
 
   return (
@@ -20,6 +23,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({ initialDate = new Date(
           setDate(newDate)
           onChange(newDate)
         }}
+        disabled={disabled}
       />
     </div>
   )

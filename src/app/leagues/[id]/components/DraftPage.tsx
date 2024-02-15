@@ -18,7 +18,7 @@ interface Props {
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
   const {
-    draft: { disableUserDraft },
+    draft: { disableUserDraft, draftTime },
     isCommissioner,
     canEditDraft,
     updateDraft,
@@ -31,18 +31,21 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const [confirmKeepersModalOpen, setConfirmKeepersModalOpen] = useState(false)
   const [draftTimeModalOpen, setDraftTimeModalOpen] = useState(false)
   const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
-  const [editDraftTime, setEditDraftTime] = useState<Date>(() => {
-    const now = new Date()
-    now.setMinutes(now.getMinutes() + 30)
-    now.setMinutes(0)
-    return now
-  })
+  const [editDraftTime, setEditDraftTime] = useState<Date | null>(null)
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
 
   const draftingPick = canEditDraft && draftPicks?.filter((p) => p.playerId === null)?.[0]
 
+  const getNearestFutureHalfHour = () => {
+    const now = new Date()
+    now.setMinutes(now.getMinutes() + 30)
+    now.setMinutes(0)
+    return now
+  }
+
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
+  useEffect(() => { draftTime && setEditDraftTime(new Date(draftTime)) }, [draftTime])
 
   const handleStart = async () => {
     await updateDraft({
@@ -69,6 +72,14 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       id: draftId,
       disableUserDraft: !disableUserDraft
     })
+  }
+
+  const handleToggleDraftTime = async () => {
+    if (!editDraftTime) {
+      setEditDraftTime(getNearestFutureHalfHour())
+    } else {
+      setEditDraftTime(null)
+    }
   }
 
   const handleSave = async () => {
@@ -207,8 +218,23 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       )}
       {draftTimeModalOpen && (
         <Modal title="Select Draft Time" size="xs" onClose={() => setDraftTimeModalOpen(false)}>
-          <div className="flex flex-col w-full items-center">
-            <DateTimePicker initialDate={editDraftTime || new Date()} onChange={setEditDraftTime} />
+          <div className="flex justify-between items-center">
+            <DateTimePicker
+              initialDate={editDraftTime || getNearestFutureHalfHour()}
+              onChange={setEditDraftTime}
+              disabled={!editDraftTime}
+            />
+            <div className="form-control">
+              <label className="label cursor-pointer">
+                <span className="label-text mr-2">Enable draft time</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary"
+                  checked={Boolean(editDraftTime)}
+                  onChange={handleToggleDraftTime}
+                />
+              </label>
+            </div>
           </div>
           <div className="flex justify-end mt-4">
             <button onClick={handleSaveDraftTime} className="btn btn-primary w-32 mr-2">Save</button>
