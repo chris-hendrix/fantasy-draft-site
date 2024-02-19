@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useSortedPlayers } from '@/hooks/player'
 import { useDraft } from '@/hooks/draft'
 import { useSendBroadcast } from '@/hooks/supabase'
-import { useUpdateDraftPick } from '@/hooks/draftPick'
+import { useDraftPicks } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
 import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
 import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS, getPlayerPositions } from '@/utils/draft'
@@ -45,9 +45,9 @@ const PlayersTable: React.FC<Props> = ({
     sessionTeamIds,
     isSessionTeam
   } = useDraft(draftId)
+  const { draftPicks, updateDraftPick } = useDraftPicks(draftId)
   const { players, isLoading: isPlayersLoading, invalidatePlayer, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const { send } = useSendBroadcast(draftId, 'draft')
-  const { updateObject: updateDraftPick } = useUpdateDraftPick()
   const [hoveredPlayerId, setHoveredPlayerId] = useState<string | null>(null)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
@@ -80,8 +80,21 @@ const PlayersTable: React.FC<Props> = ({
     })
   }
 
-  const getPlayerRound = (player: PlayerArgs) => {
-    const round = getRound(Number(getPlayerData(player, 'Rank')), teamsCount)
+  const getExpectedOverall = (player: PlayerArgs) => {
+    const rank = Number(getPlayerData(player, 'Rank'))
+    const picksBefore = draftingPick?.overall
+    if (picksBefore === undefined || !draftPicks) return null
+    const draftedBefore = draftPicks
+      .filter((dp) => Boolean(dp.player) && getPlayerData(dp.player, 'Rank') < rank)
+      .length
+    const expected = rank + picksBefore - draftedBefore - 1
+    return expected
+  }
+
+  const getExpectedRound = (player: PlayerArgs) => {
+    const expected = getExpectedOverall(player)
+    if (!expected) return 99
+    const round = getRound(expected, teamsCount)
     return Math.min(round, MAX_ROUND_FILTER)
   }
 
@@ -132,6 +145,13 @@ const PlayersTable: React.FC<Props> = ({
     {
       header: 'ADP',
       value: (player) => formatRoundPick(Number(getPlayerData(player, 'ADP')), teamsCount)
+    },
+    {
+      header: 'Expected',
+      value: (player) => {
+        const expected = getExpectedOverall(player)
+        return formatRoundPick(expected || 9999, teamsCount)
+      },
     },
     {
       header: 'Player',
@@ -212,7 +232,7 @@ const PlayersTable: React.FC<Props> = ({
         </div>}
         <div className="w-24 card bg-base-300 p-1">
           <ChipSelect
-            label="Rank Round"
+            label="Expected Rnd"
             items={[
               ...Array
                 .from({ length: MAX_ROUND_FILTER - 1 })
@@ -223,7 +243,7 @@ const PlayersTable: React.FC<Props> = ({
               setFilterOptions({
                 ...filterOptions,
                 round: selectedValues?.length
-                  ? (player) => selectedValues.includes(getPlayerRound(player))
+                  ? (player) => selectedValues.includes(getExpectedRound(player))
                   : () => true
               })
             }}
