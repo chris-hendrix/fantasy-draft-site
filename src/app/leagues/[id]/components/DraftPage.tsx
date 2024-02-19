@@ -20,7 +20,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const {
     draft: { disableUserDraft, draftTime },
     isCommissioner,
-    canEditDraft,
+    isDraftOpen,
     updateDraft,
     deleteDraft
   } = useDraft(draftId)
@@ -34,8 +34,6 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const [editDraftTime, setEditDraftTime] = useState<Date | null>(null)
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
-
-  const draftingPick = canEditDraft && draftPicks?.filter((p) => p.playerId === null)?.[0]
 
   const getNearestFutureHalfHour = () => {
     const now = new Date()
@@ -119,13 +117,13 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       {isCommissioner &&
         <div className="flex gap-2 my-2 w-full">
           {!editOrder && <>
-            {!canEditDraft && <button
+            {!isDraftOpen && <button
               className="btn btn-sm btn-primary w-32"
               onClick={handleStart}
             >
               🚀 Start
             </button>}
-            {canEditDraft && <button
+            {isDraftOpen && <button
               className="btn btn-sm btn-primary w-32"
               onClick={handleLock}
             >
@@ -199,7 +197,9 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
         </div>
         <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
           <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
-          <PlayersTable draftId={draftId} draftingPick={draftingPick || undefined} hideTeamColumn />
+          <PlayersTable
+            draftId={draftId}
+            hideTeamColumn />
         </div>
       </div>
       {!draftPicks?.length &&

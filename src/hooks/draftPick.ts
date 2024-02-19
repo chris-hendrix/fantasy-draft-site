@@ -22,14 +22,16 @@ export const useDraftPicks = (draftId: string) => {
       orderBy: { overall: 'asc' }
     }
   )
+  const draftingPick = draftPicks?.filter((p) => p.playerId === null)?.[0] || null
   const { updateObject: updateDraftPick, isLoading: isUpdating } = useUpdateDraftPick()
   const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
 
   return {
     draftPicks,
-    ...rest,
+    draftingPick,
     updateDraftPick,
     isUpdating,
-    invalidateDraftPick
+    invalidateDraftPick,
+    ...rest
   }
 }

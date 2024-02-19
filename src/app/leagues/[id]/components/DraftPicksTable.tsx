@@ -35,7 +35,7 @@ const DraftPicksTable: React.FC<Props> = ({
     isLoading: isDraftLoading,
     isCommissioner,
     teamsCount,
-    canEditDraft
+    isDraftOpen: canEditDraft
   } = useDraft(draftId)
   const {
     draftPicks,

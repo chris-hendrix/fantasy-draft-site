@@ -32,7 +32,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     isSessionTeam,
     sessionTeamIds,
     isCommissioner,
-    canEditKeepers,
+    areKeepersOpen: canEditKeepers,
     updateDraft,
     draft: { keeperEntryNote },
   } = useDraft(currentDraftId as string, { skip: !currentDraftId })
