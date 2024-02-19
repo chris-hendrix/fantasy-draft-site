@@ -2,6 +2,7 @@ import { draftApi } from '@/store/draft'
 import { DraftArgs, KeeperArgs, PlayerData } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
+import { useParams } from 'next/navigation'
 import { useSessionUser } from './user'
 
 export const {
@@ -76,6 +77,38 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     isComplete,
     isSessionTeam,
     sessionTeamIds,
+    updateDraft,
+    isUpdating,
+    deleteDraft,
+    isDeleting,
+    ...rest
+  }
+}
+
+type UseDraftsOptions = {
+  skip?: boolean,
+  yearOrderBy?: 'asc' | 'desc'
+}
+
+export const useDrafts = (leagueId?: string, options: UseDraftsOptions = {}) => {
+  const { skip, yearOrderBy } = { skip: false, yearOrderBy: 'desc', ...options }
+  const { id } = useParams()
+  const { data: drafts, ...rest } = useGetDrafts({
+    where: { leagueId: leagueId || String(id) },
+    include: {
+      draftTeams: { include: { team: true } }
+    },
+    orderBy: { year: yearOrderBy as any }
+  }, { skip })
+
+  const { addObject: addDraft, isLoading: isAdding } = useAddDraft()
+  const { updateObject: updateDraft, isLoading: isUpdating } = useUpdateDraft()
+  const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
+
+  return {
+    drafts,
+    addDraft,
+    isAdding,
     updateDraft,
     isUpdating,
     deleteDraft,

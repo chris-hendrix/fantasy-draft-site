@@ -30,7 +30,7 @@ const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
       >
         <p >{`Sport: ${league.sport}`}</p>
         <p >{`Commissioners: ${commissionerNames}`}</p>
-        <p >{`Created on ${formatDate(String(league.createdAt))}`}</p>
+        <p >{`Created on ${formatDate(league.createdAt)}`}</p>
         {teamCount && <p >{`Active teams: ${teamCount}`}</p>}
       </Card>
       {modalOpen && <LeagueModal leagueId={league.id} onClose={() => setModalOpen(false)} />}

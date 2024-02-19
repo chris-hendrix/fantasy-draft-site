@@ -1,14 +1,29 @@
-export const formatDate = (dateString: string, options: Intl.DateTimeFormatOptions = {}) => {
+export const formatDate = (date: Date, options: Intl.DateTimeFormatOptions = {}) => {
   const defaultOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   }
 
   const mergedOptions = { ...defaultOptions, ...options }
-  const formattedDate = new Date(dateString).toLocaleDateString('en-US', mergedOptions)
+  const formattedDate = new Date(date).toLocaleDateString('en-US', mergedOptions)
   return formattedDate
 }
+
+export const formatDatetime = (date: Date, options: Intl.DateTimeFormatOptions = {}) => {
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  }
+
+  const mergedOptions = { ...defaultOptions, ...options }
+  const formattedDate = new Date(date).toLocaleDateString('en-US', mergedOptions)
+  return formattedDate
+}
+
 export const toLocaleISOString = (date: Date): string => {
   const offset = date.getTimezoneOffset()
   const localDate = new Date(date.getTime() - (offset * 60 * 1000))
