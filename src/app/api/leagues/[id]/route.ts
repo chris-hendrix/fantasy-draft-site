@@ -11,7 +11,8 @@ export const GET = routeWrapper(
     if (!id) throw new ApiError('League id required', 400)
 
     const league = await prisma.league.findUnique({ ...queryParams, where: { id } })
-    return NextResponse.json(league)
+    const latestDraft = await prisma.draft.findFirst({ where: { leagueId: id }, orderBy: { year: 'desc' } })
+    return NextResponse.json({ ...league, latestDraft })
   }
 )
 

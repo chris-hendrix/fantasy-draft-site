@@ -18,18 +18,19 @@ export const {
   importedResultsRecords?: ImportedResultsRecord[]
 }>(leagueApi)
 
-export const useUserLeagues = () => {
+export const useUserLeagues = (options?: { skip?: boolean }) => {
+  const { skip } = { skip: false, ...options }
   const { user } = useSessionUser()
   const userId = user?.id
   const { data: commissionerLeagues, isLoading: isCommissionerLeaguesLoading } = useGetLeagues({
     where: { commissioners: { some: { userId } } },
     include: { teams: { include: { teamUsers: true } } }
-  }, { skip: !userId })
+  }, { skip: !userId || skip })
 
   const { data: teamLeagues, isLoading: isTeamLeaguesLoading } = useGetLeagues({
     where: { commissioners: { none: {} }, teams: { some: { teamUsers: { some: { userId } } } } },
     include: { teams: { include: { teamUsers: true } } }
-  }, { skip: !userId })
+  }, { skip: !userId || skip })
 
   const isLoading = isCommissionerLeaguesLoading && isTeamLeaguesLoading
   const leagues = Array.from(
@@ -66,7 +67,8 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
     }
   }, { skip: !id || skip })
 
-  const latestDraftId = league?.drafts[0]?.id || null
+  const latestDraft = league?.latestDraft
+  const latestDraftId = league?.latestDraft?.id || null
   const isCommissioner = Boolean(
     user && league?.commissioners.find((c) => c.userId === user?.id)
   )
@@ -80,6 +82,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
 
   return {
     league: league || {},
+    latestDraft,
     latestDraftId,
     isCommissioner,
     isMember,

@@ -25,6 +25,7 @@ export interface LeagueArgs extends League {
   commissioners: CommissionerArgs[]
   teams: TeamArgs[]
   drafts: DraftArgs[]
+  latestDraft: DraftArgs
 }
 
 export interface TeamUserArgs extends TeamUser {
