@@ -1,18 +1,26 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useDrafts } from '@/hooks/draft'
 import Table, { TableColumn } from '@/components/Table'
 import { DraftArgs, DraftTeamArgs } from '@/types'
 import { formatDatetime } from '@/utils/date'
 import { getDraftTeamData, getMedal } from '@/utils/draft'
+import { useLeague } from '@/hooks/league'
+import { useRouter } from 'next/navigation'
+import { useCurrentDraftId } from '@/hooks/app'
+import DraftModal from './DraftModal'
 
 interface Props {
   leagueId: string;
 }
 
 const DraftsTable: React.FC<Props> = ({ leagueId }) => {
+  const router = useRouter()
+  const { setCurrentDraftId } = useCurrentDraftId()
   const { drafts, isLoading } = useDrafts(leagueId)
+  const { isCommissioner } = useLeague(leagueId)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const renderDraftTeam = (draftTeam: DraftTeamArgs) => {
     const wins = getDraftTeamData(draftTeam, 'Wins')
@@ -24,6 +32,11 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
         <span className="italic text-xs ml-2 text-gray-500">{`(${wins} - ${losses} - ${ties})`}</span>
       </div>
     )
+  }
+
+  const handleLinkClick = (draftId: string, hash: string) => {
+    setCurrentDraftId(draftId)
+    router.push(`#${hash}`)
   }
 
   const columns: TableColumn<DraftArgs>[] = [
@@ -38,6 +51,14 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
     {
       header: 'Rounds',
       value: ({ rounds }) => rounds
+    },
+    {
+      header: 'Keepers',
+      value: ({ keeperCount }) => keeperCount
+    },
+    {
+      header: 'Dues',
+      value: ({ dues }) => dues
     },
     {
       header: 'Info',
@@ -58,11 +79,35 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
           </>
         )
       }
-    }
+    },
+    {
+      header: 'Links',
+      renderedValue: ({ id }) => (
+        <div className="flex gap-1">
+          <button onClick={() => handleLinkClick(id, 'draft')} className="badge badge-primary">
+            Draft
+          </button>
+
+          <button className="badge badge-secondary">Keepers</button>
+        </div>
+      )
+    },
   ]
 
   return (
-    <Table columns={columns} data={drafts || []} isLoading={isLoading} />
+    <div>
+      {isCommissioner && (
+        <button
+          className="btn btn-sm btn-primary mb-2"
+          onClick={() => setModalOpen(true)}
+        >
+          ➕ Add draft
+        </button>
+      )}
+      <Table columns={columns} data={drafts || []} isLoading={isLoading} />
+      {modalOpen && <DraftModal onClose={() => setModalOpen(false)} />}
+    </div>
+
   )
 }
 

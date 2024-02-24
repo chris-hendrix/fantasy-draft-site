@@ -39,6 +39,8 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
 
   const keepersLockDate = draft?.keepersLockDate
   const draftLockDate = draft?.draftLockDate
+  const draftTime = draft?.draftTime
+
   const isCommissioner = Boolean(
     user && draft?.league?.commissioners.find((c) => c.userId === user?.id)
   )
@@ -57,6 +59,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     && draft.draftPicks.length === draft.draftPicks.filter((dp) => Boolean(dp.playerId)).length
   )
   const draftingPick = draft?.draftPicks?.filter((p) => p.playerId === null)?.[0] || null
+  const hasFutureDraftTime = draftTime && new Date(draftTime) > new Date()
 
   const isSessionTeam = (teamId: string | null | undefined) => {
     if (!teamId) return false
@@ -64,6 +67,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     return draftTeamUsers?.some((tu) => Boolean(tu.userId === userId && tu.teamId === teamId))
   }
 
+  const { addObject: addDraft, isLoading: isAdding } = useAddDraft()
   const { updateObject: updateDraft, isLoading: isUpdating } = useUpdateDraft()
   const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
   return {
@@ -75,8 +79,11 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     draftingPick,
     teamsCount: draft?.draftTeams?.length,
     isComplete,
+    hasFutureDraftTime,
     isSessionTeam,
     sessionTeamIds,
+    addDraft,
+    isAdding,
     updateDraft,
     isUpdating,
     deleteDraft,

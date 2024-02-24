@@ -15,6 +15,9 @@ export const POSITIONS = [
   'RP'
 ]
 
+export const DEFAULT_ROUNDS = 22
+export const DEFAULT_KEEPER_COUNT = 0
+
 export const getMedal = (place?: number | null) => {
   switch (place) {
     case 1: return '🥇'
