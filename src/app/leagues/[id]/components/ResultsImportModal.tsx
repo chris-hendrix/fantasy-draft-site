@@ -28,7 +28,7 @@ const ResultsImportModal: React.FC<Props> = ({ leagueId, onClose }) => {
     if (!leagueId) return
     const objects = await csv({ checkType: true }).fromString(csvString)
     const imported = objects.map((obj: any) => ({
-      teamName: String(obj?.teamName || obj?.Team || ''),
+      teamName: String(obj?.teamName || obj?.Team || obj?.TeamName || ''),
       draftYear: Number(obj?.draftYear || obj?.Year || ''),
       data: obj
     }))

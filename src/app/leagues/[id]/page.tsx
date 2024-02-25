@@ -28,7 +28,7 @@ const LeaguePage: React.FC = () => {
     { hash: 'teams', name: 'Teams', component: <TeamsTab leagueId={league.id} /> },
     { hash: 'draft', name: 'Draft', component: <DraftTab leagueId={league.id} /> },
     { hash: 'keepers', name: 'Keepers', component: <KeeperTab leagueId={league.id} /> },
-    { hash: 'history', name: 'Stats', component: <StatsTab leagueId={league.id} /> },
+    { hash: 'stats', name: 'Stats', component: <StatsTab leagueId={league.id} /> },
     { hash: 'rules', name: 'Rules', component: <RulesTab leagueId={league.id} /> },
     ...(isCommissioner && league ? [{ hash: 'players', name: 'Players', component: <PlayerTab leagueId={league.id} /> }] : []),
     ...(isCommissioner && league ? [{ hash: 'commissioner', name: 'Commissioner', component: <CommissionerTab leagueId={league.id} /> }] : []),

@@ -7,8 +7,7 @@ import { DraftArgs, DraftTeamArgs } from '@/types'
 import { formatDatetime } from '@/utils/date'
 import { getDraftTeamData, getMedal } from '@/utils/draft'
 import { useLeague } from '@/hooks/league'
-import { useRouter } from 'next/navigation'
-import { useCurrentDraftId } from '@/hooks/app'
+import { useCurrentDraftId, useCurrentHash } from '@/hooks/app'
 import DraftModal from './DraftModal'
 
 interface Props {
@@ -16,8 +15,8 @@ interface Props {
 }
 
 const DraftsTable: React.FC<Props> = ({ leagueId }) => {
-  const router = useRouter()
   const { setCurrentDraftId } = useCurrentDraftId()
+  const { setCurrentHash } = useCurrentHash()
   const { drafts, isLoading } = useDrafts(leagueId)
   const { isCommissioner } = useLeague(leagueId)
   const [modalOpen, setModalOpen] = useState(false)
@@ -34,9 +33,9 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
     )
   }
 
-  const handleLinkClick = (draftId: string, hash: string) => {
+  const handleLink = (hash: string, draftId: string) => {
+    setCurrentHash(hash)
     setCurrentDraftId(draftId)
-    router.push(`#${hash}`)
   }
 
   const columns: TableColumn<DraftArgs>[] = [
@@ -84,11 +83,12 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
       header: 'Links',
       renderedValue: ({ id }) => (
         <div className="flex gap-1">
-          <button onClick={() => handleLinkClick(id, 'draft')} className="badge badge-primary">
+          <button onClick={() => handleLink('draft', id)} className="badge badge-primary">
             Draft
           </button>
-
-          <button className="badge badge-secondary">Keepers</button>
+          <button onClick={() => handleLink('keepers', id)} className="badge badge-primary">
+            Keepers
+          </button>
         </div>
       )
     },

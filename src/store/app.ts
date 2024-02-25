@@ -12,7 +12,8 @@ interface AlertState {
 
 interface AppState {
   alert: AlertState;
-  currentDraftId: string | null
+  currentDraftId: string | null,
+  currentHash: string | null
 }
 
 interface ShowAlertPayload {
@@ -23,7 +24,8 @@ interface ShowAlertPayload {
 
 const initialState: AppState = {
   alert: { isVisible: false, message: null, type: null, duration: 5000 },
-  currentDraftId: null
+  currentDraftId: null,
+  currentHash: null
 }
 
 export const showAlertAsync = createAsyncThunk<void, ShowAlertPayload>(
@@ -39,6 +41,9 @@ export const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
+    setCurrentHash: (state, action) => {
+      state.currentHash = action.payload
+    },
     setCurrentDraftId: (state, action) => {
       state.currentDraftId = action.payload
     },
@@ -59,6 +64,6 @@ export const appSlice = createSlice({
   },
 })
 
-export const { setCurrentDraftId } = appSlice.actions
+export const { setCurrentHash, setCurrentDraftId } = appSlice.actions
 
 export default appSlice

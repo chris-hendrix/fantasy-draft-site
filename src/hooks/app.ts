@@ -1,5 +1,12 @@
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { showAlertAsync, AlertType, setCurrentDraftId as setCurrentDraftIdAction } from '@/store/app'
+import { useRouter } from 'next/navigation'
+import {
+  showAlertAsync,
+  AlertType,
+  setCurrentHash as setCurrentHashAction,
+  setCurrentDraftId as setCurrentDraftIdAction
+} from '@/store/app'
 import { RootState, AppDispatch } from '@/store'
 import { getErrorMessage } from '@/utils/error'
 
@@ -9,6 +16,39 @@ interface ShowAlertOptions {
   errorMessage?: string,
   error?: any
   duration?: number
+}
+
+export const useCurrentHash = () => {
+  const dispatch: AppDispatch = useDispatch()
+  const currentHash = useSelector((state: RootState) => state.app.currentHash)
+  const router = useRouter() // Get the router object
+
+  const setCurrentHash = (hash: string | null) => {
+    // Set the hash in the browser URL
+    if (hash) {
+      router.push(`#${hash}`)
+    } else {
+      router.push('/')
+    }
+    // Dispatch action to set the hash in the state
+    dispatch(setCurrentHashAction(hash))
+  }
+
+  useEffect(() => {
+    // Update currentHash when URL changes
+    const handleHashChange = () => {
+      const hash = window.location.hash.substr(1)
+      dispatch(setCurrentHashAction(hash || null))
+    }
+
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [dispatch])
+
+  return { currentHash, setCurrentHash }
 }
 
 export const useCurrentDraftId = () => {
