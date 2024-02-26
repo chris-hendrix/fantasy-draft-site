@@ -8,6 +8,7 @@ import { formatDatetime } from '@/utils/date'
 import { getDraftTeamData, getMedal } from '@/utils/draft'
 import { useLeague } from '@/hooks/league'
 import { useCurrentDraftId, useCurrentHash } from '@/hooks/app'
+import ConfirmModal from '@/components/ConfirmModal'
 import DraftModal from './DraftModal'
 
 interface Props {
@@ -17,9 +18,11 @@ interface Props {
 const DraftsTable: React.FC<Props> = ({ leagueId }) => {
   const { setCurrentDraftId } = useCurrentDraftId()
   const { setCurrentHash } = useCurrentHash()
-  const { drafts, isLoading } = useDrafts(leagueId)
-  const { isCommissioner } = useLeague(leagueId)
-  const [modalOpen, setModalOpen] = useState(false)
+  const { drafts, isLoading, deleteDraft } = useDrafts(leagueId)
+  const { isCommissioner, invalidateLeague } = useLeague(leagueId)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [draftToEdit, setDraftToEdit] = useState<DraftArgs | null>(null)
+  const [draftToDelete, setDraftToDelete] = useState<DraftArgs | null>(null)
 
   const renderDraftTeam = (draftTeam: DraftTeamArgs) => {
     const wins = getDraftTeamData(draftTeam, 'Wins')
@@ -31,6 +34,14 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
         <span className="italic text-xs ml-2 text-gray-500">{`(${wins} - ${losses} - ${ties})`}</span>
       </div>
     )
+  }
+
+  const handleDelete = async () => {
+    if (!draftToDelete) return
+    const res = await deleteDraft(draftToDelete.id)
+    if ('error' in res) return
+    invalidateLeague(leagueId)
+    setDraftToDelete(null)
   }
 
   const handleLink = (hash: string, draftId: string) => {
@@ -82,16 +93,36 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
     {
       header: 'Links',
       renderedValue: ({ id }) => (
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-col">
           <button onClick={() => handleLink('draft', id)} className="badge badge-primary">
             Draft
           </button>
-          <button onClick={() => handleLink('keepers', id)} className="badge badge-primary">
+          <button onClick={() => handleLink('keepers', id)} className="badge badge-secondary">
             Keepers
           </button>
         </div>
       )
     },
+    {
+      header: '',
+      hidden: !isCommissioner,
+      renderedValue: (draft) => (
+        <div>
+          <button
+            className="btn btn-square btn-sm btn-ghost"
+            onClick={() => setDraftToEdit(draft)}
+          >
+            ✏️
+          </button>
+          <button
+            className="btn btn-square btn-sm btn-ghost"
+            onClick={() => setDraftToDelete(draft)}
+          >
+            🗑️
+          </button>
+        </div>
+      )
+    }
   ]
 
   return (
@@ -99,13 +130,22 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
       {isCommissioner && (
         <button
           className="btn btn-sm btn-primary mb-2"
-          onClick={() => setModalOpen(true)}
+          onClick={() => setAddModalOpen(true)}
         >
           ➕ Add draft
         </button>
       )}
       <Table columns={columns} data={drafts || []} isLoading={isLoading} />
-      {modalOpen && <DraftModal onClose={() => setModalOpen(false)} />}
+      {addModalOpen && <DraftModal onClose={() => setAddModalOpen(false)} />}
+      {draftToEdit && <DraftModal draftId={draftToEdit.id} onClose={() => setDraftToEdit(null)} />}
+      {draftToDelete && (
+        <ConfirmModal
+          onConfirm={handleDelete}
+          onClose={() => setDraftToDelete(null)}
+        >
+          {`This will delete the draft for ${draftToDelete.year}. Continue?`}
+        </ConfirmModal>
+      )}
     </div>
 
   )

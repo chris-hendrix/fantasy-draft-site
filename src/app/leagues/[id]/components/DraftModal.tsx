@@ -41,7 +41,7 @@ const DraftModal: React.FC<FormProps> = ({ onClose, draftId }) => {
   const onSubmit = async (data: { [x: string]: any }) => {
     const res = draftId
       ? await updateDraft({ id: draftId, ...data })
-      : await addDraft({ ...data })
+      : await addDraft({ ...data, leagueId: league.id })
     if ('error' in res) return
     onClose()
   }
