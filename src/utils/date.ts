@@ -29,3 +29,10 @@ export const toLocaleISOString = (date: Date): string => {
   const localDate = new Date(date.getTime() - (offset * 60 * 1000))
   return localDate.toISOString().slice(0, 16)
 }
+
+export const getNearestFutureHalfHour = () => {
+  const now = new Date()
+  now.setMinutes(now.getMinutes() + 30)
+  now.setMinutes(0)
+  return now
+}

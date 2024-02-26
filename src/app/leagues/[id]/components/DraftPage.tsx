@@ -8,6 +8,7 @@ import ConfirmModal from '@/components/ConfirmModal'
 import DateTimePicker from '@/components/DateTimePicker'
 import { useInvalidateDraftPicks } from '@/hooks/draftPick'
 import { useInvalidatePlayers } from '@/hooks/player'
+import { getNearestFutureHalfHour } from '@/utils/date'
 import DraftOrderModal from './DraftOrderModal'
 import DraftPicksTable from './DraftPicksTable'
 import PlayersTable from './PlayersTable'
@@ -34,13 +35,6 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const [editDraftTime, setEditDraftTime] = useState<Date | null>(null)
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
-
-  const getNearestFutureHalfHour = () => {
-    const now = new Date()
-    now.setMinutes(now.getMinutes() + 30)
-    now.setMinutes(0)
-    return now
-  }
 
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
   useEffect(() => { draftTime && setEditDraftTime(new Date(draftTime)) }, [draftTime])
