@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useRouter } from 'next/navigation'
 import {
   showAlertAsync,
   AlertType,
@@ -21,23 +20,23 @@ interface ShowAlertOptions {
 export const useCurrentHash = () => {
   const dispatch: AppDispatch = useDispatch()
   const currentHash = useSelector((state: RootState) => state.app.currentHash)
-  const router = useRouter() // Get the router object
 
   const setCurrentHash = (hash: string | null) => {
-    // Set the hash in the browser URL
     if (hash) {
-      router.push(`#${hash}`)
+      window.location.hash = hash
     } else {
-      router.push('/')
+      window.location.hash = ''
     }
-    // Dispatch action to set the hash in the state
     dispatch(setCurrentHashAction(hash))
   }
 
   useEffect(() => {
+    // Detect and set the initial hash from the URL
+    const hash = window.location.hash.substring(1)
+    dispatch(setCurrentHashAction(hash || null))
+
     // Update currentHash when URL changes
     const handleHashChange = () => {
-      const hash = window.location.hash.substr(1)
       dispatch(setCurrentHashAction(hash || null))
     }
 
