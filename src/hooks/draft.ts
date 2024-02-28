@@ -2,6 +2,7 @@ import { draftApi } from '@/store/draft'
 import { DraftArgs, KeeperArgs, PlayerData } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
+import { useParams } from 'next/navigation'
 import { useSessionUser } from './user'
 
 export const {
@@ -38,13 +39,15 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
 
   const keepersLockDate = draft?.keepersLockDate
   const draftLockDate = draft?.draftLockDate
+  const draftTime = draft?.draftTime
+
   const isCommissioner = Boolean(
     user && draft?.league?.commissioners.find((c) => c.userId === user?.id)
   )
-  const canEditDraft = Boolean(
+  const isDraftOpen = Boolean(
     (isSuccess && !draftLockDate) || (draftLockDate && draftLockDate > new Date())
   )
-  const canEditKeepers = Boolean(
+  const areKeepersOpen = Boolean(
     (isSuccess && !keepersLockDate) || (keepersLockDate && keepersLockDate > new Date())
   )
   const sessionTeamIds = draft?.draftTeams?.filter(
@@ -55,6 +58,8 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     draft?.draftPicks?.length
     && draft.draftPicks.length === draft.draftPicks.filter((dp) => Boolean(dp.playerId)).length
   )
+  const draftingPick = draft?.draftPicks?.filter((p) => p.playerId === null)?.[0] || null
+  const hasFutureDraftTime = draftTime && new Date(draftTime) > new Date()
 
   const isSessionTeam = (teamId: string | null | undefined) => {
     if (!teamId) return false
@@ -62,18 +67,55 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
     return draftTeamUsers?.some((tu) => Boolean(tu.userId === userId && tu.teamId === teamId))
   }
 
+  const { addObject: addDraft, isLoading: isAdding } = useAddDraft()
   const { updateObject: updateDraft, isLoading: isUpdating } = useUpdateDraft()
   const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
   return {
     draft: draft || {},
     isSuccess,
     isCommissioner,
-    canEditKeepers,
-    canEditDraft,
+    areKeepersOpen,
+    isDraftOpen,
+    draftingPick,
     teamsCount: draft?.draftTeams?.length,
     isComplete,
+    hasFutureDraftTime,
     isSessionTeam,
     sessionTeamIds,
+    addDraft,
+    isAdding,
+    updateDraft,
+    isUpdating,
+    deleteDraft,
+    isDeleting,
+    ...rest
+  }
+}
+
+type UseDraftsOptions = {
+  skip?: boolean,
+  yearOrderBy?: 'asc' | 'desc'
+}
+
+export const useDrafts = (leagueId?: string, options: UseDraftsOptions = {}) => {
+  const { skip, yearOrderBy } = { skip: false, yearOrderBy: 'desc', ...options }
+  const { id } = useParams()
+  const { data: drafts, ...rest } = useGetDrafts({
+    where: { leagueId: leagueId || String(id) },
+    include: {
+      draftTeams: { include: { team: true } }
+    },
+    orderBy: { year: yearOrderBy as any }
+  }, { skip })
+
+  const { addObject: addDraft, isLoading: isAdding } = useAddDraft()
+  const { updateObject: updateDraft, isLoading: isUpdating } = useUpdateDraft()
+  const { deleteObject: deleteDraft, isLoading: isDeleting } = useDeleteDraft()
+
+  return {
+    drafts,
+    addDraft,
+    isAdding,
     updateDraft,
     isUpdating,
     deleteDraft,

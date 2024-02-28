@@ -85,7 +85,7 @@ const TeamsTab: React.FC<Props> = ({ leagueId }) => {
           >✏️
           </button>}
         >
-          <p >{`Created on ${formatDate(String(userTeam.createdAt))}`}</p>
+          <p >{`Created on ${formatDate(userTeam.createdAt)}`}</p>
         </Card>
         <div className="divider" />
       </>}

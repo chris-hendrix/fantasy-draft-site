@@ -24,13 +24,14 @@ const TextInput: React.FC<Props> = ({
     if (!register) return {}
     return register(name, {
       required: required || options?.required,
-      validate: validate || options?.validate
+      validate: validate || options?.validate,
+      ...options
     })
   }
 
   let inputProps = {
     label: name.charAt(0).toUpperCase() + name.slice(1),
-    type: 'text',
+    type: typeOverride || 'text',
     autoComplete: 'off',
     disabled,
     ...registerHelper()
@@ -97,6 +98,17 @@ const TextInput: React.FC<Props> = ({
         required: 'Password is required',
         validate: (value: string) => isStrongPassword(value) || 'Weak password'
       })
+    }
+  }
+
+  if (type === 'number') {
+    inputProps = {
+      ...inputProps,
+      type: 'number',
+      ...registerHelper({
+        valueAsNumber: true,
+        validate: (value: string) => !Number.isNaN(Number(value)) || 'Invalid number'
+      }),
     }
   }
 

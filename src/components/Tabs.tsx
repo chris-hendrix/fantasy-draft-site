@@ -1,35 +1,33 @@
-'use client'
-
 import { useState, useEffect } from 'react'
+import { useCurrentHash } from '@/hooks/app'
 
 interface Tab {
   name: string;
   component?: React.ReactNode;
   hash?: string;
-  default?: boolean
+  default?: boolean;
 }
 
 interface TabsProps {
   tabs: Tab[];
-  onAdd?: () => void
-  width?: number | string
+  onAdd?: () => void;
+  width?: number | string;
 }
 
 const Tabs: React.FC<TabsProps> = ({ tabs, onAdd, width = 'full' }) => {
   const defaultIndex = tabs.findIndex((t) => t.default)
   const [tabIndex, setTabIndex] = useState(Math.max(defaultIndex, 0))
+  const { currentHash, setCurrentHash } = useCurrentHash()
 
   useEffect(() => {
-    const currentHash = window.location.hash.replace('#', '')
-    const allTabsHaveHash = tabs.every((tab) => tab.hash !== undefined)
-    const selectedIndex = tabs.findIndex((tab) => tab?.hash === currentHash)
-    if (allTabsHaveHash && selectedIndex !== -1) setTabIndex(selectedIndex)
-  }, [])
+    const selectedIndex = tabs.findIndex((tab) => tab.hash === currentHash)
+    if (selectedIndex !== -1) setTabIndex(selectedIndex)
+  }, [currentHash, tabs])
 
   const handleTabClick = (index: number) => {
     setTabIndex(index)
     if (tabs[index].hash) {
-      window.location.hash = tabs[index].hash as string
+      setCurrentHash(tabs[index].hash || null)
     }
   }
 

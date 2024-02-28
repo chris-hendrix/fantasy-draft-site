@@ -67,18 +67,18 @@ model VerificationToken {
 }
 
 model League {
-  id            String         @id @default(cuid())
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  name          String         @unique
-  sport         Sport          @default(baseball)
-  url           String?
-  rules         String?
-  defaultRounds Int?
-  defaultKeeps  Int?
-  commissioners Commissioner[]
-  teams         Team[]
-  drafts        Draft[]
+  id                 String         @id @default(cuid())
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  name               String         @unique
+  sport              Sport          @default(baseball)
+  url                String?
+  rules              String?
+  defaultRounds      Int?
+  defaultKeeperCount Int?
+  commissioners      Commissioner[]
+  teams              Team[]
+  drafts             Draft[]
 }
 
 model Commissioner {
@@ -130,6 +130,7 @@ model Draft {
   leagueId         String      @map("league_id")
   year             Int
   rounds           Int
+  keeperCount      Int?        @default(0)
   dues             Float       @default(0)
   draftTime        DateTime?
   draftLockDate    DateTime?   @default(now())

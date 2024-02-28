@@ -5,8 +5,10 @@ import { useDraft } from '@/hooks/draft'
 import { DraftPickArgs } from '@/types'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
+import DateTimePicker from '@/components/DateTimePicker'
 import { useInvalidateDraftPicks } from '@/hooks/draftPick'
 import { useInvalidatePlayers } from '@/hooks/player'
+import { getNearestFutureHalfHour } from '@/utils/date'
 import DraftOrderModal from './DraftOrderModal'
 import DraftPicksTable from './DraftPicksTable'
 import PlayersTable from './PlayersTable'
@@ -17,9 +19,9 @@ interface Props {
 
 const DraftPage: React.FC<Props> = ({ draftId }) => {
   const {
-    draft: { disableUserDraft },
+    draft: { disableUserDraft, draftTime },
     isCommissioner,
-    canEditDraft,
+    isDraftOpen,
     updateDraft,
     deleteDraft
   } = useDraft(draftId)
@@ -28,13 +30,14 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
   const [modalOpen, setModalOpen] = useState(false)
   const [draftOrderModalOpen, setDraftOrderModalOpen] = useState(false)
   const [confirmKeepersModalOpen, setConfirmKeepersModalOpen] = useState(false)
+  const [draftTimeModalOpen, setDraftTimeModalOpen] = useState(false)
   const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
+  const [editDraftTime, setEditDraftTime] = useState<Date | null>(null)
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
 
-  const draftingPick = canEditDraft && draftPicks?.filter((p) => p.playerId === null)?.[0]
-
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
+  useEffect(() => { draftTime && setEditDraftTime(new Date(draftTime)) }, [draftTime])
 
   const handleStart = async () => {
     await updateDraft({
@@ -63,6 +66,14 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
     })
   }
 
+  const handleToggleDraftTime = async () => {
+    if (!editDraftTime) {
+      setEditDraftTime(getNearestFutureHalfHour())
+    } else {
+      setEditDraftTime(null)
+    }
+  }
+
   const handleSave = async () => {
     const draftPickData = editDraftPicks.map(({ teamId, playerId }, i) => ({
       teamId: teamId as string,
@@ -81,6 +92,12 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
     setEditOrder(false)
   }
 
+  const handleSaveDraftTime = async () => {
+    const res = await updateDraft({ id: draftId, draftTime: editDraftTime })
+    if ('error' in res) return
+    setDraftTimeModalOpen(false)
+  }
+
   const handleConfirmKeepers = async () => {
     const res = await updateDraft({ id: draftId, setKeepers: true })
     if ('error' in res) return
@@ -94,13 +111,13 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       {isCommissioner &&
         <div className="flex gap-2 my-2 w-full">
           {!editOrder && <>
-            {!canEditDraft && <button
+            {!isDraftOpen && <button
               className="btn btn-sm btn-primary w-32"
               onClick={handleStart}
             >
               🚀 Start
             </button>}
-            {canEditDraft && <button
+            {isDraftOpen && <button
               className="btn btn-sm btn-primary w-32"
               onClick={handleLock}
             >
@@ -120,9 +137,15 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             </button>
             <button
               className="btn btn-sm w-32"
+              onClick={() => setDraftTimeModalOpen(true)}
+            >
+              🕜 Draft Time
+            </button>
+            <button
+              className="btn btn-sm w-32"
               onClick={() => setEditOrder(true)}
             >
-              📝 Edit
+              📝 Draft Order
             </button>
             <button className="btn btn-sm btn-error w-32" onClick={() => setModalOpen(true)}>
               🗑️ Delete
@@ -168,7 +191,9 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
         </div>
         <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
           <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
-          <PlayersTable draftId={draftId} draftingPick={draftingPick || undefined} hideTeamColumn />
+          <PlayersTable
+            draftId={draftId}
+            hideTeamColumn />
         </div>
       </div>
       {!draftPicks?.length &&
@@ -176,14 +201,41 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           <a onClick={() => setDraftOrderModalOpen(true)} className="link">Generate</a>
           &nbsp;the draft picks for this draft
         </div>}
-      {modalOpen &&
+      {modalOpen && (
         <Modal title="Are you sure?" size="xs" onClose={() => setModalOpen(false)}>
           <div>This cannot be undone.</div>
           <div className="flex justify-end mt-2">
             <button onClick={handleDelete} className="btn btn-error w-32 mr-2">Yes</button>
             <button onClick={() => setModalOpen(false)} className="btn w-32">Cancel</button>
           </div>
-        </Modal>}
+        </Modal>
+      )}
+      {draftTimeModalOpen && (
+        <Modal title="Select Draft Time" size="xs" onClose={() => setDraftTimeModalOpen(false)}>
+          <div className="flex justify-between items-center">
+            <DateTimePicker
+              initialDate={editDraftTime || getNearestFutureHalfHour()}
+              onChange={setEditDraftTime}
+              disabled={!editDraftTime}
+            />
+            <div className="form-control">
+              <label className="label cursor-pointer">
+                <span className="label-text mr-2">Enable draft time</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary"
+                  checked={Boolean(editDraftTime)}
+                  onChange={handleToggleDraftTime}
+                />
+              </label>
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
+            <button onClick={handleSaveDraftTime} className="btn btn-primary w-32 mr-2">Save</button>
+            <button onClick={() => setDraftTimeModalOpen(false)} className="btn w-32">Cancel</button>
+          </div>
+        </Modal>
+      )}
       {draftOrderModalOpen && <DraftOrderModal
         draftId={draftId}
         onClose={() => setDraftOrderModalOpen(false)}

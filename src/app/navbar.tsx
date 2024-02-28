@@ -15,8 +15,8 @@ import { useAlert } from '@/hooks/app'
 import InviteModal from '@/components/InviteModal'
 import { useInviteTeams } from '@/hooks/team'
 import { NODE_ENV } from '@/config'
-
 import Menu from '@/icons/Menu'
+import Banner from './banner'
 
 const UserDropdown: React.FC = () => {
   const { user, isLoading } = useSessionUser()
@@ -106,13 +106,6 @@ const LeagueDropdown: React.FC = () => {
 
 const Navbar: React.FC = () => {
   const { user } = useSessionUser()
-  const { inviteTeams } = useInviteTeams()
-  const { leagues } = useUserLeagues()
-  const pathname = usePathname()
-  const [inviteModalOpen, setInviteModalOpen] = useState(false)
-  const invitesCount = inviteTeams?.length
-  const defaultLeague = leagues?.[0]
-  const isHome = pathname === '/'
 
   return (
     <>
@@ -138,23 +131,7 @@ const Navbar: React.FC = () => {
           <UserDropdown />
         </div>
       </div>
-      {invitesCount > 0 && isHome && (
-        <div className="bg-accent p-2 text-center text-accent-content shadow-md">
-          {`You have ${invitesCount} league invite(s) `}
-          <a className="link" onClick={() => setInviteModalOpen(true)}>
-            View
-          </a>
-        </div>
-      )}
-      {defaultLeague && isHome && (
-        <div className="bg-accent p-2 text-center text-accent-content shadow-md">
-          {'Go to your league '}
-          <Link className="link" href={`/leagues/${defaultLeague.id}`}>
-            {defaultLeague.name}
-          </Link>
-        </div>
-      )}
-      {inviteModalOpen && <InviteModal onClose={() => setInviteModalOpen(false)} />}
+      <Banner />
     </>
   )
 }

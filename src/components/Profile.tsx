@@ -28,7 +28,7 @@ const Profile: React.FC<Props> = ({ user, canEdit = false }) => {
                 <Avatar user={user} size={64} />
               </div>
               <h3 className="text-2xl font-medium">{user?.name || user?.email}</h3>
-              <p className="text-gray-500">{`Joined on ${formatDate(String(user.createdAt))}`}</p>
+              {user?.createdAt && <p className="text-gray-500">{`Joined on ${formatDate(user.createdAt)}`}</p>}
             </div>
           )}
         </div>

@@ -58,13 +58,31 @@ export const useLeagueTeams = (leagueId: string) => {
 export const useTeams = (leagueId: string) => {
   const { data: teams, ...rest } = useGetTeams({
     where: { leagueId },
-    include: { teamUsers: { include: { user: true, team: true } } },
+    include: {
+      teamUsers: { include: { user: true, team: true } },
+      draftTeams: { include: { draft: true, team: true } },
+    },
     orderBy: [{ archivedAt: 'desc' }, { name: 'asc' }]
   })
   const { updateObject: updateTeam, isLoading: isUpdating } = useUpdateTeam()
   const { deleteObject: deleteTeam, isLoading: isDeleting } = useDeleteTeam()
 
-  return { teams, ...rest, updateTeam, isUpdating, deleteTeam, isDeleting }
+  const draftTeams = teams?.flatMap((t) => t.draftTeams) || []
+  const statDraftTeams = draftTeams
+    ?.filter((dt) => dt.seasonFinish !== null)
+    ?.sort((a, b) => ((a.seasonFinish || 99) < (b.seasonFinish || 99) ? 1 : -1))
+    ?.sort((a, b) => (a.draft.year < b.draft.year ? 1 : -1))
+
+  return {
+    teams,
+    draftTeams,
+    statDraftTeams,
+    updateTeam,
+    isUpdating,
+    deleteTeam,
+    isDeleting,
+    ...rest
+  }
 }
 
 export const useTeam = (teamId: string) => {

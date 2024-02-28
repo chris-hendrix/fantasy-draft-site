@@ -1,5 +1,5 @@
 import { leagueApi } from '@/store/league'
-import { LeagueArgs, ImportedDraftRecord } from '@/types'
+import { LeagueArgs, ImportedDraftRecord, ImportedResultsRecord } from '@/types'
 import { Prisma } from '@prisma/client'
 import { useParams } from 'next/navigation'
 import { getCrudHooks } from '@/utils/getCrudHooks'
@@ -14,21 +14,23 @@ export const {
   useInvalidateObject: useInvalidateLeague,
   useInvalidateObjects: useInvalidateLeagues
 } = getCrudHooks<LeagueArgs, Prisma.LeagueFindManyArgs, Prisma.LeagueUpdateInput & {
-  importedDraftRecords?: ImportedDraftRecord[]
+  importedDraftRecords?: ImportedDraftRecord[],
+  importedResultsRecords?: ImportedResultsRecord[]
 }>(leagueApi)
 
-export const useUserLeagues = () => {
+export const useUserLeagues = (options?: { skip?: boolean }) => {
+  const { skip } = { skip: false, ...options }
   const { user } = useSessionUser()
   const userId = user?.id
   const { data: commissionerLeagues, isLoading: isCommissionerLeaguesLoading } = useGetLeagues({
     where: { commissioners: { some: { userId } } },
     include: { teams: { include: { teamUsers: true } } }
-  }, { skip: !userId })
+  }, { skip: !userId || skip })
 
   const { data: teamLeagues, isLoading: isTeamLeaguesLoading } = useGetLeagues({
     where: { commissioners: { none: {} }, teams: { some: { teamUsers: { some: { userId } } } } },
     include: { teams: { include: { teamUsers: true } } }
-  }, { skip: !userId })
+  }, { skip: !userId || skip })
 
   const isLoading = isCommissionerLeaguesLoading && isTeamLeaguesLoading
   const leagues = Array.from(
@@ -60,12 +62,13 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
       include: {
         drafts: { orderBy: { year: 'desc' } },
         commissioners: { include: { user: true } },
-        teams: { include: { teamUsers: true } }
+        teams: { include: { teamUsers: true, draftTeams: true } }
       }
     }
   }, { skip: !id || skip })
 
-  const latestDraftId = league?.drafts[0]?.id || null
+  const latestDraft = league?.latestDraft
+  const latestDraftId = league?.latestDraft?.id || null
   const isCommissioner = Boolean(
     user && league?.commissioners.find((c) => c.userId === user?.id)
   )
@@ -75,9 +78,11 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
 
   const { addObject: addLeague, isLoading: isAdding } = useAddLeague()
   const { updateObject: updateLeague, isLoading: isUpdating } = useUpdateLeague()
+  const { invalidateObject: invalidateLeague } = useInvalidateLeague()
 
   return {
     league: league || {},
+    latestDraft,
     latestDraftId,
     isCommissioner,
     isMember,
@@ -85,6 +90,7 @@ export const useLeague = (leagueId?: string, options: UseLeagueOptions = {}) => 
     isAdding,
     updateLeague,
     isUpdating,
+    invalidateLeague,
     ...rest,
   }
 }
