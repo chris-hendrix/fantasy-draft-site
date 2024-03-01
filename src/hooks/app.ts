@@ -20,6 +20,7 @@ interface ShowAlertOptions {
 export const useCurrentHash = () => {
   const dispatch: AppDispatch = useDispatch()
   const currentHash = useSelector((state: RootState) => state.app.currentHash)
+  const windowHash = window.location.hash.substring(1)
 
   const setCurrentHash = (hash: string | null) => {
     if (hash) {
@@ -31,21 +32,9 @@ export const useCurrentHash = () => {
   }
 
   useEffect(() => {
-    // Detect and set the initial hash from the URL
-    const hash = window.location.hash.substring(1)
-    dispatch(setCurrentHashAction(hash || null))
-
-    // Update currentHash when URL changes
-    const handleHashChange = () => {
-      dispatch(setCurrentHashAction(hash || null))
-    }
-
-    window.addEventListener('hashchange', handleHashChange)
-
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange)
-    }
-  }, [dispatch])
+    if (!windowHash) return
+    dispatch(setCurrentHashAction(windowHash))
+  }, [windowHash])
 
   return { currentHash, setCurrentHash }
 }
