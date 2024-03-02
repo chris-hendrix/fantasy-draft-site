@@ -191,9 +191,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
         </div>
         <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
           <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
-          <PlayersTable
-            draftId={draftId}
-            hideTeamColumn />
+          <PlayersTable draftId={draftId} hideTeamColumn={!isDraftOpen} />
         </div>
       </div>
       {!draftPicks?.length &&
