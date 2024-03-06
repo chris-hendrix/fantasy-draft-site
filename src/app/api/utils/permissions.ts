@@ -56,3 +56,14 @@ export const checkDraftCommissioner = async (draftId: string) => {
   if (!draft) throw new ApiError('Unauthorized', 401)
   await checkLeagueCommissioner(draft.leagueId)
 }
+
+export const checkDraftTeam = async (draftId: string) => {
+  const session = await getServerSession(authOptions)
+  if (!session) throw new ApiError('Unauthorized', 401)
+  const userId = session.user.id
+  const draftTeam = await prisma.draftTeam.findFirst({
+    where: { draftId, team: { teamUsers: { some: { userId } } } }
+  })
+  if (!draftTeam) throw new ApiError('Unauthorized', 401)
+  return draftTeam
+}

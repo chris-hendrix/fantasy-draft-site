@@ -65,17 +65,11 @@ const PlayersTable: React.FC<Props> = ({
   }
 
   const handleSavePlayer = async (player: PlayerArgs) => {
-    const savedPlayer = player.savedPlayers.find((sp) => isSessionTeam(sp.teamId))
-    const isDraftable = savedPlayer?.isDraftable
+    const savedPlayer = player.savedPlayers.find((sp) => isSessionTeam(sp.teamId)) || null
     if (!sessionTeamId) return
     await updatePlayer({
       id: player.id,
-      savedPlayers: {
-        delete: savedPlayer ? { id: savedPlayer.id } : undefined,
-        create: isDraftable === false
-          ? { teamId: sessionTeamId, isDraftable: null }
-          : { teamId: sessionTeamId, isDraftable: !isDraftable }
-      }
+      savedPlayer
     })
   }
 
