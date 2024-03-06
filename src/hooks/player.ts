@@ -1,5 +1,5 @@
 import { playerApi } from '@/store/player'
-import { PlayerArgs } from '@/types'
+import { PlayerArgs, SavedPlayerArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { getPlayerData } from '@/utils/draft'
@@ -12,7 +12,9 @@ export const {
   useDeleteObject: useDeletePlayer,
   useInvalidateObject: useInvalidatePlayer,
   useInvalidateObjects: useInvalidatePlayers
-} = getCrudHooks<PlayerArgs, Prisma.PlayerFindManyArgs, Prisma.PlayerUpdateInput>(playerApi)
+} = getCrudHooks<PlayerArgs, Prisma.PlayerFindManyArgs, Prisma.PlayerUpdateInput & {
+  savedPlayer?: SavedPlayerArgs | null,
+}>(playerApi)
 
 export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: any) => {
   const result = useGetPlayers(
