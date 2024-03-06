@@ -19,7 +19,7 @@ export const PUT = routeWrapper(
     if (!id) throw new ApiError('Player id required', 400)
     const player = await prisma.player.findFirst({ where: { id } })
     if (!player) throw new ApiError('Player not found', 400)
-    const { savedPlayer, data }: any = req.consumedBody
+    const { savedPlayer, ...data }: any = req.consumedBody
 
     if (savedPlayer !== undefined) {
       const { teamId } = await checkDraftTeam(player.draftId)
