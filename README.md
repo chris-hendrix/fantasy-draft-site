@@ -19,7 +19,11 @@ This boilerplate contains:
 4. Create the following `.env` file
 ```
 # next-auth
-SECRET=<anything>
+SECRET=TODO
+
+# supabase
+NEXT_PUBLIC_SUPABASE_URL=TODO
+NEXT_PUBLIC_SUPABASE_ANON_KEY=TODO
 
 # database
 POSTGRES_HOSTNAME=localhost
@@ -28,6 +32,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
 DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public
+DIRECT_URI=${DATABASE_URI}
 ```
 5. Run the following in the root directory
 ```

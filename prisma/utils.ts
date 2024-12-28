@@ -86,50 +86,60 @@ export const generateSeedData = async () => {
     }
   })))
 
-  // create last year's draft
-  const draft = await prisma.draft.create({
-    data: {
-      leagueId: league.id,
-      year: new Date().getFullYear() - 1,
-      rounds,
-      draftTeams: { create: teams.map((t, i) => ({ teamId: t.id, order: i })) }
-    }
-  })
+  const createDraft = async (year: number, isComplete = false) => {
+    // create last year's draft
+    const draft = await prisma.draft.create({
+      data: {
+        leagueId: league.id,
+        year,
+        rounds,
+        keeperCount: 5,
+        draftTeams: { create: teams.map((t, i) => ({ teamId: t.id, order: i })) }
+      }
+    })
 
-  const players = await Promise.all((await getPlayerData()).map((p) => prisma.player.create({
-    data: {
-      draftId: draft.id,
-      name: p.name,
-      data: p.data
-    }
-  })))
+    const players = await Promise.all((await getPlayerData()).map((p) => prisma.player.create({
+      data: {
+        draftId: draft.id,
+        name: p.name,
+        data: p.data
+      }
+    })))
 
-  // keepers
-  Promise.all(
-    createTeamIdArray(teams.map((team) => team.id), keepersCount)
-      .map((teamId, i) => (prisma.keeper.create({
-        data: {
-          draftId: draft.id,
-          teamId,
-          playerId: players?.[i]?.id,
-          round: getRound(i + 1, teamsCount),
-          keeps: (i % 3) + 1
-        }
-      })))
-  )
+    // keepers
+    Promise.all(
+      createTeamIdArray(teams.map((team) => team.id), keepersCount)
+        .map((teamId, i) => (prisma.keeper.create({
+          data: {
+            draftId: draft.id,
+            teamId,
+            playerId: players?.[i]?.id,
+            round: getRound(i + 1, teamsCount),
+            keeps: (i % 3) + 1
+          }
+        })))
+    )
 
-  // draft picks
-  Promise.all(
-    createTeamIdArray(teams.map((team) => team.id), rounds)
-      .map((teamId, i) => (prisma.draftPick.create({
-        data: {
-          draftId: draft.id,
-          teamId,
-          overall: i + 1,
-          playerId: players?.[i]?.id
-        }
-      })))
-  )
+    // draft picks
+    Promise.all(
+      createTeamIdArray(teams.map((team) => team.id), rounds)
+        .map((teamId, i) => (prisma.draftPick.create({
+          data: {
+            draftId: draft.id,
+            teamId,
+            overall: i + 1,
+            playerId: isComplete ? players?.[i]?.id : null
+          }
+        })))
+    )
+
+    return draft
+  }
+
+
+  await createDraft(new Date().getFullYear() - 1, true)
+  await createDraft(new Date().getFullYear(), false)
+
 
   return { league }
 }
