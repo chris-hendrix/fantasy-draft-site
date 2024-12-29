@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useLeague, useUserLeagues } from '@/hooks/league'
+import { useUserLeagues } from '@/hooks/league'
 import { useInviteTeams } from '@/hooks/team'
 import { useCountdown } from '@/hooks/datetime'
 import InviteModal from '../components/InviteModal'
