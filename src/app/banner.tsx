@@ -13,7 +13,7 @@ const Banner: React.FC = () => {
 
   const { inviteTeams } = useInviteTeams()
   const { defaultLeague } = useUserLeagues()
-  const { latestDraft } = useLeague()
+  const latestDraft = defaultLeague?.latestDraft
   const countdown = useCountdown(latestDraft?.draftTime ? new Date(latestDraft.draftTime) : null)
 
   const getMessage = () => {
