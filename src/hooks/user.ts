@@ -7,7 +7,7 @@ export const useSessionUser = () => {
   const { data: session, isLoading: isSessionLoading } = useGetSessionQuery()
   const userId = session?.user?.id
   const { data: user, isLoading } = useGetUserQuery(userId || '', { skip: isSessionLoading || !userId })
-  return { user: user as UserArgs, isLoading }
+  return { user: user as UserArgs, isLoading: isSessionLoading || isLoading }
 }
 
 export const useUpdateUser = () => {
