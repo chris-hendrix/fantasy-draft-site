@@ -5,8 +5,8 @@ import { checkTeamEdit } from '@/app/api/utils/permissions'
 import { getNextPick } from '../../utils/draft'
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Pick id required', 400)
     const pick = await prisma.draftPick.findFirst({ where: { id }, include: { draft: true } })
     if (!pick) throw new ApiError('Pick not found', 400)

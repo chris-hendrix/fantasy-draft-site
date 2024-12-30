@@ -4,8 +4,8 @@ import { ApiError, routeWrapper, checkUserMatchesSession, checkUserBody, sanitiz
 import { generateHash, validatePassword } from '@/app/api/utils/hash'
 
 export const GET = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
 
     if (!id) throw new ApiError('User id required', 400)
 
@@ -18,8 +18,8 @@ export const GET = routeWrapper(
 )
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('User id required', 400)
 
     // change password logic
