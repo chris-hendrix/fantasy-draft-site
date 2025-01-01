@@ -5,8 +5,8 @@ import { checkLeagueCommissioner } from '@/app/api/utils/permissions'
 import { importDraftData, importResultsData } from '../../utils/draft'
 
 export const GET = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     const queryParams: any = getParsedParams(req.nextUrl) || {}
     if (!id) throw new ApiError('League id required', 400)
 
@@ -17,8 +17,8 @@ export const GET = routeWrapper(
 )
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
 
     if (!id) throw new ApiError('League id required', 400)
 
@@ -42,8 +42,8 @@ export const PUT = routeWrapper(
 )
 
 export const DELETE = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
 
     if (!id) throw new ApiError('League id required', 400)
 

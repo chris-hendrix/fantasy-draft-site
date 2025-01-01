@@ -4,8 +4,8 @@ import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkTeamEdit } from '@/app/api/utils/permissions'
 
 export const GET = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     const queryParams: any = getParsedParams(req.nextUrl) || {}
     if (!id) throw new ApiError('League id required', 400)
     const team = await prisma.team.findUnique({ ...queryParams, where: { id } })
@@ -14,8 +14,8 @@ export const GET = routeWrapper(
 )
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Team id required', 400)
     const {
       inviteEmails,
@@ -71,8 +71,8 @@ export const PUT = routeWrapper(
 )
 
 export const DELETE = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Team id required', 400)
     await checkTeamEdit(id, { commissionerOnly: true }) // commissioner only
     const deletedTeam = await prisma.team.delete({ where: { id } })

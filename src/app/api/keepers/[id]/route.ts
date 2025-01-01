@@ -4,8 +4,8 @@ import { ApiError, routeWrapper } from '@/app/api/utils/api'
 import { checkTeamEdit } from '@/app/api/utils/permissions'
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Keeper id required', 400)
     const keeper = await prisma.keeper.findFirst({ where: { id } })
     if (!keeper) throw new ApiError('Keeper not found', 400)

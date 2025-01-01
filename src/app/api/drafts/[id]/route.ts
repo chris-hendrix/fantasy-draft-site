@@ -7,8 +7,8 @@ import { getUnique } from '@/utils/array'
 import { getAllDraftData, updateDraftPlayerData } from '../../utils/draft'
 
 export const GET = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     const { getAllData, previousYear, ...queryParams }: any = getParsedParams(req.nextUrl) || {}
     if (!id) throw new ApiError('Draft id required', 400)
 
@@ -31,8 +31,8 @@ export const GET = routeWrapper(
 )
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Draft id required', 400)
     const {
       keeperCount,
@@ -115,8 +115,8 @@ export const PUT = routeWrapper(
 )
 
 export const DELETE = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Draft id required', 400)
     await checkDraftCommissioner(id) // commissioner only
     const deletedDraft = await prisma.draft.delete({ where: { id } })

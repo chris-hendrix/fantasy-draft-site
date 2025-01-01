@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useLeague, useUserLeagues } from '@/hooks/league'
+import { useUserLeagues } from '@/hooks/league'
 import { useInviteTeams } from '@/hooks/team'
 import { useCountdown } from '@/hooks/datetime'
 import InviteModal from '../components/InviteModal'
@@ -13,7 +13,7 @@ const Banner: React.FC = () => {
 
   const { inviteTeams } = useInviteTeams()
   const { defaultLeague } = useUserLeagues()
-  const { latestDraft } = useLeague()
+  const latestDraft = defaultLeague?.latestDraft
   const countdown = useCountdown(latestDraft?.draftTime ? new Date(latestDraft.draftTime) : null)
 
   const getMessage = () => {

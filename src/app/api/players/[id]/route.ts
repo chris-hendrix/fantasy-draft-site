@@ -4,8 +4,8 @@ import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkDraftCommissioner, checkDraftTeam } from '@/app/api/utils/permissions'
 
 export const GET = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     const queryParams: any = getParsedParams(req.nextUrl) || {}
     if (!id) throw new ApiError('Player id required', 400)
     const player = await prisma.player.findUnique({ ...queryParams, where: { id } })
@@ -14,8 +14,8 @@ export const GET = routeWrapper(
 )
 
 export const PUT = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Player id required', 400)
     const player = await prisma.player.findFirst({ where: { id } })
     if (!player) throw new ApiError('Player not found', 400)
@@ -45,8 +45,8 @@ export const PUT = routeWrapper(
 )
 
 export const DELETE = routeWrapper(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params
     if (!id) throw new ApiError('Player id required', 400)
     const player = await prisma.player.findFirst({ where: { id } })
     if (!player) throw new ApiError('Player not found', 400)

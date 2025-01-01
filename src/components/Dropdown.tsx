@@ -34,6 +34,7 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children, align = 'left-0' }
       return React.cloneElement(child, {
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           handleClick()
+          // @ts-ignore
           if (child.props.onClick) child.props.onClick(e)
         },
       } as React.HTMLAttributes<HTMLAnchorElement>)
