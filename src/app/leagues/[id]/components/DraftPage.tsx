@@ -181,7 +181,15 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
       }
       <div className="flex flex-row h-full w-full">
         <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
-          <h2 className="text-lg font-bold my-6 mx-2">📝 Draft</h2>
+          <div className="flex justify-between my-6 mx-2 items-center">
+            <h2 className="text-lg font-bold ">📝 Draft</h2>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => invalidateDraftPicks()}
+            >
+              🔃
+            </button>
+          </div>
           <DraftPicksTable
             draftId={draftId}
             editOrder={editOrder}
@@ -190,61 +198,79 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
           />
         </div>
         <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
-          <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
+          <div className="flex justify-between my-6 mx-2 items-center">
+            <h2 className="text-lg font-bold ">🧢 Players</h2>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => invalidatePlayers()}
+            >
+              🔃
+            </button>
+          </div>
           <PlayersTable draftId={draftId} hideTeamColumn={!isDraftOpen} />
         </div>
       </div>
-      {!draftPicks?.length &&
+      {
+        !draftPicks?.length &&
         <div className="text-sm w-full display-flex text-center p-4">
           <a onClick={() => setDraftOrderModalOpen(true)} className="link">Generate</a>
           &nbsp;the draft picks for this draft
-        </div>}
-      {modalOpen && (
-        <Modal title="Are you sure?" size="xs" onClose={() => setModalOpen(false)}>
-          <div>This cannot be undone.</div>
-          <div className="flex justify-end mt-2">
-            <button onClick={handleDelete} className="btn btn-error w-32 mr-2">Yes</button>
-            <button onClick={() => setModalOpen(false)} className="btn w-32">Cancel</button>
-          </div>
-        </Modal>
-      )}
-      {draftTimeModalOpen && (
-        <Modal title="Select Draft Time" size="xs" onClose={() => setDraftTimeModalOpen(false)}>
-          <div className="flex justify-between items-center">
-            <DateTimePicker
-              initialDate={editDraftTime || getNearestFutureHalfHour()}
-              onChange={setEditDraftTime}
-              disabled={!editDraftTime}
-            />
-            <div className="form-control">
-              <label className="label cursor-pointer">
-                <span className="label-text mr-2">Enable draft time</span>
-                <input
-                  type="checkbox"
-                  className="toggle toggle-primary"
-                  checked={Boolean(editDraftTime)}
-                  onChange={handleToggleDraftTime}
-                />
-              </label>
+        </div>
+      }
+      {
+        modalOpen && (
+          <Modal title="Are you sure?" size="xs" onClose={() => setModalOpen(false)}>
+            <div>This cannot be undone.</div>
+            <div className="flex justify-end mt-2">
+              <button onClick={handleDelete} className="btn btn-error w-32 mr-2">Yes</button>
+              <button onClick={() => setModalOpen(false)} className="btn w-32">Cancel</button>
             </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button onClick={handleSaveDraftTime} className="btn btn-primary w-32 mr-2">Save</button>
-            <button onClick={() => setDraftTimeModalOpen(false)} className="btn w-32">Cancel</button>
-          </div>
-        </Modal>
-      )}
-      {draftOrderModalOpen && <DraftOrderModal
-        draftId={draftId}
-        onClose={() => setDraftOrderModalOpen(false)}
-      />}
-      {confirmKeepersModalOpen && <ConfirmModal
-        onConfirm={handleConfirmKeepers}
-        onClose={() => setConfirmKeepersModalOpen(false)}
-      >
-        This will clear all draft data. Continue?
-      </ConfirmModal>}
-    </div>
+          </Modal>
+        )
+      }
+      {
+        draftTimeModalOpen && (
+          <Modal title="Select Draft Time" size="xs" onClose={() => setDraftTimeModalOpen(false)}>
+            <div className="flex justify-between items-center">
+              <DateTimePicker
+                initialDate={editDraftTime || getNearestFutureHalfHour()}
+                onChange={setEditDraftTime}
+                disabled={!editDraftTime}
+              />
+              <div className="form-control">
+                <label className="label cursor-pointer">
+                  <span className="label-text mr-2">Enable draft time</span>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary"
+                    checked={Boolean(editDraftTime)}
+                    onChange={handleToggleDraftTime}
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button onClick={handleSaveDraftTime} className="btn btn-primary w-32 mr-2">Save</button>
+              <button onClick={() => setDraftTimeModalOpen(false)} className="btn w-32">Cancel</button>
+            </div>
+          </Modal>
+        )
+      }
+      {
+        draftOrderModalOpen && <DraftOrderModal
+          draftId={draftId}
+          onClose={() => setDraftOrderModalOpen(false)}
+        />
+      }
+      {
+        confirmKeepersModalOpen && <ConfirmModal
+          onConfirm={handleConfirmKeepers}
+          onClose={() => setConfirmKeepersModalOpen(false)}
+        >
+          This will clear all draft data. Continue?
+        </ConfirmModal>
+      }
+    </div >
   )
 }
 

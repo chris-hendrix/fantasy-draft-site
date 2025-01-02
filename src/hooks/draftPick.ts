@@ -29,7 +29,8 @@ export const useDraftPicks = (draftId: string) => {
   const { updateObject: updateDraftPick, isLoading: isUpdating } = useUpdateDraftPick()
   const { invalidateObject: invalidateDraftPick } = useInvalidateDraftPick()
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
-
+  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
   return {
     draftPicks,
     draftingPick,
@@ -37,15 +38,16 @@ export const useDraftPicks = (draftId: string) => {
     isUpdating,
     invalidateDraftPick,
     invalidateDraftPicks,
+    invalidatePlayer,
+    invalidatePlayers,
     ...rest
   }
 }
 
 export const useLiveDraftPicks = (draftId: string) => {
   const results = useDraftPicks(draftId)
-  const { updateDraftPick, invalidateDraftPick } = results
-  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
-  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
+  const { updateDraftPick, invalidateDraftPick, invalidatePlayer } = results
+
   const { send } = useSendBroadcast(draftId, 'draft')
   const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
 
@@ -70,7 +72,6 @@ export const useLiveDraftPicks = (draftId: string) => {
 
   return {
     ...results,
-    makeLiveSelection,
-    invalidatePlayers,
+    makeLiveSelection
   }
 }
