@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useSortedPlayers } from '@/hooks/player'
 import { useDraft } from '@/hooks/draft'
-import { useSendBroadcast } from '@/hooks/supabase'
-import { useDraftPicks } from '@/hooks/draftPick'
+import { useLiveDraftPicks } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
 import Tooltip from '@/components/Tooltip'
 import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
@@ -45,9 +44,8 @@ const PlayersTable: React.FC<Props> = ({
     sessionTeamIds,
     isSessionTeam
   } = useDraft(draftId)
-  const { draftPicks, updateDraftPick, draftingPick } = useDraftPicks(draftId)
-  const { players, isLoading: isPlayersLoading, invalidatePlayer, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
-  const { send } = useSendBroadcast(draftId, 'draft')
+  const { draftPicks, makeLiveSelection, draftingPick } = useLiveDraftPicks(draftId)
+  const { players, isLoading: isPlayersLoading, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
   const canDraft = draftingPick && isSessionTeam(draftingPick.teamId)
@@ -57,11 +55,9 @@ const PlayersTable: React.FC<Props> = ({
     if (!draftingPick || !playerToBeDrafted) return
     const pickId = draftingPick.id
     const newPlayerId = playerToBeDrafted.id
-    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
-    if ('error' in res) return
-    setPlayerToBeDrafted(null)
-    invalidatePlayer(newPlayerId)
-    await send({ pickId, oldPlayerId: null, newPlayerId })
+    if (await makeLiveSelection(pickId, null, newPlayerId)) {
+      setPlayerToBeDrafted(null)
+    }
   }
 
   const handleSavePlayer = async (player: PlayerArgs) => {
@@ -298,7 +294,7 @@ const PlayersTable: React.FC<Props> = ({
       />
       {draftingPick && playerToBeDrafted && (
         <ConfirmModal
-          onConfirm={handleDraft}
+          onConfirm={async () => handleDraft()}
           onClose={() => setPlayerToBeDrafted(null)}
         >
           Draft&nbsp;
