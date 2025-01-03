@@ -15,6 +15,9 @@ export const POSITIONS = [
   'RP'
 ]
 
+export const PITCHER_POSITIONS = ['SP', 'RP']
+export const HITTER_POSITIONS = POSITIONS.filter((pos) => !PITCHER_POSITIONS.includes(pos))
+
 export const DEFAULT_ROUNDS = 22
 export const DEFAULT_KEEPER_COUNT = 0
 
@@ -83,3 +86,21 @@ export const getDraftTeamData = (draftTeam: DraftTeamArgs | null, key: string) =
   if (!Number.isNaN(Number(value))) return Number(value) as any
   return value
 }
+
+export const isPitcherPlayer = (player: PlayerArgs) => {
+  const positions = getPlayerPositions(player)
+  return positions.some((pos) => PITCHER_POSITIONS.includes(pos))
+}
+
+export const isHitterPlayer = (player: PlayerArgs) => {
+  const positions = getPlayerPositions(player)
+  return positions.some((pos) => HITTER_POSITIONS.includes(pos))
+}
+
+export const isPitcherOnly = (player: PlayerArgs) => (
+  isPitcherPlayer(player) && !isHitterPlayer(player)
+)
+
+export const isHitterOnly = (player: PlayerArgs) => (
+  isHitterPlayer(player) && !isPitcherPlayer(player)
+)
