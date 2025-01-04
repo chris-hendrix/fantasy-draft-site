@@ -223,25 +223,30 @@ const PlayersTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex gap-1">
-        {sessionTeamId && <div className="w-16 card bg-base-300 p-1">
-          <ChipSelect
-            label="Saved"
-            items={[
-              { label: ICONS.true, value: true },
-              { label: ICONS.false, value: false },
-              { label: ICONS.null, value: null }
-            ]}
-            onSelection={({ selectedValues }) => {
-              setFilterOptions({
-                ...filterOptions,
-                saved: selectedValues?.length
-                  ? (player) => selectedValues.includes(getIsDraftable(player))
-                  : () => true
-              })
-            }}
-          />
-        </div>}
-        <div className="w-24 card bg-base-300 p-1">
+        <div className="w-32 card bg-base-300 p-1">
+          <PlayerSorter onSortChange={setSortOption} />
+        </div>
+        {sessionTeamId && (
+          <div className="w-24 card bg-base-300 p-1">
+            <ChipSelect
+              label="Saved"
+              items={[
+                { label: ICONS.true, value: true },
+                { label: ICONS.false, value: false },
+                { label: ICONS.null, value: null }
+              ]}
+              onSelection={({ selectedValues }) => {
+                setFilterOptions({
+                  ...filterOptions,
+                  saved: selectedValues?.length
+                    ? (player) => selectedValues.includes(getIsDraftable(player))
+                    : () => true
+                })
+              }}
+            />
+          </div>
+        )}
+        <div className="w-32 card bg-base-300 p-1">
           <ChipSelect
             label="Expected Rnd"
             items={[
@@ -291,9 +296,7 @@ const PlayersTable: React.FC<Props> = ({
             }}
           />
         </div>
-        <div className="w-32 card bg-base-300 p-1">
-          <PlayerSorter onSortChange={setSortOption} />
-        </div>
+
       </div >
       <Table
         columns={columns}
@@ -305,6 +308,7 @@ const PlayersTable: React.FC<Props> = ({
         })}
         isLoading={isLoading}
         minHeight="600px"
+        disableSort
       />
       {
         draftingPick && playerToBeDrafted && (
