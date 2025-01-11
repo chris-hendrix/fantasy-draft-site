@@ -10,11 +10,19 @@ interface Props {
   draftId: string;
   teamId: string;
   onClose: () => void;
+  goToNextTeam: () => void;
+  goToPreviousTeam: () => void;
 }
 
 type PositionRecord = { position: string; players: PlayerArgs[] }
 
-const DraftTeamModal: React.FC<Props> = ({ draftId, teamId, onClose }) => {
+const DraftTeamModal: React.FC<Props> = ({
+  draftId,
+  teamId,
+  onClose,
+  goToPreviousTeam,
+  goToNextTeam
+}) => {
   const { draftPicks } = useDraftPicks(draftId)
   const team = draftPicks?.find((dp) => dp.teamId === teamId)?.team
   const teamPicks = draftPicks?.filter((dp) => dp.teamId === teamId) || []
@@ -58,17 +66,27 @@ const DraftTeamModal: React.FC<Props> = ({ draftId, teamId, onClose }) => {
 
   return (
     <Modal title={`${team?.name}`} size="sm" onClose={onClose}>
-      <div className="text-neutral-content">
-        <Table columns={columns}
-          data={data}
-          xs
-          minHeight={'0px'}
-        />
-      </div>
-      <div className="flex gap-2 text-sm justify-center mt-4">
-        <div className="badge badge-primary">Total: {totalPlayers}</div>
-        <div className="badge badge-primary">Hitters: {totalHitters}</div>
-        <div className="badge badge-primary">Pitchers: {totalPitchers}</div>
+      <div className="flex items-center">
+        <div className="btn" onClick={goToPreviousTeam}>
+          {'<'}
+        </div>
+        <div className="flex-grow mx-4">
+          <div className="text-neutral-content">
+            <Table columns={columns}
+              data={data}
+              xs
+              minHeight={'0px'}
+            />
+          </div>
+          <div className="flex gap-2 text-sm justify-center mt-4">
+            <div className="badge badge-primary">Total: {totalPlayers}</div>
+            <div className="badge badge-primary">Hitters: {totalHitters}</div>
+            <div className="badge badge-primary">Pitchers: {totalPitchers}</div>
+          </div>
+        </div>
+        <div className="btn" onClick={goToNextTeam}>
+          {'>'}
+        </div>
       </div>
     </Modal>
   )

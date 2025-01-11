@@ -17,8 +17,8 @@ const sizes = {
 }
 
 const Modal: React.FC<Props> = ({ children, onClose, title = '', size = 'sm' }) => (
-  <div className="modal modal-open">
-    <div className={`modal-box ${sizes[size]}`}>
+  <div className="modal modal-open" onClick={onClose}>
+    <div className={`modal-box ${sizes[size]}`} onClick={(e) => e.stopPropagation()}>
       <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={onClose}>✕</button>
       <h3 className="font-bold text-lg">{title}</h3>
       <div className="mt-4">{children}</div>

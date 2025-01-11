@@ -56,6 +56,36 @@ const DraftPicksTable: React.FC<Props> = ({
   useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
   useEffect(() => { onDraftPicksChanged && onDraftPicksChanged(draftPicks) }, [draftPicks])
 
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (clickedTeamId !== null) {
+        if (event.key === 'ArrowRight') {
+          goToNextTeam()
+        } else if (event.key === 'ArrowLeft') {
+          goToPreviousTeam()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [clickedTeamId, draftPicks])
+
+  const goToNextTeam = () => {
+    const currentIndex = draftPicks.findIndex((pick) => pick.teamId === clickedTeamId)
+    const nextIndex = (currentIndex + 1) % draftPicks.length
+    setClickedTeamId(draftPicks[nextIndex].teamId)
+  }
+
+  const goToPreviousTeam = () => {
+    const currentIndex = draftPicks.findIndex((pick) => pick.teamId === clickedTeamId)
+    const previousIndex = (currentIndex - 1 + draftPicks.length) % draftPicks.length
+    setClickedTeamId(draftPicks[previousIndex].teamId)
+  }
+
   const columns: TableColumn<DraftPickArgs>[] = [
     {
       header: '',
@@ -192,6 +222,8 @@ const DraftPicksTable: React.FC<Props> = ({
           draftId={draftId}
           teamId={clickedTeamId}
           onClose={() => setClickedTeamId(null)}
+          goToPreviousTeam={goToPreviousTeam}
+          goToNextTeam={goToNextTeam}
         />
       )}
     </>
