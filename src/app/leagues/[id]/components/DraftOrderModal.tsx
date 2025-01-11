@@ -20,6 +20,7 @@ const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
   const [editDraftTeams, setEditDraftTeams] = useState<DraftTeamArgs[]>([])
   const [confirmSave, setConfirmSave] = useState(false)
   const [confirmGenerate, setConfirmGenerate] = useState(false)
+  const [editedRounds, setEditedRounds] = useState(rounds)
 
   const draftTeamData = editDraftTeams?.map((slot, i) => ({
     teamId: String(slot.teamId), order: i
@@ -46,11 +47,12 @@ const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
 
   const handleGenerate = async () => {
     const pickData = Array.from(
-      { length: rounds },
+      { length: editedRounds },
       () => draftTeamData.map((s) => (s.teamId))
     ).flat().map((teamId, i) => ({ teamId, overall: i + 1 }))
     const res = await updateDraft({
       id: draftId,
+      rounds: editedRounds,
       draftTeams: {
         deleteMany: {},
         createMany: { data: draftTeamData }
@@ -94,8 +96,21 @@ const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
     </ConfirmModal>
   }
 
+  const RoundInput = () => (
+    <div className="flex items-center">
+      <label className="mr-2">Rounds:</label>
+      <input
+        type="number"
+        value={editedRounds}
+        onChange={(e) => setEditedRounds(Number(e.target.value))}
+        className="input input-bordered w-16"
+      />
+    </div>
+  )
+
   return (
     <Modal title="Edit draft order" onClose={onClose}>
+      <RoundInput />
       <Table columns={columns} data={editDraftTeams || []} />
       <div className="flex justify-end mt-2">
         <button onClick={() => setConfirmGenerate(true)} className="btn btn-secondary w-32 mr-2">

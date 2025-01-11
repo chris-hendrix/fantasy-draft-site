@@ -137,7 +137,7 @@ const DraftsTable: React.FC<Props> = ({ leagueId }) => {
       )}
       <Table columns={columns} data={drafts || []} isLoading={isLoading} />
       {addModalOpen && <DraftModal onClose={() => setAddModalOpen(false)} />}
-      {draftToEdit && <DraftModal draftId={draftToEdit.id} onClose={() => setDraftToEdit(null)} />}
+      {draftToEdit && <DraftModal draft={draftToEdit} onClose={() => setDraftToEdit(null)} />}
       {draftToDelete && (
         <ConfirmModal
           onConfirm={handleDelete}
