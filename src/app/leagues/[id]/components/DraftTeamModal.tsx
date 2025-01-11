@@ -1,7 +1,7 @@
 'use client'
 
 import { PlayerArgs } from '@/types'
-import { getPlayersByPosition, getPlayerData } from '@/utils/draft'
+import { getPlayersByPosition, getPlayerData, isHitterPlayer, isPitcherPlayer } from '@/utils/draft'
 import Table, { TableColumn } from '@/components/Table'
 import { useDraftPicks } from '@/hooks/draftPick'
 import Modal from '@/components/Modal'
@@ -20,6 +20,9 @@ const DraftTeamModal: React.FC<Props> = ({ draftId, teamId, onClose }) => {
   const teamPicks = draftPicks?.filter((dp) => dp.teamId === teamId) || []
   const teamPlayers = teamPicks.flatMap((dp) => (dp.player ? [dp.player] : []))
   const positionMap = getPlayersByPosition(teamPlayers)
+  const totalPlayers = teamPlayers.length
+  const totalHitters = teamPlayers.filter(isHitterPlayer).length
+  const totalPitchers = teamPlayers.filter(isPitcherPlayer).length
 
   const data = Object.keys(positionMap).map((position) => ({
     position,
@@ -36,7 +39,7 @@ const DraftTeamModal: React.FC<Props> = ({ draftId, teamId, onClose }) => {
       renderedValue: ({ players }) => (
         <div className="flex flex-wrap gap-1 py-1">
           {players.map((player) => (
-            <div key={player.id} className="badge badge-primary badge-sm">
+            <div key={player.id} className="badge badge-secondary badge-sm">
               <a
                 key={getPlayerData(player, 'Name')}
                 className="link"
@@ -54,13 +57,18 @@ const DraftTeamModal: React.FC<Props> = ({ draftId, teamId, onClose }) => {
   ]
 
   return (
-    <Modal title={`${team?.name} players`} size="sm" onClose={onClose}>
+    <Modal title={`${team?.name}`} size="sm" onClose={onClose}>
       <div className="text-neutral-content">
         <Table columns={columns}
           data={data}
           xs
           minHeight={'0px'}
         />
+      </div>
+      <div className="flex gap-2 text-sm justify-center mt-4">
+        <div className="badge badge-primary">Total: {totalPlayers}</div>
+        <div className="badge badge-primary">Hitters: {totalHitters}</div>
+        <div className="badge badge-primary">Pitchers: {totalPitchers}</div>
       </div>
     </Modal>
   )
