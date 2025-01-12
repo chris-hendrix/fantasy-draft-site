@@ -29,11 +29,28 @@ const DraftPlayerModal: React.FC<Props> = ({
   goToNextPlayer,
 }) => {
   const { canDraft, getDraftedRound } = useDraftPicks(player.draftId)
-  const draftedByTeamName = player.draftPicks?.[0]?.team?.name
-  const draftedRound = getDraftedRound(player)
+
+  const link = getPlayerData(player, 'Link')
+
+  const DraftStatus = () => {
+    const draftedByTeamName = player.draftPicks?.[0]?.team?.name
+    const draftedRound = getDraftedRound(player)
+    if (draftedByTeamName) {
+      return (
+        <div className="text text-danger text-gray-500">
+          Drafted by <b>{draftedByTeamName}</b> in <b>Round {draftedRound}</b>
+        </div>
+      )
+    }
+    return (
+      <div className="text text-success font-bold">
+        Available
+      </div>
+    )
+  }
 
   return (
-    <Modal title={getPlayerData(player, 'PlayerInfo')} size="sm" onClose={onClose}>
+    <Modal title={getPlayerData(player, 'PlayerInfo')} size="md" onClose={onClose}>
       <div className="flex flex-col gap-4">
         <div className="flex items-center">
           <div className="btn" onClick={goToPreviousPlayer}>
@@ -41,14 +58,19 @@ const DraftPlayerModal: React.FC<Props> = ({
           </div>
           <div className="flex flex-col gap-4">
             <PlayerData header="Draft status">
-              {draftedByTeamName ? `Drafted by ${draftedByTeamName} in round ${draftedRound}` : 'Available'}
+              <DraftStatus />
             </PlayerData>
             <PlayerData header="Projections">
               {getPlayerData(player, 'Projections')}
             </PlayerData>
             <PlayerData header="Notes">
-              {getPlayerData(player, 'Notes')}
+              {getPlayerData(player, 'Notes') || 'No notes available'}
             </PlayerData>
+            {link && (
+              <a className="link link-primary" href={link} target="_blank" rel="noopener noreferrer">
+                Link ↗️
+              </a>
+            )}
           </div>
           <div className="btn" onClick={goToNextPlayer}>
             {'>'}
@@ -66,7 +88,7 @@ const DraftPlayerModal: React.FC<Props> = ({
               Draft
             </button>
           )}
-          <button type="button" className="btn btn-secondary w-24" onClick={onClose}>
+          <button type="button" className="btn w-24" onClick={onClose}>
             Close
           </button>
         </div>

@@ -55,7 +55,7 @@ const DraftTeamModal: React.FC<Props> = ({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {getPlayerData(player, 'Name')}
+                {getPlayerData(player, 'Name')} ↗️
               </a>
             </div>
           ))}
@@ -66,29 +66,36 @@ const DraftTeamModal: React.FC<Props> = ({
 
   return (
     <Modal title={`${team?.name}`} size="sm" onClose={onClose}>
-      <div className="flex items-center">
-        <div className="btn" onClick={goToPreviousTeam}>
-          {'<'}
-        </div>
-        <div className="flex-grow mx-4">
-          <div className="text-neutral-content">
-            <Table columns={columns}
-              data={data}
-              xs
-              minHeight={'0px'}
-            />
+      < div className="flex flex-col gap-4">
+        <div className="flex items-center">
+          <div className="btn" onClick={goToPreviousTeam}>
+            {'<'}
           </div>
-          <div className="flex gap-2 text-sm justify-center mt-4">
-            <div className="badge badge-primary">Total: {totalPlayers}</div>
-            <div className="badge badge-primary">Hitters: {totalHitters}</div>
-            <div className="badge badge-primary">Pitchers: {totalPitchers}</div>
+          <div className="flex-grow mx-4">
+            <div className="text-neutral-content">
+              <Table columns={columns}
+                data={data}
+                xs
+                minHeight={'0px'}
+              />
+            </div>
+            <div className="flex gap-2 text-sm justify-center mt-4">
+              <div className="badge badge-primary">Total: {totalPlayers}</div>
+              <div className="badge badge-primary">Hitters: {totalHitters}</div>
+              <div className="badge badge-primary">Pitchers: {totalPitchers}</div>
+            </div>
+          </div>
+          <div className="btn" onClick={goToNextTeam}>
+            {'>'}
           </div>
         </div>
-        <div className="btn" onClick={goToNextTeam}>
-          {'>'}
+        <div className="flex flex gap-2 justify-end">
+          <button type="button" className="btn w-24" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
-    </Modal>
+    </Modal >
   )
 }
 

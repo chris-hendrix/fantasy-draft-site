@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSortedPlayers } from '@/hooks/player'
 import { useDraft } from '@/hooks/draft'
 import { useLiveDraftPicks } from '@/hooks/draftPick'
@@ -60,6 +60,24 @@ const PlayersTable: React.FC<Props> = ({
   const [sortOption, setSortOption] = useState<PlayerSortOption | null>(null)
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
   const isLoading = isDraftLoading || isPlayersLoading
+
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (clickedPlayer !== null) {
+        if (event.key === 'ArrowRight') {
+          goToNextPlayer()
+        } else if (event.key === 'ArrowLeft') {
+          goToPreviousPlayer()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [clickedPlayer, draftPicks])
 
   const handleDraft = async (player: PlayerArgs) => {
     if (!draftingPick || !player) return
