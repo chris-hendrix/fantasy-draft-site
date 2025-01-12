@@ -19,6 +19,7 @@ import {
 import ChipSelect from '@/components/ChipSelect'
 import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
+import DraftPlayerModal from './DraftPlayerModal'
 import PlayerSorter, { PlayerSortOption } from './PlayerSorter'
 
 const MAX_ROUND_FILTER = 30
@@ -56,15 +57,23 @@ const PlayersTable: React.FC<Props> = ({
   const { draftPicks, makeLiveSelection, draftingPick } = useLiveDraftPicks(draftId)
   const { players, isLoading: isPlayersLoading, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
+  const [clickedPlayer, setClickedPlayer] = useState<PlayerArgs | null>(null)
   const [sortOption, setSortOption] = useState<PlayerSortOption | null>(null)
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
-  const canDraft = !disableUserDraft && draftingPick && isSessionTeam(draftingPick.teamId)
   const isLoading = isDraftLoading || isPlayersLoading
 
-  const handleDraft = async () => {
-    if (!draftingPick || !playerToBeDrafted) return
+  const canDraft = (player: PlayerArgs) => {
+    if (disableUserDraft) return false
+    if (!draftingPick) return false
+    if (player.draftPicks?.length) return false
+    if (!isSessionTeam(draftingPick.teamId)) return false
+    return true
+  }
+
+  const handleDraft = async (player: PlayerArgs) => {
+    if (!draftingPick || !player) return
     const pickId = draftingPick.id
-    const newPlayerId = playerToBeDrafted.id
+    const newPlayerId = player.id
     if (await makeLiveSelection(pickId, null, newPlayerId)) {
       setPlayerToBeDrafted(null)
     }
@@ -154,9 +163,7 @@ const PlayersTable: React.FC<Props> = ({
         return (
           <a
             className="link"
-            href={getPlayerData(player, 'Link')}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => setClickedPlayer(player)}
           >
             {getPlayerData(player, 'PlayerInfo')}
           </a>
@@ -168,9 +175,7 @@ const PlayersTable: React.FC<Props> = ({
       value: (player) => getPlayerData(player, 'Projections'),
       renderedValue: (player) => (
         <div className="w-40">
-          <Tooltip text={getPlayerData(player, 'Notes')} >
-            {getPlayerData(player, 'Projections')}
-          </Tooltip>
+          {getPlayerData(player, 'Projections')}
         </div>
       ),
     },
@@ -180,7 +185,7 @@ const PlayersTable: React.FC<Props> = ({
       hidden: hideTeamColumn,
       renderedValue: (player) => {
         const isDrafted = player?.draftPicks?.length > 0
-        if (!isDrafted && canDraft) {
+        if (!isDrafted && canDraft(player)) {
           return (
             <button
               className="btn btn-xs btn-primary text-xs w-full"
@@ -219,6 +224,20 @@ const PlayersTable: React.FC<Props> = ({
     })
     return sorted
   })()
+
+  const goToNextPlayer = () => {
+    if (!clickedPlayer) return
+    const index = players.findIndex((p) => p.id === clickedPlayer.id)
+    const nextPlayer = players[index + 1]
+    if (nextPlayer) setClickedPlayer(nextPlayer)
+  }
+
+  const goToPreviousPlayer = () => {
+    if (!clickedPlayer) return
+    const index = players.findIndex((p) => p.id === clickedPlayer.id)
+    const previousPlayer = players[index - 1]
+    if (previousPlayer) setClickedPlayer(previousPlayer)
+  }
 
   return (
     <>
@@ -313,7 +332,7 @@ const PlayersTable: React.FC<Props> = ({
       {
         draftingPick && playerToBeDrafted && (
           <ConfirmModal
-            onConfirm={async () => handleDraft()}
+            onConfirm={async () => handleDraft(playerToBeDrafted)}
             onClose={() => setPlayerToBeDrafted(null)}
           >
             Draft&nbsp;
@@ -324,6 +343,16 @@ const PlayersTable: React.FC<Props> = ({
           </ConfirmModal>
         )
       }
+      {clickedPlayer && (
+        <DraftPlayerModal
+          player={clickedPlayer}
+          onClose={() => setClickedPlayer(null)}
+          setPlayerToBeDrafted={setPlayerToBeDrafted}
+          goToNextPlayer={goToNextPlayer}
+          goToPreviousPlayer={goToPreviousPlayer}
+          canDraft={canDraft}
+        />
+      )}
     </>
   )
 }
