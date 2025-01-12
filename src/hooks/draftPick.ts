@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
-import { DraftPickArgs } from '@/types'
+import { DraftPickArgs, PlayerArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { draftPickApi } from '@/store/draftPick'
+import { getRound } from '@/utils/draft'
+import { useDraft } from './draft'
 import { useInvalidatePlayer, useInvalidatePlayers } from './player'
 import { useSendBroadcast, useReceiveBroadcast } from './supabase'
 
@@ -18,6 +20,7 @@ export const {
 )
 
 export const useDraftPicks = (draftId: string) => {
+  const { draft: { disableUserDraft }, teamsCount, isSessionTeam } = useDraft(draftId)
   const { data: draftPicks, ...rest } = useGetDraftPicks(
     {
       where: { draftId },
@@ -31,6 +34,20 @@ export const useDraftPicks = (draftId: string) => {
   const { invalidateObjects: invalidateDraftPicks } = useInvalidateDraftPicks()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
   const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
+
+  const getDraftedRound = (player: PlayerArgs) => {
+    const pick = draftPicks?.find((dp) => dp.playerId === player.id)
+    return pick ? getRound(pick.overall, teamsCount) : null
+  }
+
+  const canDraft = (player: PlayerArgs) => {
+    if (disableUserDraft) return false
+    if (!draftingPick) return false
+    if (player.draftPicks?.length) return false
+    if (!isSessionTeam(draftingPick.teamId)) return false
+    return true
+  }
+
   return {
     draftPicks,
     draftingPick,
@@ -40,6 +57,8 @@ export const useDraftPicks = (draftId: string) => {
     invalidateDraftPicks,
     invalidatePlayer,
     invalidatePlayers,
+    canDraft,
+    getDraftedRound,
     ...rest
   }
 }

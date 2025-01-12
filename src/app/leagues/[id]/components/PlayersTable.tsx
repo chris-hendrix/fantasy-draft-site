@@ -46,7 +46,6 @@ const PlayersTable: React.FC<Props> = ({
   hideTeamColumn,
 }) => {
   const {
-    draft: { disableUserDraft },
     isLoading: isDraftLoading,
     teamsCount,
     isComplete,
@@ -54,7 +53,7 @@ const PlayersTable: React.FC<Props> = ({
     sessionTeamIds,
     isSessionTeam
   } = useDraft(draftId)
-  const { draftPicks, makeLiveSelection, draftingPick } = useLiveDraftPicks(draftId)
+  const { draftPicks, makeLiveSelection, draftingPick, canDraft } = useLiveDraftPicks(draftId)
   const { players, isLoading: isPlayersLoading, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const [clickedPlayer, setClickedPlayer] = useState<PlayerArgs | null>(null)
@@ -62,20 +61,13 @@ const PlayersTable: React.FC<Props> = ({
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
   const isLoading = isDraftLoading || isPlayersLoading
 
-  const canDraft = (player: PlayerArgs) => {
-    if (disableUserDraft) return false
-    if (!draftingPick) return false
-    if (player.draftPicks?.length) return false
-    if (!isSessionTeam(draftingPick.teamId)) return false
-    return true
-  }
-
   const handleDraft = async (player: PlayerArgs) => {
     if (!draftingPick || !player) return
     const pickId = draftingPick.id
     const newPlayerId = player.id
     if (await makeLiveSelection(pickId, null, newPlayerId)) {
       setPlayerToBeDrafted(null)
+      setClickedPlayer(null)
     }
   }
 
@@ -189,7 +181,7 @@ const PlayersTable: React.FC<Props> = ({
           return (
             <button
               className="btn btn-xs btn-primary text-xs w-full"
-              onClick={() => draftingPick && setPlayerToBeDrafted(player)}
+              onClick={() => setPlayerToBeDrafted(player)}
             >
               Draft
             </button>
@@ -227,15 +219,15 @@ const PlayersTable: React.FC<Props> = ({
 
   const goToNextPlayer = () => {
     if (!clickedPlayer) return
-    const index = players.findIndex((p) => p.id === clickedPlayer.id)
-    const nextPlayer = players[index + 1]
+    const index = sortedPlayers.findIndex((p) => p.id === clickedPlayer.id)
+    const nextPlayer = sortedPlayers[index + 1]
     if (nextPlayer) setClickedPlayer(nextPlayer)
   }
 
   const goToPreviousPlayer = () => {
     if (!clickedPlayer) return
-    const index = players.findIndex((p) => p.id === clickedPlayer.id)
-    const previousPlayer = players[index - 1]
+    const index = sortedPlayers.findIndex((p) => p.id === clickedPlayer.id)
+    const previousPlayer = sortedPlayers[index - 1]
     if (previousPlayer) setClickedPlayer(previousPlayer)
   }
 
@@ -327,30 +319,28 @@ const PlayersTable: React.FC<Props> = ({
         })}
         isLoading={isLoading}
         minHeight="600px"
-        disableSort
       />
-      {
-        draftingPick && playerToBeDrafted && (
-          <ConfirmModal
-            onConfirm={async () => handleDraft(playerToBeDrafted)}
-            onClose={() => setPlayerToBeDrafted(null)}
-          >
+      {draftingPick && playerToBeDrafted && (
+        <ConfirmModal
+          onConfirm={async () => handleDraft(playerToBeDrafted)}
+          onClose={() => setPlayerToBeDrafted(null)}
+        >
+          <>
             Draft&nbsp;
             <b>{getPlayerName(playerToBeDrafted)}</b>
             &nbsp;in round&nbsp;
             {getRound(draftingPick.overall, teamsCount)}
             ?
-          </ConfirmModal>
-        )
-      }
-      {clickedPlayer && (
+          </>
+        </ConfirmModal>
+      )}
+      {clickedPlayer && !playerToBeDrafted && (
         <DraftPlayerModal
           player={clickedPlayer}
           onClose={() => setClickedPlayer(null)}
           setPlayerToBeDrafted={setPlayerToBeDrafted}
           goToNextPlayer={goToNextPlayer}
           goToPreviousPlayer={goToPreviousPlayer}
-          canDraft={canDraft}
         />
       )}
     </>

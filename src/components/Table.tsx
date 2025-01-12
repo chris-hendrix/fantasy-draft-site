@@ -20,7 +20,7 @@ interface Props<T> {
   notes?: string | ReactNode;
   rowStyle?: CssWithClassName | ((rowData: T) => CssWithClassName)
   isLoading?: boolean,
-  disableSort?: boolean
+  enableSort?: boolean
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -58,7 +58,7 @@ const Table = <T extends {}>({
   notes,
   rowStyle,
   isLoading,
-  disableSort = false
+  enableSort = false
 }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -103,7 +103,7 @@ const Table = <T extends {}>({
   const visibleData = sortedData && sortedData.slice(start, end)
 
   const handleColumnClick = (index: number) => {
-    if (disableSort) return
+    if (!enableSort) return
     if (sortState.column === index) {
       // same column is clicked
       if (sortState.direction === 'asc') setSortState({ column: index, direction: 'desc' })
@@ -136,7 +136,7 @@ const Table = <T extends {}>({
               <th
                 key={index}
                 onClick={() => handleColumnClick(index)}
-                style={{ cursor: disableSort ? undefined : 'pointer' }}
+                style={{ cursor: enableSort ? 'pointer' : undefined }}
               >
                 {column.header}
                 {sortState.column === index && (

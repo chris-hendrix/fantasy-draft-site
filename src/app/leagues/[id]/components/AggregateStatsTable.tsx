@@ -183,7 +183,7 @@ const AggregateStatsTable: React.FC<Props> = ({ leagueId, average }) => {
   ]
 
   return (
-    <Table columns={columns} data={data} xs />
+    <Table columns={columns} data={data} xs enableSort />
   )
 }
 

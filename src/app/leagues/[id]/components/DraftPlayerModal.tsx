@@ -3,6 +3,8 @@
 import { PlayerArgs } from '@/types'
 import { getPlayerData } from '@/utils/draft'
 import Modal from '@/components/Modal'
+import { useDraftPicks } from '@/hooks/draftPick'
+import React from 'react'
 
 interface Props {
   player: PlayerArgs;
@@ -10,8 +12,14 @@ interface Props {
   setPlayerToBeDrafted: (player: PlayerArgs) => void;
   goToNextPlayer: () => void;
   goToPreviousPlayer: () => void;
-  canDraft: (player: PlayerArgs) => boolean;
 }
+
+const PlayerData = ({ header, children }: { header: string, children: React.ReactNode }) => (
+  <div className="flex flex-col gap-1">
+    <div className="font-bold">{header}</div>
+    <div>{children}</div>
+  </div>
+)
 
 const DraftPlayerModal: React.FC<Props> = ({
   player,
@@ -19,14 +27,11 @@ const DraftPlayerModal: React.FC<Props> = ({
   setPlayerToBeDrafted,
   goToPreviousPlayer,
   goToNextPlayer,
-  canDraft
 }) => {
-  const PlayerData = ({ dataKey }: { dataKey: string }) => (
-    <div className="flex flex-col gap-1">
-      <div className="font-bold">{dataKey}</div>
-      <div>{getPlayerData(player, dataKey)}</div>
-    </div>
-  )
+  const { canDraft, getDraftedRound } = useDraftPicks(player.draftId)
+  const draftedByTeamName = player.draftPicks?.[0]?.team?.name
+  const draftedRound = getDraftedRound(player)
+
   return (
     <Modal title={getPlayerData(player, 'PlayerInfo')} size="sm" onClose={onClose}>
       <div className="flex flex-col gap-4">
@@ -35,8 +40,15 @@ const DraftPlayerModal: React.FC<Props> = ({
             {'<'}
           </div>
           <div className="flex flex-col gap-4">
-            <PlayerData dataKey="Projections" />
-            <PlayerData dataKey="Notes" />
+            <PlayerData header="Draft status">
+              {draftedByTeamName ? `Drafted by ${draftedByTeamName} in round ${draftedRound}` : 'Available'}
+            </PlayerData>
+            <PlayerData header="Projections">
+              {getPlayerData(player, 'Projections')}
+            </PlayerData>
+            <PlayerData header="Notes">
+              {getPlayerData(player, 'Notes')}
+            </PlayerData>
           </div>
           <div className="btn" onClick={goToNextPlayer}>
             {'>'}
@@ -49,7 +61,6 @@ const DraftPlayerModal: React.FC<Props> = ({
               className="btn btn-primary w-24"
               onClick={() => {
                 setPlayerToBeDrafted(player)
-                onClose()
               }}
             >
               Draft
