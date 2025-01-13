@@ -25,12 +25,6 @@ import PlayerSorter, { PlayerSortOption } from './PlayerSorter'
 
 const MAX_ROUND_FILTER = 30
 
-const ICONS = {
-  true: '🟢',
-  false: '🔴',
-  null: '⚫'
-}
-
 interface Props {
   draftId: string;
   maxItemsPerPage?: number,
@@ -126,11 +120,6 @@ const PlayersTable: React.FC<Props> = ({
     playerSearch: () => true
   })
 
-  const getIcon = (isDraftable: boolean | undefined | null) => {
-    if (isDraftable === undefined || isDraftable === null) return ICONS.null
-    return isDraftable ? ICONS.true : ICONS.false
-  }
-
   const getIsDraftable = (player: PlayerArgs) => {
     const savedPlayer = player?.savedPlayers?.find((sp) => isSessionTeam(sp.teamId))
     return !savedPlayer ? null : savedPlayer.isDraftable
@@ -140,11 +129,16 @@ const PlayersTable: React.FC<Props> = ({
     {
       header: '',
       hidden: !sessionTeamId || isComplete,
-      value: (player) => getIcon(getIsDraftable(player)),
+      value: (player) => (getIsDraftable(player) ? '⭐' : '☆'),
       renderedValue: (player) => (
-        <div onClick={() => handleSavePlayer(player)} className="text-[0.5rem] flex text-center cursor-pointer">
-          {getIcon(getIsDraftable(player))}
-        </div>
+        <Tooltip text="Save player">
+          <div
+            onClick={() => handleSavePlayer(player)}
+            className="text-[0.5rem] flex text-center cursor-pointer"
+          >
+            {getIsDraftable(player) ? '⭐' : '☆'}
+          </div>
+        </Tooltip>
       )
     },
     {
@@ -323,7 +317,7 @@ const PlayersTable: React.FC<Props> = ({
           />
           {sessionTeamId && (
             <Toggle
-              label="Saved"
+              label="⭐Saved"
               value={availableOnly}
               size="xs"
               setValue={(value: boolean) => {

@@ -29,9 +29,7 @@ export const PUT = routeWrapper(
         data: {
           savedPlayers: {
             delete: savedPlayer ? { id: savedPlayer.id } : undefined,
-            create: isDraftable === false
-              ? { teamId, isDraftable: null }
-              : { teamId, isDraftable: !isDraftable }
+            create: { teamId, isDraftable: !isDraftable }
           }
         }
       })
