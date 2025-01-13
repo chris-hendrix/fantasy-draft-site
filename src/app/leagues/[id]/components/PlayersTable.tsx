@@ -19,6 +19,7 @@ import {
 import ChipSelect from '@/components/ChipSelect'
 import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
+import Toggle from '@/components/Toggle'
 import DraftPlayerModal from './DraftPlayerModal'
 import PlayerSorter, { PlayerSortOption } from './PlayerSorter'
 
@@ -58,6 +59,7 @@ const PlayersTable: React.FC<Props> = ({
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const [clickedPlayer, setClickedPlayer] = useState<PlayerArgs | null>(null)
   const [sortOption, setSortOption] = useState<PlayerSortOption | null>(null)
+  const [availableOnly, setAvailableOnly] = useState(false)
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
   const isLoading = isDraftLoading || isPlayersLoading
 
@@ -117,6 +119,7 @@ const PlayersTable: React.FC<Props> = ({
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     saved: () => true,
+    available: () => true,
     round: () => true,
     team: () => true,
     position: () => true,
@@ -255,26 +258,6 @@ const PlayersTable: React.FC<Props> = ({
         <div className="w-32 card bg-base-300 p-1">
           <PlayerSorter onSortChange={setSortOption} />
         </div>
-        {sessionTeamId && (
-          <div className="w-24 card bg-base-300 p-1">
-            <ChipSelect
-              label="Saved"
-              items={[
-                { label: ICONS.true, value: true },
-                { label: ICONS.false, value: false },
-                { label: ICONS.null, value: null }
-              ]}
-              onSelection={({ selectedValues }) => {
-                setFilterOptions({
-                  ...filterOptions,
-                  saved: selectedValues?.length
-                    ? (player) => selectedValues.includes(getIsDraftable(player))
-                    : () => true
-                })
-              }}
-            />
-          </div>
-        )}
         <div className="w-32 card bg-base-300 p-1">
           <ChipSelect
             label="Expected Rnd"
@@ -324,6 +307,37 @@ const PlayersTable: React.FC<Props> = ({
               })
             }}
           />
+        </div>
+        <div className="w-24 card bg-base-300 p-1 flex items-center">
+          <Toggle
+            label="Available"
+            value={availableOnly}
+            size="xs"
+            setValue={(value: boolean) => {
+              setAvailableOnly(value)
+              setFilterOptions({
+                ...filterOptions,
+                available: (player) => !value || !player.draftPicks.length
+              })
+            }}
+          />
+          {sessionTeamId && (
+            <Toggle
+              label="Saved"
+              value={availableOnly}
+              size="xs"
+              setValue={(value: boolean) => {
+                setAvailableOnly(value)
+                setFilterOptions({
+                  ...filterOptions,
+                  saved: (player) => (
+                    !value ||
+                    player.savedPlayers.some((sp) => sp.teamId === sessionTeamId && sp.isDraftable)
+                  ),
+                })
+              }}
+            />
+          )}
         </div>
 
       </div >
