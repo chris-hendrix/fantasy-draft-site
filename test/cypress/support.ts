@@ -10,6 +10,7 @@ declare global {
       logoutUser: () => void,
       openMenuAndClick: (linkText: string) => void
       fillInput: (name: string, value: string) => void
+      exitModal: () => void
     }
   }
 }
@@ -49,4 +50,9 @@ Cypress.Commands.add('logoutUser', () => {
 
 Cypress.Commands.add('fillInput', (name, value) => {
   cy.get(`input[name="${name}"]`).type(value)
+})
+
+Cypress.Commands.add('exitModal', () => {
+  cy.contains('button', '✕').click()
+  cy.get('.modal-open').should('not.exist')
 })

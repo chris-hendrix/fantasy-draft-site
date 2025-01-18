@@ -7,38 +7,26 @@ describe('User tests', () => {
   })
   after(() => { cy.task('deleteTestUsers') })
 
-  it('New user can sign up and logout', () => {
+  it('New user can sign in, edit profile, and logout', () => {
     cy.visit('')
-    cy.loginUser()
-    cy.openMenuAndClick('Profile')
-    cy.logoutUser()
-  })
 
-  it('Existing user can sign in and logout', () => {
-    cy.visit('')
-    cy.loginUser()
-    cy.openMenuAndClick('Profile')
-    cy.logoutUser()
-  })
-
-  it('Existing user cannot sign up twice', () => {
-    cy.visit('/')
-    cy.signUpUser() // same user as previous test
+    // user cannot signup twice
+    cy.signUpUser()
     cy.contains('button', 'Sign up')
-  })
+    cy.exitModal()
 
-  it('User can edit profile', () => {
-    const text = 'Patch Adams'
-
-    cy.visit('')
+    // user can login and edit profile
+    const newName = 'Patch Adams'
     cy.loginUser()
     cy.openMenuAndClick('Profile')
     cy.get('#edit-profile').click()
-
-    cy.get('input[name="name"]').type(text)
+    cy.get('input[name="name"]').type(newName)
     cy.get('button[type="submit"]').click()
     cy.contains('button', 'Close').click()
-    cy.contains(text).should('exist')
+    cy.contains(newName).should('exist')
+
+    // user can logout
+    cy.logoutUser()
   })
 
   it('User can change password', () => {
