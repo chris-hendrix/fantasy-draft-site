@@ -136,10 +136,8 @@ export const generateSeedData = async () => {
     return draft
   }
 
-
   await createDraft(new Date().getFullYear() - 1, true)
   await createDraft(new Date().getFullYear(), false)
-
 
   return { league }
 }

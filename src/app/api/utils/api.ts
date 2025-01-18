@@ -106,8 +106,16 @@ export const checkUserBody = async (body: any, id: string | null = null) => {
     return Boolean(user && user.id !== id)
   }
 
+  const hasIllegalFields = () => {
+    // TODO probably a better way to do this
+    const legalFields = ['email', 'username', 'name', 'image', 'bucketImage', 'info', 'password']
+    const illegalFields = Object.keys(body).filter((field) => !legalFields.includes(field))
+    return illegalFields.length > 0
+  }
+
   if (!body) throw new ApiError('Request must have body', 400)
   const { username, email } = body
   if (username && await usernameExists(username)) throw new ApiError('Username exists', 400)
   if (email && await emailExists(email)) throw new ApiError('Email exists', 400)
+  if (hasIllegalFields()) throw new ApiError('Illegal fields in body', 400)
 }
