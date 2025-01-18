@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import classNames from 'classnames'
 
 interface Props {
   label: string;
@@ -10,8 +11,19 @@ interface Props {
 const Toggle: React.FC<Props> = ({ label, value, setValue, size = 'md' }) => {
   const [checked, setChecked] = useState(value)
 
-  const toggleSize = `toggle-${size}`
-  const textSize = `text-${size}`
+  const toggleSize = classNames({
+    'toggle-xs': size === 'xs',
+    'toggle-sm': size === 'sm',
+    'toggle-md': size === 'md',
+    'toggle-lg': size === 'lg',
+  })
+
+  const textSize = classNames({
+    'text-xs': size === 'xs',
+    'text-sm': size === 'sm',
+    'text-md': size === 'md',
+    'text-lg': size === 'lg',
+  })
 
   return (
     <div className="form-control ml-auto">
