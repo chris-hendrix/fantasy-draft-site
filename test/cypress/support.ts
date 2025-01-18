@@ -9,6 +9,7 @@ declare global {
       loginUser: (user?: User) => void,
       logoutUser: () => void,
       openMenuAndClick: (linkText: string) => void
+      fillInput: (name: string, value: string) => void
     }
   }
 }
@@ -44,4 +45,8 @@ Cypress.Commands.add('loginUser', (user = defaultUser) => {
 Cypress.Commands.add('logoutUser', () => {
   cy.visit('')
   cy.openMenuAndClick('Log out')
+})
+
+Cypress.Commands.add('fillInput', (name, value) => {
+  cy.get(`input[name="${name}"]`).type(value)
 })
