@@ -47,7 +47,7 @@ const PlayerSorter: React.FC<Props> = ({ onSortChange }) => {
       <option value="">None</option>
       {stats.map((stat) => (
         <option key={stat.key} value={stat.key}>
-          {`${stat.key}${stat.order === 'asc' ? ' ↑' : ' ↓'}`}
+          {`${stat.key}`}
         </option>
       ))}
     </select>

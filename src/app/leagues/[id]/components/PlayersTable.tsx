@@ -249,7 +249,7 @@ const PlayersTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex gap-1">
-        <div className="w-32 card bg-base-300 p-1">
+        <div className="w-24 card bg-base-300 p-1">
           <PlayerSorter onSortChange={setSortOption} />
         </div>
         <div className="w-32 card bg-base-300 p-1">
