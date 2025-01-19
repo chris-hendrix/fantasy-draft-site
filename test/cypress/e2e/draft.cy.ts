@@ -12,7 +12,7 @@ const inviteUser = (user: User) => {
 }
 
 const acceptInvite = () => {
-  cy.visit('')
+  cy.visit('/')
   cy.contains('My Leagues').click()
   cy.contains('li', 'League invites').click()
   cy.get('#btn-accept-invite').click()
@@ -28,7 +28,7 @@ const goToLeagueHome = (leagueName: string) => {
 
 describe('Draft tests', () => {
   before(() => {
-    cy.visit('')
+    cy.visit('/')
   })
   after(() => { cy.task('deleteTestUsers') })
 
