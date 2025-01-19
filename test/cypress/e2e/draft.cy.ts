@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
 import { createNewUser, User } from '../support'
+import { playerData } from '../fixtures/player-data'
 
 const inviteUser = (user: User) => {
   cy.contains('a', 'Teams').click()
@@ -47,6 +48,23 @@ describe('Draft tests', () => {
     // admin creates draft
     cy.contains('button', 'Add draft').click()
     cy.contains('button', 'Save').click()
+    cy.reload() // TODO should improve UX
+    cy.get('table > tbody').should('exist')
+
+    // TODO admin sets draft order
+    cy.contains('a', 'Draft').click()
+
+    // admin adds players
+    cy.contains('a', 'Players').click()
+    cy.contains('button', 'Import').click()
+
+    // paste playerData into textarea without typing
+    cy.get('textarea').invoke('val', playerData.trim()).trigger('input')
+    cy.get('textarea').type(' ') // enable the button
+    cy.contains('button', 'Read CSV').click()
+    cy.get('table > tbody').should('exist')
+    cy.contains('button', 'Overwrite').click()
+    cy.contains('button', 'Confirm').click()
 
     // admin goes to teams and invites self and user
     inviteUser(commissioner)
@@ -64,8 +82,6 @@ describe('Draft tests', () => {
     cy.contains('My Leagues').click()
     cy.contains('li', leagueName).click()
 
-    // TODO invite users
-    // TODO accept invite
     // TODO start draft
     // TODO draft player
   })
