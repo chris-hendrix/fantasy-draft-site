@@ -34,7 +34,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
   const userId = user?.id
   const { data: draft, isSuccess, ...rest } = useGetDraft({
     id: draftId,
-    queryParams: { getAllData: true, previousYear }
+    queryParams: { previousYear }
   }, { skip })
 
   const keepersLockDate = draft?.keepersLockDate
