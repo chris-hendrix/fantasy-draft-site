@@ -34,7 +34,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
   const userId = user?.id
   const { data: draft, isSuccess, ...rest } = useGetDraft({
     id: draftId,
-    queryParams: { previousYear }
+    queryParams: { previousYear, getAllData: true }
   }, { skip })
 
   const keepersLockDate = draft?.keepersLockDate
@@ -44,6 +44,7 @@ export const useDraft = (draftId: string, options: UseDraftOptions = {}) => {
   const isCommissioner = Boolean(
     user && draft?.league?.commissioners.find((c) => c.userId === user?.id)
   )
+
   const isDraftOpen = Boolean(
     (isSuccess && !draftLockDate) || (draftLockDate && draftLockDate > new Date())
   )

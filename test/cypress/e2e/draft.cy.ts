@@ -20,6 +20,12 @@ const acceptInvite = () => {
   cy.exitModal()
 }
 
+const goToLeagueHome = (leagueName: string) => {
+  cy.visit('/')
+  cy.contains('My Leagues').click()
+  cy.contains(leagueName).click()
+}
+
 describe('Draft tests', () => {
   before(() => {
     cy.visit('')
@@ -31,7 +37,7 @@ describe('Draft tests', () => {
     const commissioner = createNewUser('commissioner')
     const secondUser = createNewUser('user')
 
-    // admin creates draft and make sure its on the homepage
+    // commissioner creates league and make sure its on the homepage
     cy.signUpUser(commissioner)
     cy.contains('My Leagues').click()
     cy.contains('li', 'Create league').click()
@@ -41,46 +47,51 @@ describe('Draft tests', () => {
     cy.contains('button', 'Save').click()
     cy.contains(leagueName).should('exist')
 
-    // admin goes to league
-    cy.contains('My Leagues').click()
-    cy.contains(leagueName).click()
-
-    // admin creates draft
-    cy.contains('button', 'Add draft').click()
-    cy.contains('button', 'Save').click()
-    cy.reload() // TODO should improve UX
-    cy.get('table > tbody').should('exist')
-
-    // TODO admin sets draft order
-    cy.contains('a', 'Draft').click()
-
-    // admin adds players
-    cy.contains('a', 'Players').click()
-    cy.contains('button', 'Import').click()
-
-    // paste playerData into textarea without typing
-    cy.get('textarea').invoke('val', playerData.trim()).trigger('input')
-    cy.get('textarea').type(' ') // enable the button
-    cy.contains('button', 'Read CSV').click()
-    cy.get('table > tbody').should('exist')
-    cy.contains('button', 'Overwrite').click()
-    cy.contains('button', 'Confirm').click()
-
-    // admin goes to teams and invites self and user
+    // commissioner goes to teams and invites self and user
+    goToLeagueHome(leagueName)
     inviteUser(commissioner)
     inviteUser(secondUser)
     acceptInvite()
 
-    // admin logs out
+    // commissioner logs out
     cy.logoutUser()
 
     // user signs up and accepts invite
     cy.signUpUser(secondUser)
     acceptInvite()
 
-    // user goes to league home
-    cy.contains('My Leagues').click()
-    cy.contains('li', leagueName).click()
+    // user logs out
+    cy.logoutUser()
+
+    // commissioner logs in
+    cy.loginUser(commissioner)
+
+    // commissioner creates draft
+    goToLeagueHome(leagueName)
+    cy.contains('button', 'Add draft').click()
+    cy.contains('button', 'Save').click()
+    cy.reload() // TODO should improve UX
+    cy.get('table > tbody').should('exist')
+
+    // commissioner adds players
+    cy.contains('a', 'Players').click()
+    cy.contains('button', 'Import').click()
+    cy.get('textarea').invoke('val', playerData.trim()).trigger('input')
+    cy.get('textarea').type(' ') // type a char to enable the button
+    cy.contains('button', 'Read CSV').click()
+    cy.get('table > tbody').should('exist')
+    cy.contains('button', 'Overwrite').click()
+    cy.contains('button', 'Confirm').click()
+
+    // commissioner sets draft order
+    // TODO this can only happen after draft is created, need to handle vice versa
+    goToLeagueHome(leagueName)
+    cy.contains('a', 'Draft').click()
+    cy.contains('button', 'Generate').click()
+    cy.contains('button', 'Generate draft').click()
+    cy.contains('button', 'Confirm').click()
+    cy.get('table > tbody').contains(commissioner.username).should('exist')
+    cy.get('table > tbody').contains(secondUser.username).should('exist')
 
     // TODO start draft
     // TODO draft player

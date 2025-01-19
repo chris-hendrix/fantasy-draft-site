@@ -42,12 +42,14 @@ Cypress.Commands.add('loginUser', (user = defaultUser) => {
   cy.get('input[name="email"]').type(user.email)
   cy.get('input[name="password"]').type(user.password)
   cy.contains('button', 'Log in').click()
+  cy.wait(1000)
 })
 
 Cypress.Commands.add('logoutUser', () => {
   cy.visit('/')
   cy.openMenuAndClick('Log out')
   cy.visit('/')
+  cy.reload()
 })
 
 Cypress.Commands.add('fillInput', (name, value) => {
