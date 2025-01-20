@@ -110,4 +110,11 @@ describe('Draft tests', () => {
     cy.contains('button', 'Start').click()
     draftPlayer(parsedPlayerData[0]?.Name)
   })
+
+  it('User can draft the second player', () => {
+    cy.loginUser(secondUser)
+    goToLeagueHome(leagueName)
+    cy.contains('a', 'Draft').click()
+    draftPlayer(parsedPlayerData[1]?.Name)
+  })
 })
