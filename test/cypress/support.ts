@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { TEST_EMAIL_DOMAIN } from '../utils'
+import 'cypress-fail-fast'
 
 export type User = { username: string, email: string, password: string }
 declare global {

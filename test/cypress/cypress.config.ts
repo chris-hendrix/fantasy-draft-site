@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
+import cypressFailFast from 'cypress-fail-fast/plugin'
 import { deleteTestUsers } from '../utils'
-import { APP_URL, TEST_PREFIX } from '../../src/config'
+import { APP_URL } from '../../src/config'
 
 const cypressConfig = defineConfig({
   e2e: {
@@ -15,8 +16,9 @@ const cypressConfig = defineConfig({
       on('task', {
         deleteTestUsers: async () => deleteTestUsers(),
       })
+      cypressFailFast(on, _config)
     },
-    env: { TEST_PREFIX },
+    env: { },
   },
 })
 
