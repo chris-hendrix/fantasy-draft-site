@@ -35,48 +35,47 @@ const draftPlayer = (playerName: string) => {
 }
 
 describe('Draft tests', () => {
+  const commissioner = createNewUser('commissioner')
+  const secondUser = createNewUser('user')
+  const leagueName = `League ${new Date().getTime()}`
+
   let parsedPlayerData: any[] = []
+
   before(() => {
-    cy.visit('/')
     cy.wrap((async () => csv().fromString(playerData))()).then((data) => {
       parsedPlayerData = data as any[]
     })
   })
+  beforeEach(() => {
+    cy.visit('/')
+  })
   after(() => { cy.task('deleteTestUsers') })
 
-  it('User can create draft', () => {
-    cy.visit('')
-    const commissioner = createNewUser('commissioner')
-    const secondUser = createNewUser('user')
-
-    // commissioner creates league and make sure its on the homepage
+  it('Commissioner can signup, create a league and invite users', () => {
     cy.signUpUser(commissioner)
     cy.contains('My Leagues').click()
     cy.contains('li', 'Create league').click()
-    const leagueName = `League ${new Date().getTime()}`
     cy.fillInput('name', leagueName)
     cy.fillInput('url', 'www.E2edDraft.com')
     cy.contains('button', 'Save').click()
     cy.contains(leagueName).should('exist')
 
-    // commissioner goes to teams and invites self and user
     goToLeagueHome(leagueName)
     inviteUser(commissioner)
     inviteUser(secondUser)
     acceptInvite()
+  })
 
-    // commissioner logs out
-    cy.logoutUser()
-
-    // user signs up and accepts invite
+  it('User can signup and accept invite', () => {
     cy.signUpUser(secondUser)
     acceptInvite()
+  })
 
-    // user logs out
-    cy.logoutUser()
-
-    // commissioner logs in
+  it('Commissioner can create draft, add players, and set draft order', () => {
     cy.loginUser(commissioner)
+    goToLeagueHome(leagueName)
+    cy.contains('a', 'Draft').click()
+    cy.contains('button', 'Start').should('not.exist')
 
     // commissioner creates draft
     goToLeagueHome(leagueName)
@@ -96,21 +95,19 @@ describe('Draft tests', () => {
     cy.contains('button', 'Overwrite').click()
     cy.contains('button', 'Confirm').click()
     cy.contains('a', parsedPlayerData[0]?.Name).should('exist')
+  })
 
-    // commissioner sets draft order
-    // TODO this can only happen after draft is created, need to handle vice versa
+  it('Commissioner can set draft order, start draft, and draft first player', () => {
+    cy.loginUser(commissioner)
     goToLeagueHome(leagueName)
+    // TODO this can only happen after draft is created, need to handle vice versa
     cy.contains('a', 'Draft').click()
     cy.contains('button', 'Generate').click()
     cy.contains('button', 'Generate draft').click()
     cy.contains('button', 'Confirm').click()
     cy.get('table > tbody').contains(commissioner.username).should('exist')
     cy.get('table > tbody').contains(secondUser.username).should('exist')
-
-    // commissioner starts draft and drafts first player
     cy.contains('button', 'Start').click()
     draftPlayer(parsedPlayerData[0]?.Name)
-
-    // user logs in and drafts a player
   })
 })
