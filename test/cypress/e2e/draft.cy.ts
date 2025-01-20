@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import csv from 'csvtojson'
 import { createNewUser, User } from '../support'
 import { playerData } from '../fixtures/player-data'
 
@@ -26,9 +27,20 @@ const goToLeagueHome = (leagueName: string) => {
   cy.contains(leagueName).click()
 }
 
+const draftPlayer = (playerName: string) => {
+  cy.contains('a', playerName).click()
+  cy.get('.modal-open').contains('button', 'Draft').click()
+  cy.get('.modal-open').contains('button', 'Confirm').click()
+  cy.get('td').contains('button', 'Draft').should('not.exist')
+}
+
 describe('Draft tests', () => {
+  let parsedPlayerData: any[] = []
   before(() => {
     cy.visit('/')
+    cy.wrap((async () => csv().fromString(playerData))()).then((data) => {
+      parsedPlayerData = data as any[]
+    })
   })
   after(() => { cy.task('deleteTestUsers') })
 
@@ -76,12 +88,14 @@ describe('Draft tests', () => {
     // commissioner adds players
     cy.contains('a', 'Players').click()
     cy.contains('button', 'Import').click()
-    cy.get('textarea').invoke('val', playerData.trim()).trigger('input')
+    cy.get('textarea').invoke('val', playerData).trigger('input')
     cy.get('textarea').type(' ') // type a char to enable the button
+    cy.get('textarea').type('{backspace}')
     cy.contains('button', 'Read CSV').click()
     cy.get('table > tbody').should('exist')
     cy.contains('button', 'Overwrite').click()
     cy.contains('button', 'Confirm').click()
+    cy.contains('a', parsedPlayerData[0]?.Name).should('exist')
 
     // commissioner sets draft order
     // TODO this can only happen after draft is created, need to handle vice versa
@@ -93,7 +107,10 @@ describe('Draft tests', () => {
     cy.get('table > tbody').contains(commissioner.username).should('exist')
     cy.get('table > tbody').contains(secondUser.username).should('exist')
 
-    // TODO start draft
-    // TODO draft player
+    // commissioner starts draft and drafts first player
+    cy.contains('button', 'Start').click()
+    draftPlayer(parsedPlayerData[0]?.Name)
+
+    // user logs in and drafts a player
   })
 })
