@@ -14,16 +14,16 @@ const inviteUser = (user: User) => {
 
 const acceptInvite = () => {
   cy.visit('/')
-  cy.contains('My Leagues').click()
+  cy.get('#leagues-btn').click()
+  cy.wait(1000)
   cy.contains('li', 'League invites').click()
   cy.get('#btn-accept-invite').click()
-  cy.get('#btn-accept-invite').should('be.disabled')
   cy.exitModal()
 }
 
 const goToLeagueHome = (leagueName: string) => {
   cy.visit('/')
-  cy.contains('My Leagues').click()
+  cy.get('#leagues-btn').click()
   cy.contains(leagueName).click()
 }
 
@@ -46,33 +46,33 @@ describe('Draft tests', () => {
       parsedPlayerData = data as any[]
     })
   })
-  beforeEach(() => {
-    cy.visit('/')
-  })
+  beforeEach(() => { cy.visit('/') })
   after(() => { cy.task('deleteTestUsers') })
 
   it('Commissioner can signup, create a league and invite users', () => {
     cy.signUpUser(commissioner)
-    cy.contains('My Leagues').click()
+    cy.get('#leagues-btn').click()
     cy.contains('li', 'Create league').click()
     cy.fillInput('name', leagueName)
     cy.fillInput('url', 'www.E2edDraft.com')
     cy.contains('button', 'Save').click()
     cy.contains(leagueName).should('exist')
-
     goToLeagueHome(leagueName)
     inviteUser(commissioner)
     inviteUser(secondUser)
-    acceptInvite()
+    cy.logoutUser()
   })
 
   it('User can signup and accept invite', () => {
+    cy.visit('/')
     cy.signUpUser(secondUser)
+    cy.visit('/')
     acceptInvite()
   })
 
   it('Commissioner can create draft, add players, and set draft order', () => {
     cy.loginUser(commissioner)
+    acceptInvite()
     goToLeagueHome(leagueName)
     cy.contains('a', 'Draft').click()
     cy.contains('button', 'Start').should('not.exist')

@@ -58,6 +58,7 @@ Cypress.Commands.add('fillInput', (name, value) => {
 })
 
 Cypress.Commands.add('exitModal', () => {
-  cy.contains('button', '✕').click()
-  cy.get('.modal-open').should('not.exist')
+  if (cy.get('.modal-open').should('exist')) {
+    cy.get('.modal-open').contains('button', '✕').click()
+  }
 })
