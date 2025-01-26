@@ -20,7 +20,7 @@ interface ShowAlertOptions {
 export const useCurrentHash = () => {
   const dispatch: AppDispatch = useDispatch()
   const currentHash = useSelector((state: RootState) => state.app.currentHash)
-  const windowHash = window.location.hash.substring(1)
+  const windowHash = typeof window !== 'undefined' ? window.location.hash.substring(1) : null
 
   const setCurrentHash = (hash: string | null) => {
     if (hash) {

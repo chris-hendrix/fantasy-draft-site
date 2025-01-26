@@ -19,7 +19,8 @@ interface Props<T> {
   minHeight?: string;
   notes?: string | ReactNode;
   rowStyle?: CssWithClassName | ((rowData: T) => CssWithClassName)
-  isLoading?: boolean
+  isLoading?: boolean,
+  enableSort?: boolean
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
@@ -57,6 +58,7 @@ const Table = <T extends {}>({
   notes,
   rowStyle,
   isLoading,
+  enableSort = false
 }: Props<T>) => {
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -81,14 +83,17 @@ const Table = <T extends {}>({
     return String(aValue).localeCompare(String(bValue))
   }
 
-  let sortedData = data ? [...data] : []
-  if (sortState.column !== -1) {
-    const sortFunction = columns[sortState.column].sort || defaultSort
-    sortedData = sortedData?.sort(sortFunction)
-    if (sortState.direction === 'desc') {
-      sortedData?.reverse()
+  const sortedData = (() => {
+    let sorted = data ? [...data] : []
+    if (sortState.column !== -1) {
+      const sortFunction = columns[sortState.column].sort || defaultSort
+      sorted = sorted?.sort(sortFunction)
+      if (sortState.direction === 'desc') {
+        sorted?.reverse()
+      }
     }
-  }
+    return sorted
+  })()
 
   const itemsPerPage = Math.min(maxItemsPerPage, data.length)
   const totalPages = data && Math.ceil(data.length / Math.min(itemsPerPage, data.length))
@@ -98,6 +103,7 @@ const Table = <T extends {}>({
   const visibleData = sortedData && sortedData.slice(start, end)
 
   const handleColumnClick = (index: number) => {
+    if (!enableSort) return
     if (sortState.column === index) {
       // same column is clicked
       if (sortState.direction === 'asc') setSortState({ column: index, direction: 'desc' })
@@ -130,7 +136,7 @@ const Table = <T extends {}>({
               <th
                 key={index}
                 onClick={() => handleColumnClick(index)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: enableSort ? 'pointer' : undefined }}
               >
                 {column.header}
                 {sortState.column === index && (

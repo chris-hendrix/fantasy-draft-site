@@ -1,21 +1,24 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { TEST_EMAIL_DOMAIN } from '../utils'
+import 'cypress-fail-fast'
 
-type User = { username: string, email: string, password: string }
+export type User = { username: string, email: string, password: string }
 declare global {
   namespace Cypress {
     interface Chainable {
-      signUpUser: (user?: User) => void,
-      loginUser: (user?: User) => void,
+      signUpUser: (user?: User) => User,
+      loginUser: (user?: User) => User,
       logoutUser: () => void,
       openMenuAndClick: (linkText: string) => void
+      fillInput: (name: string, value: string) => void
+      exitModal: () => void
     }
   }
 }
 
-export const createNewUser = () => ({
-  username: `patch-adams-${new Date().getTime()}`,
-  email: `patch-adams-${new Date().getTime()}@${TEST_EMAIL_DOMAIN}`,
+export const createNewUser = (username: string = 'patch-adams') => ({
+  username: `${username}-${new Date().getTime()}`,
+  email: `${username}-${new Date().getTime()}@${TEST_EMAIL_DOMAIN}`,
   password: 'Abcd1234!'
 })
 
@@ -32,6 +35,7 @@ Cypress.Commands.add('signUpUser', (user = defaultUser) => {
   cy.get('input[name="password"]').type(user.password)
   cy.get('input[name="confirmPassword"]').type(user.password)
   cy.contains('button', 'Sign up').click()
+  cy.wait(1000)
 })
 
 Cypress.Commands.add('loginUser', (user = defaultUser) => {
@@ -39,9 +43,22 @@ Cypress.Commands.add('loginUser', (user = defaultUser) => {
   cy.get('input[name="email"]').type(user.email)
   cy.get('input[name="password"]').type(user.password)
   cy.contains('button', 'Log in').click()
+  cy.wait(1000)
 })
 
 Cypress.Commands.add('logoutUser', () => {
-  cy.visit('')
+  cy.visit('/')
   cy.openMenuAndClick('Log out')
+  cy.visit('/')
+  cy.reload()
+})
+
+Cypress.Commands.add('fillInput', (name, value) => {
+  cy.get(`input[name="${name}"]`).type(value)
+})
+
+Cypress.Commands.add('exitModal', () => {
+  if (cy.get('.modal-open').should('exist')) {
+    cy.get('.modal-open').contains('button', '✕').click()
+  }
 })

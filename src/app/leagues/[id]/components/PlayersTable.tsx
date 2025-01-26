@@ -1,32 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSortedPlayers } from '@/hooks/player'
 import { useDraft } from '@/hooks/draft'
-import { useSendBroadcast } from '@/hooks/supabase'
-import { useDraftPicks } from '@/hooks/draftPick'
+import { useLiveDraftPicks } from '@/hooks/draftPick'
 import Table, { TableColumn } from '@/components/Table'
 import Tooltip from '@/components/Tooltip'
-import { PlayerArgs, TeamArgs, DraftPickArgs } from '@/types'
-import { formatRoundPick, getPlayerData, getRound, getPlayerName, getPlayerTeam, POSITIONS, getPlayerPositions } from '@/utils/draft'
-import { getUnique } from '@/utils/array'
+import { PlayerArgs, DraftPickArgs } from '@/types'
+import {
+  formatRoundPick,
+  getPlayerData,
+  getRound,
+  getPlayerName,
+  getPlayerTeam,
+  POSITIONS,
+  getPlayerPositions,
+} from '@/utils/draft'
 import ChipSelect from '@/components/ChipSelect'
 import ConfirmModal from '@/components/ConfirmModal'
 import SearchFilter from '@/components/SearchFilter'
+import Toggle from '@/components/Toggle'
+import DraftPlayerModal from './DraftPlayerModal'
+import PlayerSorter, { PlayerSortOption } from './PlayerSorter'
 
 const MAX_ROUND_FILTER = 30
-
-const ICONS = {
-  true: '🟢',
-  false: '🔴',
-  null: '⚫'
-}
 
 interface Props {
   draftId: string;
   maxItemsPerPage?: number,
   hideTeamColumn?: boolean,
   draftingPick?: DraftPickArgs
+  customSort?: { key: string, order: 'asc' | 'desc', isHitterStat?: boolean }
 }
 
 type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
@@ -34,10 +38,9 @@ type FilterOptions = { [key: string]: (pick: PlayerArgs) => boolean }
 const PlayersTable: React.FC<Props> = ({
   draftId,
   maxItemsPerPage = 100,
-  hideTeamColumn
+  hideTeamColumn,
 }) => {
   const {
-    draft: { disableUserDraft },
     isLoading: isDraftLoading,
     teamsCount,
     isComplete,
@@ -45,23 +48,41 @@ const PlayersTable: React.FC<Props> = ({
     sessionTeamIds,
     isSessionTeam
   } = useDraft(draftId)
-  const { draftPicks, updateDraftPick, draftingPick } = useDraftPicks(draftId)
-  const { players, isLoading: isPlayersLoading, invalidatePlayer, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
-  const { send } = useSendBroadcast(draftId, 'draft')
+  const { draftPicks, makeLiveSelection, draftingPick, canDraft } = useLiveDraftPicks(draftId)
+  const { players, isLoading: isPlayersLoading, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
+  const [clickedPlayer, setClickedPlayer] = useState<PlayerArgs | null>(null)
+  const [sortOption, setSortOption] = useState<PlayerSortOption | null>(null)
+  const [availableOnly, setAvailableOnly] = useState(false)
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
-  const canDraft = draftingPick && isSessionTeam(draftingPick.teamId)
   const isLoading = isDraftLoading || isPlayersLoading
 
-  const handleDraft = async () => {
-    if (!draftingPick || !playerToBeDrafted) return
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (clickedPlayer !== null) {
+        if (event.key === 'ArrowRight') {
+          goToNextPlayer()
+        } else if (event.key === 'ArrowLeft') {
+          goToPreviousPlayer()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [clickedPlayer, draftPicks])
+
+  const handleDraft = async (player: PlayerArgs) => {
+    if (!draftingPick || !player) return
     const pickId = draftingPick.id
-    const newPlayerId = playerToBeDrafted.id
-    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
-    if ('error' in res) return
-    setPlayerToBeDrafted(null)
-    invalidatePlayer(newPlayerId)
-    await send({ pickId, oldPlayerId: null, newPlayerId })
+    const newPlayerId = player.id
+    if (await makeLiveSelection(pickId, null, newPlayerId)) {
+      setPlayerToBeDrafted(null)
+      setClickedPlayer(null)
+    }
   }
 
   const handleSavePlayer = async (player: PlayerArgs) => {
@@ -90,29 +111,14 @@ const PlayersTable: React.FC<Props> = ({
     return Math.min(round, MAX_ROUND_FILTER)
   }
 
-  const getUniqueTeamOptions = () => {
-    const teams = players
-      .map((player) => getPlayerTeam(player))
-      .filter((team) => Boolean(team))
-    const uniqueTeams = getUnique<TeamArgs>(teams, (team) => team.id)
-    return [
-      { value: 'free_agent', label: '👤 Free Agent' },
-      ...uniqueTeams.map((t) => ({ value: t.id, label: t.name }))
-    ]
-  }
-
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     saved: () => true,
+    available: () => true,
     round: () => true,
     team: () => true,
     position: () => true,
     playerSearch: () => true
   })
-
-  const getIcon = (isDraftable: boolean | undefined | null) => {
-    if (isDraftable === undefined || isDraftable === null) return ICONS.null
-    return isDraftable ? ICONS.true : ICONS.false
-  }
 
   const getIsDraftable = (player: PlayerArgs) => {
     const savedPlayer = player?.savedPlayers?.find((sp) => isSessionTeam(sp.teamId))
@@ -123,11 +129,16 @@ const PlayersTable: React.FC<Props> = ({
     {
       header: '',
       hidden: !sessionTeamId || isComplete,
-      value: (player) => getIcon(getIsDraftable(player)),
+      value: (player) => (getIsDraftable(player) ? '⭐' : '☆'),
       renderedValue: (player) => (
-        <div onClick={() => handleSavePlayer(player)} className="text-[0.5rem] flex text-center cursor-pointer">
-          {getIcon(getIsDraftable(player))}
-        </div>
+        <Tooltip text="Save player">
+          <div
+            onClick={() => handleSavePlayer(player)}
+            className="text-[0.5rem] flex text-center cursor-pointer"
+          >
+            {getIsDraftable(player) ? '⭐' : '☆'}
+          </div>
+        </Tooltip>
       )
     },
     {
@@ -159,9 +170,7 @@ const PlayersTable: React.FC<Props> = ({
         return (
           <a
             className="link"
-            href={getPlayerData(player, 'Link')}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => setClickedPlayer(player)}
           >
             {getPlayerData(player, 'PlayerInfo')}
           </a>
@@ -173,54 +182,77 @@ const PlayersTable: React.FC<Props> = ({
       value: (player) => getPlayerData(player, 'Projections'),
       renderedValue: (player) => (
         <div className="w-40">
-          <Tooltip text={getPlayerData(player, 'Notes')} >
-            {getPlayerData(player, 'Projections')}
-          </Tooltip>
+          {getPlayerData(player, 'Projections')}
         </div>
       ),
     },
-    { header: 'Team', value: (player) => getPlayerTeam(player)?.name || '', hidden: hideTeamColumn },
     {
-      header: '',
-      hidden: !isDraftOpen || disableUserDraft || !draftingPick,
-      renderedValue: (player) => (
-        <button
-          className="btn btn-xs btn-primary text-xs"
-          disabled={player?.draftPicks?.length > 0 || !canDraft}
-          onClick={() => draftingPick && setPlayerToBeDrafted(player)}
-        >
-          Draft
-        </button>
-      )
-    }
+      header: 'Team',
+      value: (player) => getPlayerTeam(player)?.name || '',
+      hidden: hideTeamColumn,
+      renderedValue: (player) => {
+        const isDrafted = player?.draftPicks?.length > 0
+        if (!isDrafted && canDraft(player)) {
+          return (
+            <button
+              className="btn btn-xs btn-primary text-xs w-full"
+              onClick={() => setPlayerToBeDrafted(player)}
+            >
+              Draft
+            </button>
+          )
+        }
+        return getPlayerTeam(player)?.name || ''
+      }
+    },
   ]
 
-  const filteredPlayers = players.filter((player) => Object
+  const filteredPlayers = players?.filter((player) => Object
     .values(filterOptions)
-    .every((filter) => filter(player)))
+    .every((filter) => filter(player))) || []
+
+  const sortedPlayers = (() => {
+    if (!sortOption) return filteredPlayers
+    const { key, order, filter } = sortOption
+
+    // add additional filter
+    const filtered = filter ? filteredPlayers.filter(filter) : filteredPlayers
+
+    // sort
+    const sorted = filtered.sort((a, b) => {
+      const valueA = getPlayerData(a, key)
+      const valueB = getPlayerData(b, key)
+
+      if (!valueA) return 1 // if data is '', send to back
+      if (!valueB) return -1
+      if (valueA < valueB) return order === 'asc' ? -1 : 1
+      if (valueA > valueB) return order === 'asc' ? 1 : -1
+      return 0
+    })
+    return sorted
+  })()
+
+  const goToNextPlayer = () => {
+    if (!clickedPlayer) return
+    const index = sortedPlayers.findIndex((p) => p.id === clickedPlayer.id)
+    const nextPlayer = sortedPlayers[index + 1]
+    if (nextPlayer) setClickedPlayer(nextPlayer)
+  }
+
+  const goToPreviousPlayer = () => {
+    if (!clickedPlayer) return
+    const index = sortedPlayers.findIndex((p) => p.id === clickedPlayer.id)
+    const previousPlayer = sortedPlayers[index - 1]
+    if (previousPlayer) setClickedPlayer(previousPlayer)
+  }
 
   return (
     <>
       <div className="flex gap-1">
-        {sessionTeamId && <div className="w-16 card bg-base-300 p-1">
-          <ChipSelect
-            label="Saved"
-            items={[
-              { label: ICONS.true, value: true },
-              { label: ICONS.false, value: false },
-              { label: ICONS.null, value: null }
-            ]}
-            onSelection={({ selectedValues }) => {
-              setFilterOptions({
-                ...filterOptions,
-                saved: selectedValues?.length
-                  ? (player) => selectedValues.includes(getIsDraftable(player))
-                  : () => true
-              })
-            }}
-          />
-        </div>}
         <div className="w-24 card bg-base-300 p-1">
+          <PlayerSorter onSortChange={setSortOption} />
+        </div>
+        <div className="w-32 card bg-base-300 p-1">
           <ChipSelect
             label="Expected Rnd"
             items={[
@@ -270,24 +302,42 @@ const PlayersTable: React.FC<Props> = ({
             }}
           />
         </div>
-        {!hideTeamColumn && <div className="w-60 card bg-base-300 p-1">
-          <ChipSelect
-            label="Team"
-            items={getUniqueTeamOptions()}
-            onSelection={({ selectedValues }) => {
+        <div className="w-24 card bg-base-300 p-1 flex items-center">
+          <Toggle
+            label="Available"
+            value={availableOnly}
+            size="xs"
+            setValue={(value: boolean) => {
+              setAvailableOnly(value)
               setFilterOptions({
                 ...filterOptions,
-                team: selectedValues?.length
-                  ? (player) => selectedValues.includes(getPlayerTeam(player)?.id || 'free_agent')
-                  : () => true
+                available: (player) => !value || !player.draftPicks.length
               })
             }}
           />
-        </div>}
-      </div>
+          {sessionTeamId && (
+            <Toggle
+              label="⭐Saved"
+              value={availableOnly}
+              size="xs"
+              setValue={(value: boolean) => {
+                setAvailableOnly(value)
+                setFilterOptions({
+                  ...filterOptions,
+                  saved: (player) => (
+                    !value ||
+                    player.savedPlayers.some((sp) => sp.teamId === sessionTeamId && sp.isDraftable)
+                  ),
+                })
+              }}
+            />
+          )}
+        </div>
+
+      </div >
       <Table
         columns={columns}
-        data={filteredPlayers}
+        data={sortedPlayers}
         maxItemsPerPage={maxItemsPerPage}
         xs
         rowStyle={(player: PlayerArgs) => (!player?.draftPicks?.length ? {} : {
@@ -298,15 +348,26 @@ const PlayersTable: React.FC<Props> = ({
       />
       {draftingPick && playerToBeDrafted && (
         <ConfirmModal
-          onConfirm={handleDraft}
+          onConfirm={async () => handleDraft(playerToBeDrafted)}
           onClose={() => setPlayerToBeDrafted(null)}
         >
-          Draft&nbsp;
-          <b>{getPlayerName(playerToBeDrafted)}</b>
-          &nbsp;in round&nbsp;
-          {getRound(draftingPick.overall, teamsCount)}
-          ?
+          <>
+            Draft&nbsp;
+            <b>{getPlayerName(playerToBeDrafted)}</b>
+            &nbsp;in round&nbsp;
+            {getRound(draftingPick.overall, teamsCount)}
+            ?
+          </>
         </ConfirmModal>
+      )}
+      {clickedPlayer && !playerToBeDrafted && (
+        <DraftPlayerModal
+          player={clickedPlayer}
+          onClose={() => setClickedPlayer(null)}
+          setPlayerToBeDrafted={setPlayerToBeDrafted}
+          goToNextPlayer={goToNextPlayer}
+          goToPreviousPlayer={goToPreviousPlayer}
+        />
       )}
     </>
   )

@@ -42,6 +42,7 @@ const InviteModal: React.FC<FormProps> = ({ onClose }) => {
     {
       renderedValue: ((team) => <>
         <button
+          id="btn-accept-invite"
           className="btn btn-ghost btn-square btn-sm"
           onClick={() => handleUpdate(team)}
           disabled={isLoading}

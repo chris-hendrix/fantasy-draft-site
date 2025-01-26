@@ -1,0 +1,9 @@
+{
+  "installCommand": "npm install && npm run migrate",
+  "crons": [
+    {
+      "path": "/api/health",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

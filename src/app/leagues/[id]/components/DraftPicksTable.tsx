@@ -4,16 +4,14 @@ import { useState, useEffect } from 'react'
 import { DraftPickArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName, getRound } from '@/utils/draft'
-import { useInvalidatePlayer } from '@/hooks/player'
-import { useDraftPicks } from '@/hooks/draftPick'
-import { useSendBroadcast, useReceiveBroadcast } from '@/hooks/supabase'
+import { useLiveDraftPicks } from '@/hooks/draftPick'
 import ChipSelect from '@/components/ChipSelect'
 import { getUnique } from '@/utils/array'
 import SearchFilter from '@/components/SearchFilter'
 import { useDraft } from '@/hooks/draft'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
-import PositionsTable from './PositionsTable'
+import DraftTeamModal from './DraftTeamModal'
 
 interface Props {
   draftId: string;
@@ -40,12 +38,10 @@ const DraftPicksTable: React.FC<Props> = ({
   const {
     draftPicks,
     isLoading: isDraftPicksLoading,
-    updateDraftPick,
-    invalidateDraftPick
-  } = useDraftPicks(draftId)
-  const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+    makeLiveSelection
+  } = useLiveDraftPicks(draftId)
   const [editPickId, setEditPickId] = useState<string | null>(null)
-  const [hoveredPickId, setHoveredPickId] = useState<string | null>(null)
+  const [clickedTeamId, setClickedTeamId] = useState<string | null>(null)
   const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     round: () => true,
@@ -53,8 +49,6 @@ const DraftPicksTable: React.FC<Props> = ({
     playerSearch: () => true
   })
 
-  const { send } = useSendBroadcast(draftId, 'draft')
-  const { latestPayload } = useReceiveBroadcast(draftId, 'draft')
   const draftingPick = draftPicks?.filter((p) => p.playerId === null)?.[0]
   const isLoading = isDraftLoading || isDraftPicksLoading
 
@@ -63,19 +57,33 @@ const DraftPicksTable: React.FC<Props> = ({
   useEffect(() => { onDraftPicksChanged && onDraftPicksChanged(draftPicks) }, [draftPicks])
 
   useEffect(() => {
-    const { pickId, oldPlayerId } = latestPayload || {}
-    pickId && invalidateDraftPick(pickId)
-    oldPlayerId && invalidatePlayer(latestPayload?.oldPlayerId)
-  }, [latestPayload])
+    const handleKeyDown = (event: any) => {
+      if (clickedTeamId !== null) {
+        if (event.key === 'ArrowRight') {
+          goToNextTeam()
+        } else if (event.key === 'ArrowLeft') {
+          goToPreviousTeam()
+        }
+      }
+    }
 
-  const handleSelection = async (
-    pickId: string,
-    oldPlayerId: string,
-    newPlayerId: string | null
-  ) => {
-    const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
-    if ('error' in res) return
-    await send({ pickId, oldPlayerId, newPlayerId })
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [clickedTeamId, draftPicks])
+
+  const goToNextTeam = () => {
+    const currentIndex = draftPicks.findIndex((pick) => pick.teamId === clickedTeamId)
+    const nextIndex = (currentIndex + 1) % draftPicks.length
+    setClickedTeamId(draftPicks[nextIndex].teamId)
+  }
+
+  const goToPreviousTeam = () => {
+    const currentIndex = draftPicks.findIndex((pick) => pick.teamId === clickedTeamId)
+    const previousIndex = (currentIndex - 1 + draftPicks.length) % draftPicks.length
+    setClickedTeamId(draftPicks[previousIndex].teamId)
   }
 
   const columns: TableColumn<DraftPickArgs>[] = [
@@ -98,21 +106,12 @@ const DraftPicksTable: React.FC<Props> = ({
       header: 'Team',
       value: (pick) => pick.team?.name,
       renderedValue: (pick) => (
-        <div
-          className="cursor-pointer w-40"
-          onMouseEnter={() => setHoveredPickId(pick.id)}
-          onMouseLeave={() => setHoveredPickId(null)}
+        <a
+          className="link"
+          onClick={() => setClickedTeamId(pick.team?.id || null)}
         >
-          {hoveredPickId === pick.id && (
-            <div className="absolute menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-200 text-xs">
-              <label className="text-xs w-fit p-0.5 text-neutral-content bold" >
-                {pick?.team?.name || ''}
-              </label>
-              <PositionsTable draftId={pick.draftId} teamId={pick.teamId} />
-            </div>
-          )}
           {pick.team?.name}
-        </div>
+        </a>
       )
     },
     {
@@ -133,8 +132,8 @@ const DraftPicksTable: React.FC<Props> = ({
         return (
           <PlayerAutocomplete
             draftId={draftId}
-            onSelection={(newPlayerId) => {
-              handleSelection(String(id), String(player?.id), newPlayerId)
+            onSelection={async (newPlayerId) => {
+              await makeLiveSelection(String(id), String(player?.id), newPlayerId)
             }}
             size="xs"
             initialId={player?.id}
@@ -218,6 +217,15 @@ const DraftPicksTable: React.FC<Props> = ({
         minHeight="600px"
         isLoading={isLoading}
       />
+      {clickedTeamId && (
+        <DraftTeamModal
+          draftId={draftId}
+          teamId={clickedTeamId}
+          onClose={() => setClickedTeamId(null)}
+          goToPreviousTeam={goToPreviousTeam}
+          goToNextTeam={goToNextTeam}
+        />
+      )}
     </>
   )
 }

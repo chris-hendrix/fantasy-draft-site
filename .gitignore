@@ -40,3 +40,6 @@ next-env.d.ts
 
 # ssl certificates
 *.crt
+
+# cypress screenshots
+test/cypress/screenshots

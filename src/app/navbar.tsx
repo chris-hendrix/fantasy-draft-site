@@ -79,7 +79,7 @@ const LeagueDropdown: React.FC = () => {
     <>
       <Dropdown
         label={
-          <div className="btn btn-ghost text-primary-content">
+          <div id="leagues-btn" className="btn btn-ghost text-primary-content">
             {selectedLeague ? selectedLeague.name : 'My Leagues'} 🔽
           </div>
         }

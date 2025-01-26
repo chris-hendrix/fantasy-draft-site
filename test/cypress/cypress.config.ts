@@ -1,13 +1,15 @@
 import { defineConfig } from 'cypress'
+import cypressFailFast from 'cypress-fail-fast/plugin'
 import { deleteTestUsers } from '../utils'
-import { APP_URL, TEST_PREFIX } from '../../src/config'
+import { APP_URL } from '../../src/config'
 
 const cypressConfig = defineConfig({
   e2e: {
     baseUrl: APP_URL,
-    retries: { runMode: 2, openMode: 1 },
+    retries: { runMode: 1, openMode: 1 },
     video: false,
-    screenshotOnRunFailure: false,
+    screenshotOnRunFailure: true,
+    screenshotsFolder: 'test/cypress/screenshots',
     downloadsFolder: 'test/cypress/download',
     supportFile: 'test/cypress/support.ts',
     specPattern: 'test/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
@@ -15,8 +17,9 @@ const cypressConfig = defineConfig({
       on('task', {
         deleteTestUsers: async () => deleteTestUsers(),
       })
+      cypressFailFast(on, _config)
     },
-    env: { TEST_PREFIX },
+    env: { },
   },
 })
 

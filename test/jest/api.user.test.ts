@@ -53,6 +53,14 @@ describe('/api/users', () => {
     expect(res.status).toBe(401)
   })
 
+  test('user cannot edit illegal fields', async () => {
+    const user = await createGetServerSessionMock()
+    const body = { admin: true }
+    const req = createNextRequest({ method: 'PUT', body })
+    const res = await putUser(req, { params: { id: user.id } })
+    expect(res.status).toBe(400)
+  })
+
   test('user can change password', async () => {
     const user = await createGetServerSessionMock()
     const body = { currentPassword: 'Abcd1234!', password: 'Abcd1234!!!', confirmPassword: 'Abcd1234!!!' }

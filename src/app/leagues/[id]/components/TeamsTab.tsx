@@ -59,6 +59,7 @@ const TeamsTab: React.FC<Props> = ({ leagueId }) => {
           {users.map((u) => (
             <span key={u.id} >
               ✅ {u.name || u.email}
+              {u.name ? ` (${u.email})` : ''}
             </span>
           ))}
           {inviteEmails.map((email) => <span key={email}>⚠️ {email}</span>)}
