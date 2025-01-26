@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { createNewUser } from '../support'
 
-describe('User tests', () => {
+describe('Auth flow', () => {
   const user = createNewUser()
 
   beforeEach(() => {

@@ -62,7 +62,7 @@ const keepPlayer = (playerName: string, asCommissioner = true) => {
   availablePlayers.splice(availablePlayers.indexOf(playerName), 1)
 }
 
-describe('Draft tests', () => {
+describe('Draft create and start flow', () => {
   before(() => {
     cy.wrap((async () => csv().fromString(playerData))()).then((data) => {
       const parsedPlayerData = data as any[]
