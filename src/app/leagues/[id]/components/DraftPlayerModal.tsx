@@ -34,8 +34,6 @@ const DraftPlayerModal: React.FC<Props> = ({
   const link = getPlayerData(player, 'Link')
   const photoUrl = getPlayerData(player, 'PhotoURL')
 
-  console.log({ photoUrl })
-
   const DraftStatus = () => {
     const draftedByTeamName = player.draftPicks?.[0]?.team?.name
     const draftedRound = getDraftedRound(player)

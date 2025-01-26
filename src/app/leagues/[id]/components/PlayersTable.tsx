@@ -207,9 +207,9 @@ const PlayersTable: React.FC<Props> = ({
     },
   ]
 
-  const filteredPlayers = players.filter((player) => Object
+  const filteredPlayers = players?.filter((player) => Object
     .values(filterOptions)
-    .every((filter) => filter(player)))
+    .every((filter) => filter(player))) || []
 
   const sortedPlayers = (() => {
     if (!sortOption) return filteredPlayers
