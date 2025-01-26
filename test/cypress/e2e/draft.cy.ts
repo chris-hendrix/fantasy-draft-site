@@ -3,6 +3,13 @@ import csv from 'csvtojson'
 import { createNewUser, User } from '../support'
 import { playerData } from '../fixtures/player-data'
 
+const commissioner = createNewUser('commissioner')
+const secondUser = createNewUser('user')
+const leagueName = `League ${new Date().getTime()}`
+const keptPlayers: string[] = []
+const allPlayers: string[] = []
+const availablePlayers: string[] = []
+
 const inviteUser = (user: User) => {
   cy.contains('a', 'Teams').click()
   cy.contains('button', 'Invite team').click()
@@ -21,7 +28,7 @@ const acceptInvite = () => {
   cy.exitModal()
 }
 
-const goToLeagueHome = (leagueName: string) => {
+const goToLeagueHome = () => {
   cy.visit('/')
   cy.get('#leagues-btn').click()
   cy.contains(leagueName).click()
@@ -32,18 +39,35 @@ const draftPlayer = (playerName: string) => {
   cy.get('.modal-open').contains('button', 'Draft').click()
   cy.get('.modal-open').contains('button', 'Confirm').click()
   cy.get('td').contains('button', 'Draft').should('not.exist')
+  availablePlayers.splice(availablePlayers.indexOf(playerName), 1)
+}
+
+const keepPlayer = (playerName: string, asCommissioner = true) => {
+  // edit  keeper data in the all keepers table
+  const buttonId = asCommissioner ? '#all-keeper-edit' : '#team-keeper-edit'
+  cy.get(buttonId).click()
+  const keeperEntryTd = cy.get('td')
+    .filter((i, td) => Boolean(td.querySelector('div.input')))
+    .first()
+  keeperEntryTd.click() // click to enable the input
+  keeperEntryTd.click() // click to insert the input
+  keeperEntryTd.find('input').type(playerName.slice(0, 10))
+  cy.contains(playerName).click()
+  if (asCommissioner) {
+    cy.get('input[placeholder="Round"]').first().type('3')
+    cy.get('input[placeholder="Keeps"]').first().type('1')
+  }
+  cy.contains('button', 'Save').click()
+  keptPlayers.push(playerName)
+  availablePlayers.splice(availablePlayers.indexOf(playerName), 1)
 }
 
 describe('Draft tests', () => {
-  const commissioner = createNewUser('commissioner')
-  const secondUser = createNewUser('user')
-  const leagueName = `League ${new Date().getTime()}`
-
-  let parsedPlayerData: any[] = []
-
   before(() => {
     cy.wrap((async () => csv().fromString(playerData))()).then((data) => {
-      parsedPlayerData = data as any[]
+      const parsedPlayerData = data as any[]
+      allPlayers.push(...parsedPlayerData.map((player) => player.Name))
+      availablePlayers.push(...parsedPlayerData.map((player) => player.Name))
     })
   })
   beforeEach(() => { cy.visit('/') })
@@ -57,7 +81,7 @@ describe('Draft tests', () => {
     cy.fillInput('url', 'www.E2edDraft.com')
     cy.contains('button', 'Save').click()
     cy.contains(leagueName).should('exist')
-    goToLeagueHome(leagueName)
+    goToLeagueHome()
     inviteUser(commissioner)
     inviteUser(secondUser)
     cy.logoutUser()
@@ -70,21 +94,24 @@ describe('Draft tests', () => {
     acceptInvite()
   })
 
-  it('Commissioner can create draft, add players, and set draft order', () => {
+  it('Commissioner can create draft', () => {
     cy.loginUser(commissioner)
     acceptInvite()
-    goToLeagueHome(leagueName)
+    goToLeagueHome()
     cy.contains('a', 'Draft').click()
     cy.contains('button', 'Start').should('not.exist')
 
     // commissioner creates draft
-    goToLeagueHome(leagueName)
+    goToLeagueHome()
     cy.contains('button', 'Add draft').click()
     cy.contains('button', 'Save').click()
     cy.reload() // TODO should improve UX
     cy.get('table > tbody').should('exist')
+  })
 
-    // commissioner adds players
+  it('Commissioner can add players from csv', () => {
+    cy.loginUser(commissioner)
+    goToLeagueHome()
     cy.contains('a', 'Players').click()
     cy.contains('button', 'Import').click()
     cy.get('textarea').invoke('val', playerData).trigger('input')
@@ -94,12 +121,26 @@ describe('Draft tests', () => {
     cy.get('table > tbody').should('exist')
     cy.contains('button', 'Overwrite').click()
     cy.contains('button', 'Confirm').click()
-    cy.contains('a', parsedPlayerData[0]?.Name).should('exist')
+    cy.contains('a', allPlayers[0]).should('exist')
   })
 
-  it('Commissioner can set draft order, start draft, and draft first player', () => {
+  it('Commissioner can enable, edit, and import keepers', () => {
     cy.loginUser(commissioner)
-    goToLeagueHome(leagueName)
+    goToLeagueHome()
+    cy.contains('a', 'Keepers').click()
+    cy.contains('button', 'Generate').click()
+    cy.contains('button', 'Generate keeper slots').click()
+    cy.contains('button', 'Confirm').click()
+    cy.get('table > tbody').should('exist')
+    cy.contains('Keeper Entry').should('exist')
+
+    // edit  keeper data in the all keepers table
+    keepPlayer(availablePlayers[0])
+  })
+
+  it('Commissioner can set draft order, import keepers, start draft, and draft first player', () => {
+    cy.loginUser(commissioner)
+    goToLeagueHome()
     // TODO this can only happen after draft is created, need to handle vice versa
     cy.contains('a', 'Draft').click()
     cy.contains('button', 'Generate').click()
@@ -107,14 +148,22 @@ describe('Draft tests', () => {
     cy.contains('button', 'Confirm').click()
     cy.get('table > tbody').contains(commissioner.username).should('exist')
     cy.get('table > tbody').contains(secondUser.username).should('exist')
+
+    // import keepers into draft
+    cy.contains('button', 'Keepers').click()
+    cy.contains('button', 'Confirm').click()
+    cy.get('tr').filter((index, tr) => (
+      tr.innerText.includes(commissioner.username) &&
+       tr.innerText.includes(keptPlayers[0])
+    )).should('exist')
     cy.contains('button', 'Start').click()
-    draftPlayer(parsedPlayerData[0]?.Name)
+    draftPlayer(availablePlayers[0])
   })
 
   it('User can draft the second player', () => {
     cy.loginUser(secondUser)
-    goToLeagueHome(leagueName)
+    goToLeagueHome()
     cy.contains('a', 'Draft').click()
-    draftPlayer(parsedPlayerData[1]?.Name)
+    draftPlayer(availablePlayers[0])
   })
 })
