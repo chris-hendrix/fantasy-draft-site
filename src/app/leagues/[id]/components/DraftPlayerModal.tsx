@@ -5,6 +5,7 @@ import { getPlayerData } from '@/utils/draft'
 import Modal from '@/components/Modal'
 import { useDraftPicks } from '@/hooks/draftPick'
 import React from 'react'
+import Image from 'next/image'
 
 interface Props {
   player: PlayerArgs;
@@ -31,6 +32,9 @@ const DraftPlayerModal: React.FC<Props> = ({
   const { canDraft, getDraftedRound } = useDraftPicks(player.draftId)
 
   const link = getPlayerData(player, 'Link')
+  const photoUrl = getPlayerData(player, 'PhotoURL')
+
+  console.log({ photoUrl })
 
   const DraftStatus = () => {
     const draftedByTeamName = player.draftPicks?.[0]?.team?.name
@@ -49,17 +53,37 @@ const DraftPlayerModal: React.FC<Props> = ({
     )
   }
 
+  const PlayerHeader = () => (
+    <div className="flex justify-between bg-gray-700 p-4 rounded-lg items-center">
+      <div className="flex flex-col gap-4">
+        <PlayerData header={getPlayerData(player, 'PlayerInfo')}>
+          <DraftStatus />
+        </PlayerData>
+      </div>
+      {photoUrl && (
+        <div className="avatar">
+          <div className="relative rounded-full w-16 h-16 bg-neutral-content">
+            <Image
+              src={photoUrl}
+              alt={photoUrl}
+              fill
+            />
+          </div>
+        </div>
+      )}
+    </div>
+
+  )
+
   return (
     <Modal title={getPlayerData(player, 'PlayerInfo')} size="md" onClose={onClose}>
       <div className="flex flex-col gap-4">
-        <div className="flex items-center">
-          <div className="btn" onClick={goToPreviousPlayer}>
+        <div className="flex items-center gap-2">
+          <div className="btn btn-primary" onClick={goToPreviousPlayer}>
             {'<'}
           </div>
           <div className="flex flex-col gap-4">
-            <PlayerData header="Draft status">
-              <DraftStatus />
-            </PlayerData>
+            <PlayerHeader />
             <PlayerData header="Projections">
               {getPlayerData(player, 'Projections')}
             </PlayerData>
@@ -72,7 +96,7 @@ const DraftPlayerModal: React.FC<Props> = ({
               </a>
             )}
           </div>
-          <div className="btn" onClick={goToNextPlayer}>
+          <div className="btn btn-primary" onClick={goToNextPlayer}>
             {'>'}
           </div>
         </div>
