@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import { routeWrapper } from '@/app/api/utils/api'
 import { checkLeagueCommissioner } from '../utils/permissions'
 
-export function convertToCSV(objArray: any[]): any {
+const convertToCSV = (objArray: any[]): any => {
   const array = [Object.keys(objArray[0])].concat(objArray)
   return array.map((row) => Object.values(row)
     .map((value) => (typeof value === 'string' ? JSON.stringify(value) : value)).toString())
