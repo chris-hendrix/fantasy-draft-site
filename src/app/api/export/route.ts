@@ -19,7 +19,12 @@ export const POST = routeWrapper(
       include: {
         player: true,
         draft: true,
-        team: { include: { teamUsers: { include: { user: true } } } } },
+        team: {
+          include: {
+            teamUsers: { include: { user: true } }
+          }
+        }
+      },
     })
 
     const keepers = await prisma.keeper.findMany({
@@ -28,10 +33,14 @@ export const POST = routeWrapper(
 
     const draftPickData = draftPicks.map((dp) => {
       const keeper = keepers.find((k) => k.playerId && k.playerId === dp?.playerId)
+      const teamName = (
+        dp.team?.teamUsers?.[0]?.user?.name ||
+        dp.team.name
+      )
       return {
         year: dp.draft.year,
         overall: dp.overall,
-        team: dp?.team?.teamUsers?.[0]?.user?.name || null,
+        team: teamName || null,
         player: dp?.player?.name || null,
         keeperRound: keeper?.round || null,
         keeperKeeps: keeper?.keeps || null
