@@ -139,7 +139,10 @@ export const generateSeedData = async () => {
   await createDraft(new Date().getFullYear() - 1, true)
   await createDraft(new Date().getFullYear(), false)
 
-  return { league }
+  return {
+    league,
+    commissioner: admin,
+  }
 }
 
 export const deleteSeedData = async () => prisma.user.deleteMany({
