@@ -22,12 +22,13 @@ describe('/api/export', () => {
     expect(res.status).toBe(200)
     const csv = await res.text()
 
+    expect(csv.split('\n').length).toBeGreaterThan(2)
+
     const expectedColumns = ['year', 'overall', 'team', 'player']
     const csvHeaders = csv.split('\n')[0]
     expectedColumns.forEach((column) => {
       expect(csvHeaders).toContain(column)
     })
-    expect(csv.split('\n').length).toBeGreaterThan(2)
   })
 
   test('non-commissioner cannot retrieve CSV data', async () => {
