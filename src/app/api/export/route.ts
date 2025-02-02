@@ -23,7 +23,7 @@ const getPlayerInfo = (player: Player | null) => {
 export const POST = routeWrapper(
   async (req: NextRequest) => {
     const { leagueId } = req.consumedBody
-    checkLeagueCommissioner(leagueId)
+    await checkLeagueCommissioner(leagueId)
     const draftPicks = await prisma.draftPick.findMany({
       where: { draft: { leagueId } },
       include: {

@@ -59,7 +59,7 @@ describe('/api/teams', () => {
     expect(res.status).toBe(401)
   })
 
-  test('commissioner can delete league', async () => {
+  test('commissioner can delete team', async () => {
     const user = await createGetServerSessionMock()
     const league = await createLeague({ commissioners: { create: [{ userId: user.id }] } })
     const team = await createTeam({ leagueId: league.id })
