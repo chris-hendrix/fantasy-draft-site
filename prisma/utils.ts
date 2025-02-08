@@ -86,6 +86,11 @@ export const generateSeedData = async () => {
     }
   })))
 
+  // round to the nearest x places
+  const adjStat = (stat: number, places = 0) => (
+    Math.round(stat * (0.5 + Math.random()) * 10 ** places) / 10 ** places
+  )
+
   const createDraft = async (year: number, isComplete = false) => {
     // create last year's draft
     const draft = await prisma.draft.create({
@@ -94,7 +99,35 @@ export const generateSeedData = async () => {
         year,
         rounds,
         keeperCount: 5,
-        draftTeams: { create: teams.map((t, i) => ({ teamId: t.id, order: i })) }
+        draftTeams: { create: teams.map((t, i) => ({
+          teamId: t.id,
+          order: i,
+          seasonFinish: isComplete ? i + 1 : undefined,
+          seasonData: isComplete ? {
+            K: adjStat(1500),
+            R: adjStat(727),
+            W: adjStat(85),
+            GB: adjStat(5),
+            HR: adjStat(213),
+            SB: adjStat(90),
+            SV: adjStat(75),
+            AVG: adjStat(0.247, 3),
+            ERA: adjStat(3.44, 2),
+            Pct: adjStat(0.423, 3),
+            RBI: adjStat(667),
+            Name: t.name,
+            Rank: i + 1,
+            Team: t.name,
+            Ties: adjStat(11),
+            WHIP: adjStat(1.182, 3),
+            Wins: adjStat(79),
+            Year: year,
+            Moves: adjStat(49),
+            Losses: adjStat(110),
+            RegRank: i + 1,
+            PlayRank: i < 4 ? i + 1 : 'DNQ',
+          } : undefined
+        })) }
       }
     })
 
@@ -136,6 +169,7 @@ export const generateSeedData = async () => {
     return draft
   }
 
+  await createDraft(new Date().getFullYear() - 2, true)
   await createDraft(new Date().getFullYear() - 1, true)
   await createDraft(new Date().getFullYear(), false)
 

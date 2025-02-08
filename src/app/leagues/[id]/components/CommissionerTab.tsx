@@ -36,8 +36,9 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
+      const timestamp = new Date().toISOString()
       a.href = url
-      a.download = 'league-data.csv'
+      a.download = `league-data_${timestamp}.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

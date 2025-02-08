@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import archiver from 'archiver'
 import { routeWrapper } from '@/app/api/utils/api'
-import { JsonObject } from '@prisma/client/runtime/library'
-import { Player } from '@prisma/client'
+import { PassThrough } from 'stream'
 import { checkLeagueCommissioner } from '../utils/permissions'
+import getTeamSeasonData from './team-season-data'
+import getDraftPickData from './draft-pick-data'
+import getKeeperData from './keeper-data'
 
 const convertToCSV = (objArray: any[]): any => {
   const array = [Object.keys(objArray[0])].concat(objArray)
@@ -12,71 +14,45 @@ const convertToCSV = (objArray: any[]): any => {
     .join('\n')
 }
 
-const getPlayerInfo = (player: Player | null) => {
-  const key = 'PlayerInfo'
-  if (!player?.data) return null
-  const data = player?.data as JsonObject
-  if (!(key in data)) return null
-  return data[key] as string
-}
-
 export const POST = routeWrapper(
   async (req: NextRequest) => {
     const { leagueId } = req.consumedBody
     await checkLeagueCommissioner(leagueId)
-    const draftPicks = await prisma.draftPick.findMany({
-      where: { draft: { leagueId } },
-      include: {
-        player: true,
-        draft: { include: { draftTeams: true, league: true } },
-        team: {
-          include: {
-            teamUsers: { include: { user: true } }
-          }
-        }
-      },
+
+    const teamSeasonData = await getTeamSeasonData(leagueId)
+    const draftPickData = await getDraftPickData(leagueId)
+    const keeperData = await getKeeperData(leagueId)
+
+    const teamSeasonCSV = convertToCSV(teamSeasonData)
+    const draftPickCSV = convertToCSV(draftPickData)
+    const keeperCSV = convertToCSV(keeperData)
+
+    const archive = archiver('zip', {
+      zlib: { level: 9 }
     })
 
-    const keepers = await prisma.keeper.findMany({
-      where: { draft: { leagueId } },
-    })
+    const passThrough = new PassThrough()
 
-    const draftPickData = draftPicks.map((dp) => {
-      const { overall, draft, playerId, player } = dp
-      const keeper = keepers.find((k) => k.playerId && k.playerId === playerId)
-      const teamsCount = draft.draftTeams?.length || null
-      const round = teamsCount ? Math.floor((overall - 1) / teamsCount) + 1 : 99
-      const roundPick = teamsCount ? ((overall - 1) % teamsCount) + 1 : 99
-      const teamName = (
-        dp.team?.teamUsers?.[0]?.user?.name ||
-        dp.team.name
-      )
-      return {
-        year: draft.year,
-        overall,
-        round,
-        roundPick,
-        team: teamName || null,
-        player: player?.name || null,
-        playerInfo: getPlayerInfo(player) || null,
-        keeperRound: keeper?.round || null,
-        keeperKeeps: keeper?.keeps || null,
+    archive.pipe(passThrough)
+
+    archive.append(teamSeasonCSV, { name: 'team-season-data.csv' })
+    archive.append(draftPickCSV, { name: 'draft-pick-data.csv' })
+    archive.append(keeperCSV, { name: 'keeper-data.csv' })
+
+    await archive.finalize()
+
+    const readableStream = new ReadableStream({
+      start(controller) {
+        passThrough.on('data', (chunk) => controller.enqueue(chunk))
+        passThrough.on('end', () => controller.close())
+        passThrough.on('error', (err) => controller.error(err))
       }
     })
 
-    // sort by year, then by overall
-    draftPickData.sort((a, b) => {
-      if (a.year === b.year) {
-        return a.overall - b.overall
-      }
-      return a.year - b.year
-    })
-
-    const csv = convertToCSV(draftPickData)
-    return new NextResponse(csv, {
+    return new NextResponse(readableStream, {
       headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="league-data.csv"',
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename="export.zip"',
       },
     })
   }
