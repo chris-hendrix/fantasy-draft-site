@@ -11,7 +11,7 @@ describe('/api/export', () => {
     seedData = await generateSeedData()
   })
 
-  test('commissioner can retrieve CSV data', async () => {
+  test('commissioner can retrieve zip file with CSV data', async () => {
     const { league, commissioner } = seedData
     await createGetServerSessionMock(commissioner.id)
     const req = createNextRequest({
@@ -19,19 +19,15 @@ describe('/api/export', () => {
       body: { leagueId: league.id },
     })
     const res = await postExport(req)
+
+    // expect zip file to have 3 >1000 byte files
     expect(res.status).toBe(200)
-    const csv = await res.text()
-
-    expect(csv.split('\n').length).toBeGreaterThan(2)
-
-    const expectedColumns = ['year', 'overall', 'team', 'player']
-    const csvHeaders = csv.split('\n')[0]
-    expectedColumns.forEach((column) => {
-      expect(csvHeaders).toContain(column)
-    })
+    expect(res.headers.get('Content-Type')).toBe('application/zip')
+    const body = await res.arrayBuffer()
+    expect(body.byteLength).toBeGreaterThan(3 * 3000)
   })
 
-  test('non-commissioner cannot retrieve CSV data', async () => {
+  test('non-commissioner cannot retrieve zip file with CSV data', async () => {
     const { league } = seedData
     await createGetServerSessionMock()
     const req = createNextRequest({
