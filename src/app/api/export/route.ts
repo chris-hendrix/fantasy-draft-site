@@ -3,6 +3,7 @@ import { routeWrapper } from '@/app/api/utils/api'
 import { checkLeagueCommissioner } from '../utils/permissions'
 import getTeamSeasonData from './team-season-data'
 import getDraftPickData from './draft-pick-data'
+import getKeeperData from './keeper-data'
 
 const convertToCSV = (objArray: any[]): any => {
   const array = [Object.keys(objArray[0])].concat(objArray)
@@ -20,6 +21,8 @@ export const POST = routeWrapper(
     let data: any = {}
     if (exportName === 'team-season-data') {
       data = await getTeamSeasonData(leagueId)
+    } else if (exportName === 'keeper-data') {
+      data = await getKeeperData(leagueId)
     } else {
       data = await getDraftPickData(leagueId)
     }

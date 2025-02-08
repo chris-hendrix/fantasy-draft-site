@@ -6,7 +6,10 @@ const getTeamSeasonData = async (leagueId: string) => {
     where: { leagueId },
     include: {
       teamUsers: { include: { user: true, team: true } },
-      draftTeams: { include: { draft: true, team: true } },
+      draftTeams: { include: {
+        draft: true,
+        team: { include: { teamUsers: { include: { user: true } } } }
+      } },
     },
     orderBy: [{ archivedAt: 'desc' }, { name: 'asc' }]
   })
@@ -25,7 +28,7 @@ const getTeamSeasonData = async (leagueId: string) => {
     ]
     const record: any = {
       Year: dt.draft.year,
-      Team: dt.team.name,
+      Team: dt.team.teamUsers?.[0]?.user?.name || dt.team.name,
     }
     orderedKeys.forEach((key) => {
       if (seasonData && key in seasonData) {
@@ -36,6 +39,14 @@ const getTeamSeasonData = async (leagueId: string) => {
     Object.assign(record, seasonData)
 
     return record
+  })
+
+  // sort by year then by rank
+  data.sort((a, b) => {
+    if (a.Year === b.Year) {
+      return a.Rank - b.Rank
+    }
+    return a.Year - b.Year
   })
   return data
 }

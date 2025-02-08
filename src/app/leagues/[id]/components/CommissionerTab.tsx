@@ -55,6 +55,9 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
       <button className="btn btn-primary" onClick={() => handleExportLeagueData('team-season-data')}>
         Export team season data
       </button>
+      <button className="btn btn-primary" onClick={() => handleExportLeagueData('keeper-data')}>
+        Export keeper data
+      </button>
       <button className="btn btn-primary" onClick={() => setImportModalOpen(true)}>
         Import drafts
       </button>

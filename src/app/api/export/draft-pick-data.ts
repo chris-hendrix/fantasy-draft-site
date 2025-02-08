@@ -1,14 +1,5 @@
 import prisma from '@/lib/prisma'
-import { JsonObject } from '@prisma/client/runtime/library'
-import { Player } from '@prisma/client'
-
-const getPlayerInfo = (player: Player | null) => {
-  const key = 'PlayerInfo'
-  if (!player?.data) return null
-  const data = player?.data as JsonObject
-  if (!(key in data)) return null
-  return data[key] as string
-}
+import { getPlayerInfo } from './utils'
 
 const getDraftPickData = async (leagueId: string) => {
   const draftPicks = await prisma.draftPick.findMany({
