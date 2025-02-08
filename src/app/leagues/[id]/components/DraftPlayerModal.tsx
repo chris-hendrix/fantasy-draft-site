@@ -10,9 +10,9 @@ import Image from 'next/image'
 interface Props {
   player: PlayerArgs;
   onClose: () => void;
-  setPlayerToBeDrafted: (player: PlayerArgs) => void;
-  goToNextPlayer: () => void;
-  goToPreviousPlayer: () => void;
+  setPlayerToBeDrafted?: (player: PlayerArgs) => void;
+  goToNextPlayer?: () => void;
+  goToPreviousPlayer?: () => void;
 }
 
 const PlayerData = ({ header, children }: { header: string, children: React.ReactNode }) => (
@@ -37,6 +37,13 @@ const DraftPlayerModal: React.FC<Props> = ({
   const DraftStatus = () => {
     const draftedByTeamName = player.draftPicks?.[0]?.team?.name
     const draftedRound = getDraftedRound(player)
+    if (draftedRound && !draftedByTeamName) {
+      return (
+        <div className="text text-gray-500">
+          Drafted in <b>Round {draftedRound}</b>
+        </div>
+      )
+    }
     if (draftedByTeamName) {
       return (
         <div className="text text-danger text-gray-500">
@@ -77,9 +84,11 @@ const DraftPlayerModal: React.FC<Props> = ({
     <Modal title={getPlayerData(player, 'PlayerInfo')} size="md" onClose={onClose}>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
-          <div className="btn btn-primary" onClick={goToPreviousPlayer}>
-            {'<'}
-          </div>
+          {goToPreviousPlayer && (
+            <div className="btn btn-primary" onClick={goToPreviousPlayer}>
+              {'<'}
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <PlayerHeader />
             <PlayerData header="Projections">
@@ -94,12 +103,14 @@ const DraftPlayerModal: React.FC<Props> = ({
               </a>
             )}
           </div>
-          <div className="btn btn-primary" onClick={goToNextPlayer}>
-            {'>'}
-          </div>
+          {goToNextPlayer && (
+            <div className="btn btn-primary" onClick={goToNextPlayer}>
+              {'>'}
+            </div>
+          )}
         </div>
         <div className="flex flex gap-2 justify-end">
-          {canDraft(player) && (
+          {setPlayerToBeDrafted && canDraft(player) && (
             <button
               type="button"
               className="btn btn-primary w-24"
