@@ -50,13 +50,10 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
   return (
     <div className="flex flex-col items-center mt-8 gap-4">
       <button className="btn btn-primary" onClick={() => handleExportLeagueData('draft-pick-data')}>
-        Export league data
+        Export draft pick data
       </button>
-      <button className="btn btn-primary" onClick={() => handleExportLeagueData('historical-data')}>
-        Export historical data
-      </button>
-      <button className="btn btn-primary" onClick={() => handleExportLeagueData('historical-avg-data')}>
-        Export historical (averages)
+      <button className="btn btn-primary" onClick={() => handleExportLeagueData('team-season-data')}>
+        Export team season data
       </button>
       <button className="btn btn-primary" onClick={() => setImportModalOpen(true)}>
         Import drafts

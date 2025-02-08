@@ -67,7 +67,7 @@ const StatsTable: React.FC<Props> = ({ leagueId }) => {
   ]
 
   return (
-    <Table data={statDraftTeams} columns={columns} xs />
+    <Table data={statDraftTeams} columns={columns} xs enableSort />
   )
 }
 

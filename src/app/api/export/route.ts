@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { routeWrapper } from '@/app/api/utils/api'
 import { checkLeagueCommissioner } from '../utils/permissions'
-import getHistoricalData from './historical-data'
-import getDraftPickData from './draft-picks'
+import getTeamSeasonData from './team-season-data'
+import getDraftPickData from './draft-pick-data'
 
 const convertToCSV = (objArray: any[]): any => {
   const array = [Object.keys(objArray[0])].concat(objArray)
@@ -14,14 +14,12 @@ const convertToCSV = (objArray: any[]): any => {
 export const POST = routeWrapper(
   async (req: NextRequest) => {
     const { leagueId } = req.consumedBody
-    const exportName = req.consumedBody?.exportName || 'league-data'
+    const exportName = req.consumedBody?.exportName || 'draft-pick-data'
     await checkLeagueCommissioner(leagueId)
 
     let data: any = {}
-    if (exportName === 'historical-data') {
-      data = await getHistoricalData(leagueId)
-    } else if (exportName === 'historical-avg-data') {
-      data = await getHistoricalData(leagueId, true)
+    if (exportName === 'team-season-data') {
+      data = await getTeamSeasonData(leagueId)
     } else {
       data = await getDraftPickData(leagueId)
     }
