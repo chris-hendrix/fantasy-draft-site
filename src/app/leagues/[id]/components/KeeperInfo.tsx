@@ -34,7 +34,7 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
   if (!isLoading && !teamDraftPickCols) return null
 
   return (
-    <div className="text-xs flex gap-3">
+    <div className="text-xs lg:flex gap-3">
       <div className="card flex flex-col items-center bg-base-300 p-4 flex-grow">
         <h2 className="font-bold mb-2">Commissioner Note</h2>
         <div className="w-full whitespace-pre-line">
@@ -42,7 +42,7 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
         </div>
       </div>
       <div className="card flex flex-col items-center bg-base-300 p-4">
-        <h2 className="font-bold mb-2">{`${year} Keepers`}</h2>
+        <h2 className="font-bold mb-2">{`Your ${year} Keepers`}</h2>
         <div>
           {teamKeepers?.map((k) => (
             <div key={k.id}>
@@ -52,8 +52,8 @@ const KeeperInfo: React.FC<Props> = ({ draftId }) => {
         </div>
       </div>
       <div className="card flex flex-col items-center bg-base-300 p-4">
-        <h2 className="font-bold mb-2">{`${year} Draft`}</h2>
-        <div className="text-xs flex gap-2">
+        <h2 className="font-bold mb-2">Your {`${year} Draft`}</h2>
+        <div className="text-xs flex flex-col lg:flex-row gap-2">
           {teamDraftPickCols?.map((col, i) => (
             <div key={`$col-${i}`}>
               {col.map((dp) => (

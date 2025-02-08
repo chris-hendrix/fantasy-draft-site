@@ -179,8 +179,8 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
 
         </div>
       }
-      <div className="flex flex-row h-full w-full">
-        <div className="w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
+      <div className="flex flex-col md:flex-row h-full w-full">
+        <div className="w-full md:w-5/12 h-full max-h-screen min-h-screen overflow-y-auto">
           <div className="flex justify-between my-6 mx-2 items-center">
             <h2 className="text-lg font-bold ">📝 Draft</h2>
             <button
@@ -197,7 +197,7 @@ const DraftPage: React.FC<Props> = ({ draftId }) => {
             onDraftPicksChanged={setDraftPicks}
           />
         </div>
-        <div className="w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
+        <div className="w-full md:w-7/12 h-full max-h-screen min-h-screen overflow-y-auto">
           <div className="flex justify-between my-6 mx-2 items-center">
             <h2 className="text-lg font-bold ">🧢 Players</h2>
             <button

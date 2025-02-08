@@ -47,7 +47,7 @@ const DraftTeamModal: React.FC<Props> = ({
       renderedValue: ({ players }) => (
         <div className="flex flex-wrap gap-1 py-1">
           {players.map((player) => (
-            <div key={player.id} className="badge badge-secondary badge-sm">
+            <div key={player.id} className="badge badge-neutral badge-sm">
               <a
                 key={getPlayerData(player, 'Name')}
                 className="link"

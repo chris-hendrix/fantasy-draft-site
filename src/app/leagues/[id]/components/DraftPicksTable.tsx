@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DraftPickArgs } from '@/types'
+import { DraftPickArgs, PlayerArgs } from '@/types'
 import Table, { TableColumn } from '@/components/Table'
 import { formatRoundPick, getPlayerName, getRound } from '@/utils/draft'
 import { useLiveDraftPicks } from '@/hooks/draftPick'
@@ -12,6 +12,7 @@ import { useDraft } from '@/hooks/draft'
 import MoveButtons from './MoveButtons'
 import PlayerAutocomplete from './PlayerAutocomplete'
 import DraftTeamModal from './DraftTeamModal'
+import DraftPlayerModal from './DraftPlayerModal'
 
 interface Props {
   draftId: string;
@@ -42,6 +43,7 @@ const DraftPicksTable: React.FC<Props> = ({
   } = useLiveDraftPicks(draftId)
   const [editPickId, setEditPickId] = useState<string | null>(null)
   const [clickedTeamId, setClickedTeamId] = useState<string | null>(null)
+  const [clickedPlayer, setClickedPlayer] = useState<PlayerArgs | null>(null)
   const [editDraftPicks, setEditDraftPicks] = useState<DraftPickArgs[]>([])
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     round: () => true,
@@ -51,6 +53,10 @@ const DraftPicksTable: React.FC<Props> = ({
 
   const draftingPick = draftPicks?.filter((p) => p.playerId === null)?.[0]
   const isLoading = isDraftLoading || isDraftPicksLoading
+
+  const filteredPicks = (editDraftPicks || []).filter((pick) => Object
+    .values(filterOptions)
+    .every((filter) => filter(pick)))
 
   useEffect(() => { setEditDraftPicks(draftPicks) }, [draftPicks])
   useEffect(() => { onOrderChange(editDraftPicks) }, [editDraftPicks])
@@ -75,15 +81,27 @@ const DraftPicksTable: React.FC<Props> = ({
   }, [clickedTeamId, draftPicks])
 
   const goToNextTeam = () => {
-    const currentIndex = draftPicks.findIndex((pick) => pick.teamId === clickedTeamId)
-    const nextIndex = (currentIndex + 1) % draftPicks.length
-    setClickedTeamId(draftPicks[nextIndex].teamId)
+    const currentIndex = filteredPicks.findIndex((pick) => pick.teamId === clickedTeamId)
+    const nextIndex = (currentIndex + 1) % filteredPicks.length
+    setClickedTeamId(filteredPicks[nextIndex].teamId)
   }
 
   const goToPreviousTeam = () => {
-    const currentIndex = draftPicks.findIndex((pick) => pick.teamId === clickedTeamId)
-    const previousIndex = (currentIndex - 1 + draftPicks.length) % draftPicks.length
-    setClickedTeamId(draftPicks[previousIndex].teamId)
+    const currentIndex = filteredPicks.findIndex((pick) => pick.teamId === clickedTeamId)
+    const previousIndex = (currentIndex - 1 + filteredPicks.length) % filteredPicks.length
+    setClickedTeamId(filteredPicks[previousIndex].teamId)
+  }
+
+  const goToPreviousPlayer = () => {
+    const currentIndex = filteredPicks.findIndex((pick) => pick.playerId === clickedPlayer?.id)
+    const previousIndex = (currentIndex - 1 + filteredPicks.length) % filteredPicks.length
+    setClickedPlayer(filteredPicks[previousIndex].player)
+  }
+
+  const goToNextPlayer = () => {
+    const currentIndex = filteredPicks.findIndex((pick) => pick.playerId === clickedPlayer?.id)
+    const nextIndex = (currentIndex + 1) % filteredPicks.length
+    setClickedPlayer(filteredPicks[nextIndex].player)
   }
 
   const columns: TableColumn<DraftPickArgs>[] = [
@@ -120,7 +138,16 @@ const DraftPicksTable: React.FC<Props> = ({
       cellStyle: { maxWidth: '256px', width: '256px' },
       value: ({ player }) => player && getPlayerName(player),
       renderedValue: ({ id, player }) => {
-        if (!isCommissioner || !canEditDraft) return player && <div className="">{getPlayerName(player)}</div>
+        if (!isCommissioner || !canEditDraft) {
+          return (
+            <a
+              className="link"
+              onClick={() => setClickedPlayer(player)}
+            >
+              {getPlayerName(player)}
+            </a>
+          )
+        }
         if (editPickId !== id) {
           return <div
             className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
@@ -146,10 +173,6 @@ const DraftPicksTable: React.FC<Props> = ({
       }
     }
   ]
-
-  const filteredPicks = (editDraftPicks || []).filter((pick) => Object
-    .values(filterOptions)
-    .every((filter) => filter(pick)))
 
   return (
     <>
@@ -224,6 +247,14 @@ const DraftPicksTable: React.FC<Props> = ({
           onClose={() => setClickedTeamId(null)}
           goToPreviousTeam={goToPreviousTeam}
           goToNextTeam={goToNextTeam}
+        />
+      )}
+      {clickedPlayer && (
+        <DraftPlayerModal
+          player={clickedPlayer}
+          onClose={() => setClickedPlayer(null)}
+          goToNextPlayer={goToNextPlayer}
+          goToPreviousPlayer={goToPreviousPlayer}
         />
       )}
     </>

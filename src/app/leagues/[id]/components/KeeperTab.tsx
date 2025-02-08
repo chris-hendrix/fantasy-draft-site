@@ -151,9 +151,9 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
           <div className="divider" />
         </>
       )}
-      {currentDraftId &&
-        <div className="flex flex-row h-full w-full">
-          <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
+      {currentDraftId && (
+        <div className="flex flex-col md:flex-row h-full w-full">
+          <div className="w-full md:w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6 mx-2">✅ Selected Keepers</h2>
             {isCommissioner && <div className="flex gap-2 mb-2">
               {!allEdit && <button id="all-keeper-edit" className="btn btn-sm w-32" onClick={() => setAllEdit(true)}>📝 Edit</button>}
@@ -166,11 +166,12 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
               onKeepersChange={setAllKeepers}
             />
           </div>
-          <div className="w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
+          <div className="w-full md:w-1/2 h-full max-h-screen min-h-screen overflow-y-auto">
             <h2 className="text-lg font-bold my-6 mx-2">🧢 Players</h2>
             <PlayersTable draftId={currentDraftId} hideTeamColumn />
           </div>
-        </div>}
+        </div>
+      )}
       {generateModalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">
         <input
           type="number"
