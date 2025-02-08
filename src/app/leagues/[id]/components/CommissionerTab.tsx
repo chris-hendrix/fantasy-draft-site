@@ -22,13 +22,13 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
     window.location.reload()
   }
 
-  const handleExportLeagueData = async (exportName: string) => {
+  const handleExportLeagueData = async () => {
     const res = await fetch('/api/export', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ leagueId, exportName }),
+      body: JSON.stringify({ leagueId }),
     })
 
     if (res.ok) {
@@ -36,8 +36,9 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
+      const timestamp = new Date().toISOString()
       a.href = url
-      a.download = `${exportName}.csv`
+      a.download = `league-data_${timestamp}.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -49,14 +50,8 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
 
   return (
     <div className="flex flex-col items-center mt-8 gap-4">
-      <button className="btn btn-primary" onClick={() => handleExportLeagueData('draft-pick-data')}>
-        Export draft pick data
-      </button>
-      <button className="btn btn-primary" onClick={() => handleExportLeagueData('team-season-data')}>
-        Export team season data
-      </button>
-      <button className="btn btn-primary" onClick={() => handleExportLeagueData('keeper-data')}>
-        Export keeper data
+      <button className="btn btn-primary" onClick={() => handleExportLeagueData()}>
+        Export league data
       </button>
       <button className="btn btn-primary" onClick={() => setImportModalOpen(true)}>
         Import drafts
