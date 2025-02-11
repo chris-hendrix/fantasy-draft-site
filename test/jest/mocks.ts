@@ -9,10 +9,10 @@ export const createGetServerSessionMock = async (userId?: string) => {
   const body = generateUserBody()
   const hash = await generateHash(body.password)
   const user = userId ?
-    await prisma.user.findFirstOrThrow({ where: { id: userId } }) :
+    await prisma.user.findUniqueOrThrow({ where: { id: userId } }) :
     await prisma.user.create({ data: { ...body, password: hash } })
   const mockGetServerSession = getServerSession as jest.Mock
-  mockGetServerSession.mockReturnValueOnce(Promise.resolve({
+  mockGetServerSession.mockReturnValue(Promise.resolve({
     expires: new Date(Date.now() + 2 * 86400).toISOString(),
     user
   }))

@@ -1,8 +1,10 @@
 import prisma from '@/lib/prisma'
 import { GET as getUsers, POST as postUser } from '@/app/api/users/route'
+import { POST as postPasswordReset } from '@/app/api/auth/password-reset/route'
 import { PUT as putUser } from '@/app/api/users/[id]/route'
 import { createNextRequest, generateUserBody, deleteTestUsers } from '../utils'
 import { createGetServerSessionMock } from './mocks'
+import { validatePassword } from '../../src/app/api/utils/hash'
 
 jest.mock('next-auth')
 
@@ -67,5 +69,38 @@ describe('/api/users', () => {
     const req = createNextRequest({ method: 'PUT', body })
     const res = await putUser(req, { params: { id: user.id } })
     expect(res.status).toBe(200)
+  })
+
+  test('admin can reset user password', async () => {
+    const userBody = generateUserBody()
+    const user = await prisma.user.create({ data: userBody })
+    const admin = await prisma.user.create({
+      data: generateUserBody({ admin: true, name: 'Admin' })
+    })
+    await createGetServerSessionMock(admin.id)
+
+    const req = createNextRequest({ method: 'POST', body: { userId: user.id } })
+    const res = await postPasswordReset(req)
+    expect(res.status).toBe(200)
+
+    // expect response to contain new password
+    const data = await res.json()
+    expect(data).toEqual(
+      expect.objectContaining({ password: expect.any(String) }),
+    )
+    // expect new password to work
+    const { password: hash } = await prisma.user.findUniqueOrThrow({ where: { id: user.id } })
+    expect(await validatePassword(data.password, hash!)).toBe(true)
+  })
+
+  test('non-admin cannot reset user password', async () => {
+    const user = await prisma.user.create({
+      data: generateUserBody()
+    })
+    await createGetServerSessionMock()
+
+    const req = createNextRequest({ method: 'POST', body: { userId: user.id } })
+    const res = await postPasswordReset(req)
+    expect(res.status).toBe(401)
   })
 })
