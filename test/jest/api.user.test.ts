@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { GET as getUsers, POST as postUser } from '@/app/api/users/route'
 import { POST as postPasswordReset } from '@/app/api/auth/password-reset/route'
 import { PUT as putUser } from '@/app/api/users/[id]/route'
+import isStrongPassword from 'validator/lib/isStrongPassword'
 import { createNextRequest, generateUserBody, deleteTestUsers } from '../utils'
 import { createGetServerSessionMock } from './mocks'
 import { validatePassword } from '../../src/app/api/utils/hash'
@@ -88,6 +89,10 @@ describe('/api/users', () => {
     expect(data).toEqual(
       expect.objectContaining({ password: expect.any(String) }),
     )
+
+    // expect strong password
+    expect(isStrongPassword(data.password)).toBe(true)
+
     // expect new password to work
     const { password: hash } = await prisma.user.findUniqueOrThrow({ where: { id: user.id } })
     expect(await validatePassword(data.password, hash!)).toBe(true)
