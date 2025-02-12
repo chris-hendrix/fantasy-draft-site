@@ -30,7 +30,6 @@ const generateStrongPassword = (length = 16) => {
 export const POST = routeWrapper(async (req: NextRequest) => {
   await checkAdmin()
   const { userId }: any = req.consumedBody
-  // new password must have a capital letter and a special character
   const password = generateStrongPassword()
   const hash = await generateHash(password)
   await prisma.user.update({

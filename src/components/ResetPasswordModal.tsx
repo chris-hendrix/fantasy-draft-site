@@ -65,7 +65,7 @@ const ResetPasswordModal: React.FC<FormProps> = ({ user, onClose }) => {
         onConfirm={handleUpdatePassword}
         onClose={onClose}
       >
-        {`Are you sure you want to reset ${user.name}'s password?`}
+        {'Are you sure you want to reset this user\'s password?'}
       </ConfirmModal>
     )
   }
