@@ -76,7 +76,7 @@ describe('/api/users', () => {
     const userBody = generateUserBody()
     const user = await prisma.user.create({ data: userBody })
     const admin = await prisma.user.create({
-      data: generateUserBody({ admin: true, name: 'Admin' })
+      data: generateUserBody({ admin: true })
     })
     await createGetServerSessionMock(admin.id)
 
