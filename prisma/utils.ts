@@ -64,7 +64,8 @@ export const generateSeedData = async () => {
       email: adminEmail,
       username: 'admin',
       name: 'Admin',
-      password: await generateHash('Abcd1234!')
+      password: await generateHash('Abcd1234!'),
+      admin: true
     }
   })
   const users = await Promise.all([...Array(teamsCount - 1)].map(() => generateUser()))
