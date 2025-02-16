@@ -4,8 +4,10 @@ import {
   Draft,
   DraftTeam,
   DraftPick,
+  File,
   Keeper,
   League,
+  LeagueFile,
   Player,
   SavedPlayer,
   Team,
@@ -26,6 +28,12 @@ export interface LeagueArgs extends League {
   teams: TeamArgs[]
   drafts: DraftArgs[]
   latestDraft: DraftArgs
+}
+
+export interface LeagueFileArgs extends LeagueFile {
+  league: LeagueArgs
+  draft: DraftArgs
+  file: File
 }
 
 export interface TeamUserArgs extends TeamUser {

@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
-import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_BUCKET } from '@/config'
+import {
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  PUBLIC_SUPABASE_BUCKET,
+  PRIVATE_SUPABASE_BUCKET
+} from '@/config'
 
 const createSupabaseClient = () => createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
@@ -11,9 +16,10 @@ const getSupabaseClient = () => {
 
 const supabase = getSupabaseClient()
 
-export const uploadFile = async (file: File, directory: string) => {
+export const uploadFile = async (file: File, directory: string, asPublic: boolean = false) => {
   if (!supabase) throw new Error('Supabase client not running')
-  const storageApi = supabase.storage.from(SUPABASE_BUCKET)
+  const bucket = asPublic ? PUBLIC_SUPABASE_BUCKET : PRIVATE_SUPABASE_BUCKET
+  const storageApi = supabase.storage.from(bucket)
   const path = `${directory}/${file.name}`
 
   // clear existing files
@@ -25,14 +31,31 @@ export const uploadFile = async (file: File, directory: string) => {
   }
 
   // upload new file
-  const { error: uploadError } = await storageApi.upload(path, file, {
+  const { data, error: uploadError } = await storageApi.upload(path, file, {
     contentType: file.type, upsert: true
   })
   if (uploadError) throw new Error(uploadError.message)
 
-  // get public url
-  const { data: { publicUrl } } = await storageApi.getPublicUrl(path)
-  return publicUrl
+  return {
+    fullPath: data.fullPath,
+    publicUrl: asPublic
+      ? storageApi.getPublicUrl(path).data.publicUrl
+      : null,
+    name: file.name,
+    size: file.size,
+    type: file.type,
+  }
+}
+
+export const getSignedUrl = async (path: string, expiresIn: number = 60) => {
+  if (!supabase) throw new Error('Supabase client not running')
+  const bucket = PRIVATE_SUPABASE_BUCKET
+  const storageApi = supabase.storage.from(bucket)
+
+  const { data, error } = await storageApi.createSignedUrl(path, expiresIn)
+  if (error) throw new Error(error.message)
+
+  return data.signedUrl
 }
 
 export default supabase

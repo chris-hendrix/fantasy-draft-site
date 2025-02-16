@@ -55,6 +55,7 @@ model User {
   info          Json?
   commissioners Commissioner[]
   teamUsers     TeamUser[]
+  files         File[]
 }
 
 model VerificationToken {
@@ -79,6 +80,7 @@ model League {
   commissioners      Commissioner[]
   teams              Team[]
   drafts             Draft[]
+  leagueFiles        LeagueFile[]
 }
 
 model Commissioner {
@@ -124,24 +126,25 @@ model TeamUser {
 }
 
 model Draft {
-  id               String      @id @default(cuid())
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  leagueId         String      @map("league_id")
+  id               String       @id @default(cuid())
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  leagueId         String       @map("league_id")
   year             Int
   rounds           Int
-  keeperCount      Int?        @default(0)
-  dues             Float       @default(0)
+  keeperCount      Int?         @default(0)
+  dues             Float        @default(0)
   draftTime        DateTime?
-  draftLockDate    DateTime?   @default(now())
+  draftLockDate    DateTime?    @default(now())
   keepersLockDate  DateTime?
   keeperEntryNote  String?
-  disableUserDraft Boolean     @default(false)
-  league           League      @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  disableUserDraft Boolean      @default(false)
+  league           League       @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   players          Player[]
   draftTeams       DraftTeam[]
   draftPicks       DraftPick[]
   keepers          Keeper[]
+  leagueFiles      LeagueFile[]
 
   @@unique([leagueId, year], name: "LeagueYearUniqueConstraint")
 }
@@ -223,7 +226,45 @@ model SavedPlayer {
   @@unique([teamId, playerId])
 }
 
+model File {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+  userId      String       @map("user_id")
+  name        String
+  bucketUrl   String
+  type        String
+  size        Int
+  metadata    Json?
+  user        User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  leagueFiles LeagueFile[]
+
+  @@index([userId])
+}
+
+model LeagueFile {
+  id        String             @id @default(cuid())
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now())
+  leagueId  String             @map("league_id")
+  draftId   String?            @map("draft_id")
+  fileId    String             @map("file_id")
+  category  LeagueFileCategory @default(other)
+  league    League             @relation(fields: [leagueId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  draft     Draft?             @relation(fields: [draftId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  file      File               @relation(fields: [fileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([leagueId, fileId])
+}
+
 enum Sport {
   baseball
   football
+}
+
+enum LeagueFileCategory {
+  backup
+  deadline_rosters
+  league_image
+  other
 }

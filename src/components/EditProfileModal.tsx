@@ -45,8 +45,9 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, setActiveForm }) 
       <div className="flex items-center justify-between">
         <FileUploadWrapper
           bucketDirectory={`image/${user.id}`}
-          onFileUpload={setImageUrl}
+          onFileUpload={({ publicUrl }) => setImageUrl(publicUrl || '')}
           onError={setError}
+          asPublic
         >
           <div
             className="avatar indicator tooltip tooltip-right"

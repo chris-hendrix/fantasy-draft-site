@@ -5,6 +5,7 @@ import { useDeleteLeague } from '@/hooks/league'
 import { useAlert } from '@/hooks/app'
 import Modal from '@/components/Modal'
 import DraftImportModal from './DraftImportModal'
+import LeagueFilesTable from './LeagueFilesTable'
 
 interface Props {
   leagueId: string;
@@ -71,6 +72,7 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
       {importModalOpen && (
         <DraftImportModal leagueId={leagueId} onClose={() => setImportModalOpen(false)} />
       )}
+      <LeagueFilesTable leagueId={leagueId} />
     </div>
   )
 }
