@@ -232,7 +232,7 @@ model File {
   updatedAt   DateTime     @default(now())
   userId      String       @map("user_id")
   name        String
-  bucketUrl   String
+  bucketPath  String
   type        String
   size        Int
   metadata    Json?

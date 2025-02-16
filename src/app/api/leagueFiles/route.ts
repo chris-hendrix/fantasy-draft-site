@@ -21,7 +21,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
   const fileData = {
     userId: user.id,
     name: data.name,
-    bucketUrl: data.bucketUrl,
+    bucketPath: data.bucketPath,
     type: data.type,
     size: data.size,
     metadata: { title: 'File Name', description: 'File Description' },

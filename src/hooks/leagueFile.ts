@@ -33,7 +33,7 @@ export const useLeagueFiles = (leagueId: string) => {
       const leagueFileData = {
         leagueId,
         category: LeagueFileCategory.other,
-        bucketUrl: path,
+        bucketPath: path,
         name: file.name,
         type: file.type,
         size: file.size,

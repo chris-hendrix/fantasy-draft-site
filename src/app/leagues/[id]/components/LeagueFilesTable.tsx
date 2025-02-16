@@ -10,10 +10,9 @@ interface Props {
 
 const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
   const { leagueFiles, uploadLeagueFile, isLoading } = useLeagueFiles(leagueId)
-  console.log({ leagueFiles })
 
   const downloadFile = async (leagueFile: LeagueFileArgs) => {
-    const url = await getSignedUrl(leagueFile.file.bucketUrl)
+    const url = await getSignedUrl(leagueFile.file.bucketPath)
     if (!url) return
     const a = document.createElement('a')
     a.href = url

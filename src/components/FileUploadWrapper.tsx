@@ -2,7 +2,7 @@ import React from 'react'
 import { uploadFile } from '@/lib/supabase'
 
 type FileInfo = {
-  fullPath: string;
+  path: string;
   publicUrl: string | null;
   name: string;
   size: number;

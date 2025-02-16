@@ -8,7 +8,7 @@ CREATE TABLE "File" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "user_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "bucketUrl" TEXT NOT NULL,
+    "bucketPath" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
     "metadata" JSONB,
