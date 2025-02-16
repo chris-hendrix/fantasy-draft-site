@@ -6,7 +6,7 @@ import { checkLeagueCommissioner } from '../utils/permissions'
 export const GET = routeWrapper(
   async (req: NextRequest) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { queryParams }: any = getParsedParams(req.nextUrl)
+    const queryParams : any = getParsedParams(req.nextUrl)
     const leagueFiles = await prisma.leagueFile.findMany({ ...queryParams })
     return NextResponse.json(leagueFiles)
   }

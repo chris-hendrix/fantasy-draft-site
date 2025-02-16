@@ -22,14 +22,6 @@ export const uploadFile = async (file: File, directory: string, asPublic: boolea
   const storageApi = supabase.storage.from(bucket)
   const path = `${directory}/${file.name}`
 
-  // clear existing files
-  const { data: list, error: listError } = await storageApi.list(`${directory}/`)
-  if (listError) throw new Error(listError.message)
-  if (list?.length) {
-    const { error: removeError } = await storageApi.remove(list?.map((f) => `${directory}/${f.name}`) || [])
-    if (removeError) throw new Error(removeError.message)
-  }
-
   // upload new file
   const { data, error: uploadError } = await storageApi.upload(path, file, {
     contentType: file.type, upsert: true
@@ -37,7 +29,7 @@ export const uploadFile = async (file: File, directory: string, asPublic: boolea
   if (uploadError) throw new Error(uploadError.message)
 
   return {
-    fullPath: data.fullPath,
+    path: data.path,
     publicUrl: asPublic
       ? storageApi.getPublicUrl(path).data.publicUrl
       : null,

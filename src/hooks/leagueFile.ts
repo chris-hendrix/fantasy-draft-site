@@ -29,11 +29,11 @@ export const useLeagueFiles = (leagueId: string) => {
   const uploadLeagueFile = async (file: File) => {
     setIsUploading(true)
     try {
-      const { fullPath } = await uploadFile(file, `LeagueFiles/${leagueId}`)
+      const { path } = await uploadFile(file, `leagues/${leagueId}`)
       const leagueFileData = {
         leagueId,
         category: LeagueFileCategory.other,
-        bucketUrl: fullPath,
+        bucketUrl: path,
         name: file.name,
         type: file.type,
         size: file.size,
