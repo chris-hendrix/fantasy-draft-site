@@ -2,24 +2,13 @@ import React from 'react'
 import { useLeagueFiles } from '@/hooks/leagueFile'
 import Table, { TableColumn } from '@/components/Table'
 import { LeagueFileArgs } from '@/types'
-import { getSignedUrl } from '@/lib/supabase'
 
 interface Props {
   leagueId: string;
 }
 
 const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
-  const { leagueFiles, uploadLeagueFile, isLoading } = useLeagueFiles(leagueId)
-
-  const downloadFile = async (leagueFile: LeagueFileArgs) => {
-    const url = await getSignedUrl(leagueFile.file.bucketPath)
-    if (!url) return
-    const a = document.createElement('a')
-    a.href = url
-    a.download = leagueFile.file.name
-    a.click()
-    a.remove()
-  }
+  const { leagueFiles, uploadLeagueFile, downloadLeagueFile, isLoading } = useLeagueFiles(leagueId)
 
   const columns: TableColumn<LeagueFileArgs>[] = [
     {
@@ -31,7 +20,7 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
       renderedValue: (leagueFile) => (
         <button
           className="btn btn-primary"
-          onClick={() => downloadFile(leagueFile)}
+          onClick={() => downloadLeagueFile(leagueFile.id)}
         >
           Download
         </button>
