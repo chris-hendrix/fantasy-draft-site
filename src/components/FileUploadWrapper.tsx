@@ -1,5 +1,5 @@
 import React from 'react'
-import { uploadFile } from '@/lib/supabase'
+import { uploadPublicFile } from '@/lib/supabase'
 
 type FileInfo = {
   path: string;
@@ -28,7 +28,7 @@ const FileUploadWrapper: React.FC<ImageUploaderProps> = ({
     try {
       const file = e.target?.files?.[0]
       if (!file) return
-      const fileInfo = await uploadFile(file, bucketDirectory, asPublic)
+      const fileInfo = await uploadPublicFile(file, bucketDirectory, asPublic)
       const { publicUrl } = fileInfo
       publicUrl && onFileUpload && onFileUpload(fileInfo)
     } catch (error) {

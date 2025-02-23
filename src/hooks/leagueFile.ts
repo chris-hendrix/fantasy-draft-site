@@ -4,13 +4,21 @@ import { Prisma, LeagueFileCategory } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { leagueFileApi } from '@/store/leagueFile'
 
+type FileData = {
+  bucketPath?: string
+  name?: string
+  type?: string
+  size?: number
+  metadata?: Record<string, any> | null
+}
+
 export const {
   useGetObjects: useGetLeagueFiles,
   useAddObject: useAddLeagueFile,
   useUpdateObject: useUpdateLeagueFile,
   useDeleteObject: useDeleteLeagueFile,
 } = getCrudHooks<LeagueFileArgs, Prisma.LeagueFileFindManyArgs,
-Prisma.LeagueFileUncheckedUpdateInput>(
+Prisma.LeagueFileUncheckedUpdateInput & FileData>(
   leagueFileApi
 )
 
@@ -18,6 +26,11 @@ type SignedUrlOptions = {
   isUpload?: boolean
   bucketPath?: string // for upload
   leagueFileId?: string // for download
+}
+
+type LeagueFileData = {
+  category?: LeagueFileCategory
+  metadata?: Record<string, any> | null
 }
 
 const getSignedUrl = async (leagueId: string, options: SignedUrlOptions = {}) => {
@@ -57,36 +70,71 @@ const downloadFileFromSignedUrl = async (leagueId: string, leagueFileId: string)
 }
 
 export const useLeagueFiles = (leagueId: string) => {
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<any | null>(null)
+  const [isMutating, setIsMutating] = useState(false)
+  const [mutateError, setMutateError] = useState<any | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState<any | null>(null)
 
-  const { data: leagueFiles, isLoading } = useGetLeagueFiles({
+  const { data: leagueFiles, isLoading: isQuerying, error: queryError } = useGetLeagueFiles({
     where: { leagueId },
     include: { file: true },
   }, { skip: !leagueId })
 
-  const { addObject: addLeagueFile, error: addError } = useAddLeagueFile()
+  const { addObject } = useAddLeagueFile()
+  const { updateObject } = useUpdateLeagueFile()
+  const { deleteObject: deleteLeagueFile } = useDeleteLeagueFile()
 
-  const uploadLeagueFile = async (file: File) => {
-    setIsUploading(true)
+  const addLeagueFile = async ({
+    file,
+    category = LeagueFileCategory.other,
+    metadata = null,
+  }: { file: File } & LeagueFileData) => {
+    setIsMutating(true)
     try {
       const bucketPath = await uploadFileToSignedUrl(file, leagueId)
-      const leagueFileData = {
+      await addObject({
         leagueId,
-        category: LeagueFileCategory.other,
+        category,
         bucketPath,
         name: file.name,
         type: file.type,
         size: file.size,
-      }
-
-      await addLeagueFile(leagueFileData)
+        metadata
+      } as any)
     } catch (error) {
-      setUploadError(error)
+      setMutateError(error)
     }
-    setIsUploading(false)
+    setIsMutating(false)
+  }
+
+  const updateLeagueFile = async ({
+    leagueFileId,
+    file,
+    category = LeagueFileCategory.other,
+    metadata = null,
+  }: { leagueFileId: string, file?: File } & LeagueFileData) => {
+    setIsMutating(true)
+    try {
+      const newFileData: FileData = {}
+      if (file) {
+        const bucketPath = await uploadFileToSignedUrl(file, leagueId)
+        Object.assign(newFileData, {
+          bucketPath,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        })
+      }
+      await updateObject({
+        id: leagueFileId,
+        category,
+        metadata,
+        ...newFileData,
+      })
+    } catch (error) {
+      setMutateError(error)
+    }
+    setIsMutating(false)
   }
 
   const downloadLeagueFile = async (leagueFileId: string) => {
@@ -107,12 +155,15 @@ export const useLeagueFiles = (leagueId: string) => {
 
   return {
     leagueFiles,
-    isLoading,
-    isUploading,
-    uploadLeagueFile,
-    downloadLeagueFile,
+    isQuerying,
+    isMutating,
     isDownloading,
-    uploadError: addError || uploadError,
+    queryError,
+    mutateError,
     downloadError,
+    addLeagueFile,
+    updateLeagueFile,
+    deleteLeagueFile,
+    downloadLeagueFile,
   }
 }
