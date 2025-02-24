@@ -50,16 +50,7 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
   }
 
   return (
-    <div className="flex flex-col items-center mt-8 gap-4">
-      <button className="btn btn-primary" onClick={() => handleExportLeagueData()}>
-        Export league data
-      </button>
-      <button className="btn btn-primary" onClick={() => setImportModalOpen(true)}>
-        Import drafts
-      </button>
-      <button className="btn btn-error" onClick={() => setDeleteModalOpen(true)}>
-        Delete league
-      </button>
+    <>
       {deleteModalOpen && (
         <Modal title="Are you sure?" size="xs" onClose={() => setDeleteModalOpen(false)}>
           <div>This cannot be undone.</div>
@@ -72,8 +63,25 @@ const CommissionerTab: React.FC<Props> = ({ leagueId }) => {
       {importModalOpen && (
         <DraftImportModal leagueId={leagueId} onClose={() => setImportModalOpen(false)} />
       )}
-      <LeagueFilesTable leagueId={leagueId} />
-    </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex mt-8 gap-2">
+          <button className="btn btn-primary btn-sm" onClick={() => handleExportLeagueData()}>
+            Export league data
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={() => setImportModalOpen(true)}>
+            Import drafts
+          </button>
+          <button className="btn btn-error btn-sm" onClick={() => setDeleteModalOpen(true)}>
+            Delete league
+          </button>
+        </div>
+        <div className="max-w-lg">
+          <h2 className="text-lg font-bold my-6 mx-2">📁 League Files</h2>
+          <LeagueFilesTable leagueId={leagueId} />
+        </div>
+      </div>
+    </>
+
   )
 }
 

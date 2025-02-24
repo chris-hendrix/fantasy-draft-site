@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLeagueFiles } from '@/hooks/leagueFile'
 import { useSessionUser } from '@/hooks/user'
-import { LeagueFileArgs } from '@/types'
+import { LeagueFileArgs, DraftArgs } from '@/types'
 import { LeagueFileCategory } from '@prisma/client'
 import Modal from '@/components/Modal'
 import Form from '@/components/Form'
-import TextInput from '@/components/TextInput'
 import { useAlert } from '@/hooks/app'
+import DraftSelect from './DraftSelect'
 
 interface FormProps {
   leagueId: string;
@@ -15,20 +15,23 @@ interface FormProps {
   leagueFile?: LeagueFileArgs
 }
 
-const LEAGUE_FILE_CATEGORIES = {
-  other: 'Other',
-  deadline_rosters: 'deadline_rosters',
-  backup: 'backup',
-}
+export const LEAGUE_FILE_CATEGORIES = [
+  { enum: LeagueFileCategory.other, name: 'Other' },
+  { enum: LeagueFileCategory.league_image, name: 'League Image' },
+  { enum: LeagueFileCategory.deadline_rosters, name: 'Deadline Rosters' },
+  { enum: LeagueFileCategory.backup, name: 'Backup' },
+]
 
 const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueFile }) => {
   const { user } = useSessionUser()
   const { showAlert } = useAlert()
   const [file, setFile] = useState<File | null>(null)
   const [category, setCategory] = useState<LeagueFileCategory | null>(null)
+  const [draft, setDraft] = useState<DraftArgs | null>(null)
   const {
     addLeagueFile,
     updateLeagueFile,
+    invalidateLeagueFiles,
     isMutating,
   } = useLeagueFiles(leagueId)
   const metadata: any = leagueFile?.file?.metadata
@@ -47,6 +50,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
     const leagueFileData = {
       leagueId,
       category: category || LeagueFileCategory.other,
+      draftId: draft?.id,
       metadata: {
         title: title && String(title),
         description: description ? String(description) : null,
@@ -65,6 +69,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
         return
       }
       await addLeagueFile({ file, ...leagueFileData })
+      invalidateLeagueFiles()
     }
     onClose()
   }
@@ -96,14 +101,6 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
         onCancel={onClose}
         isSubmitting={isMutating}
       >
-        <TextInput
-          name="title" form={form} disabled={isMutating}
-          required validate={(value: string) => value.length > 4 || 'Too short'}
-        />
-        <TextInput
-          name="description" labelOverride="League URL" form={form} disabled={isMutating}
-          required validate={(value: string) => value.length > 4 || 'Too short'}
-        />
         <div className="mb-4">
           <label className="block mb-2 font-bold">
             Category
@@ -111,10 +108,16 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
           <select
             className="select select-bordered w-full mb-2"
             onChange={(e) => setCategory(e.target.value as LeagueFileCategory)}>
-            {Object.entries(LEAGUE_FILE_CATEGORIES).map(([key, value]) => (
-              <option key={key} value={key}>{value}</option>
+            {LEAGUE_FILE_CATEGORIES.map((c) => (
+              <option key={c.enum} value={c.enum}>
+                {c.name}
+              </option>
             ))}
           </select>
+          <label className="block mb-2 font-bold">
+            Draft
+          </label>
+          <DraftSelect leagueId={leagueId} onSelect={setDraft} />
         </div>
         <UploadButton />
       </Form>

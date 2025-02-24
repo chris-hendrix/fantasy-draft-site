@@ -35,6 +35,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
     leagueId: data.leagueId,
     fileId: file.id,
     category: data.category,
+    draftId: data.draftId,
   }
 
   const leagueFile = await prisma.leagueFile.create({

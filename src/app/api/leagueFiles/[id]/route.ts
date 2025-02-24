@@ -42,6 +42,7 @@ export const PUT = routeWrapper(
       data: {
         fileId: newFile?.id,
         category: data.category,
+        draftId: data.draftId
       } })
 
     // update file metadata
@@ -65,11 +66,16 @@ export const DELETE = routeWrapper(
   async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params
     if (!id) throw new ApiError('League file id required', 400)
-    const leagueFile = await prisma.leagueFile.findFirst({ where: { id } })
+    const leagueFile = await prisma.leagueFile.findFirst({
+      where: { id },
+      include: { file: true }
+    })
     if (!leagueFile) throw new ApiError('Keeper not found', 400)
     await checkLeagueCommissioner(leagueFile.leagueId)
+    const bucketPath = leagueFile?.file?.bucketPath
     await prisma.leagueFile.delete({ where: { id } })
-    // TODO delete file from bucket
+
+    bucketPath && await deleteObject(bucketPath)
     return NextResponse.json({ id })
   }
 )

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { routeWrapper, ApiError } from '@/app/api/utils/api'
-import { PRIVATE_SUPABASE_BUCKET } from '@/config'
 import { getSignedDownloadUrl, getSignedUploadUrl } from '../../utils/supabase'
 import { checkLeagueMember, checkLeagueCommissioner } from '../../utils/permissions'
 
@@ -15,7 +14,6 @@ export const POST = routeWrapper(async (req: NextRequest) => {
     if (!bucketPath) throw new ApiError('Must specify bucket path', 400)
     checkLeagueCommissioner(leagueId)
     const { signedUrl } = await getSignedUploadUrl(
-      PRIVATE_SUPABASE_BUCKET,
       bucketPath,
     )
     return NextResponse.json({ signedUrl, path: bucketPath })
@@ -28,7 +26,6 @@ export const POST = routeWrapper(async (req: NextRequest) => {
   })
   if (!leagueFile) throw new ApiError('League file not found', 404)
   const { signedUrl } = await getSignedDownloadUrl(
-    PRIVATE_SUPABASE_BUCKET,
     leagueFile.file.bucketPath
   )
   return NextResponse.json({ signedUrl })

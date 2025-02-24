@@ -17,6 +17,8 @@ export const {
   useAddObject: useAddLeagueFile,
   useUpdateObject: useUpdateLeagueFile,
   useDeleteObject: useDeleteLeagueFile,
+  useInvalidateObject: useInvalidateLeagueFile,
+  useInvalidateObjects: useInvalidateLeagueFiles,
 } = getCrudHooks<LeagueFileArgs, Prisma.LeagueFileFindManyArgs,
 Prisma.LeagueFileUncheckedUpdateInput & FileData>(
   leagueFileApi
@@ -30,7 +32,8 @@ type SignedUrlOptions = {
 
 type LeagueFileData = {
   category?: LeagueFileCategory
-  metadata?: Record<string, any> | null
+  metadata?: Record<string, any>
+  draftId?: string
 }
 
 const getSignedUrl = async (leagueId: string, options: SignedUrlOptions = {}) => {
@@ -77,17 +80,20 @@ export const useLeagueFiles = (leagueId: string) => {
 
   const { data: leagueFiles, isLoading: isQuerying, error: queryError } = useGetLeagueFiles({
     where: { leagueId },
-    include: { file: true },
+    include: { file: true, draft: true },
   }, { skip: !leagueId })
 
   const { addObject } = useAddLeagueFile()
   const { updateObject } = useUpdateLeagueFile()
   const { deleteObject: deleteLeagueFile } = useDeleteLeagueFile()
+  const { invalidateObject: invalidateLeagueFile } = useInvalidateLeagueFile()
+  const { invalidateObjects: invalidateLeagueFiles } = useInvalidateLeagueFiles()
 
   const addLeagueFile = async ({
     file,
     category = LeagueFileCategory.other,
-    metadata = null,
+    metadata,
+    draftId,
   }: { file: File } & LeagueFileData) => {
     setIsMutating(true)
     try {
@@ -95,6 +101,7 @@ export const useLeagueFiles = (leagueId: string) => {
       await addObject({
         leagueId,
         category,
+        draftId,
         bucketPath,
         name: file.name,
         type: file.type,
@@ -111,7 +118,8 @@ export const useLeagueFiles = (leagueId: string) => {
     leagueFileId,
     file,
     category = LeagueFileCategory.other,
-    metadata = null,
+    draftId,
+    metadata,
   }: { leagueFileId: string, file?: File } & LeagueFileData) => {
     setIsMutating(true)
     try {
@@ -128,6 +136,7 @@ export const useLeagueFiles = (leagueId: string) => {
       await updateObject({
         id: leagueFileId,
         category,
+        draftId,
         metadata,
         ...newFileData,
       })
@@ -165,5 +174,7 @@ export const useLeagueFiles = (leagueId: string) => {
     updateLeagueFile,
     deleteLeagueFile,
     downloadLeagueFile,
+    invalidateLeagueFile,
+    invalidateLeagueFiles,
   }
 }
