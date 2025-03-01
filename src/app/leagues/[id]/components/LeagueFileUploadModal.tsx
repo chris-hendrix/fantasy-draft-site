@@ -26,8 +26,10 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
   const { user } = useSessionUser()
   const { showAlert } = useAlert()
   const [file, setFile] = useState<File | null>(null)
-  const [category, setCategory] = useState<LeagueFileCategory | null>(null)
-  const [draft, setDraft] = useState<DraftArgs | null>(null)
+  const [category, setCategory] = useState<LeagueFileCategory | null>(leagueFile?.category || null)
+  const [draft, setDraft] = useState<DraftArgs | null>(leagueFile?.draft || null)
+
+  console.log({ leagueFile })
   const {
     addLeagueFile,
     updateLeagueFile,
@@ -94,7 +96,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
   if (!user) return <></>
 
   return (
-    <Modal title={leagueFile ? 'Edit league' : 'Create league'} onClose={onClose}>
+    <Modal title={leagueFile ? 'Edit league file' : 'Upload league file'} onClose={onClose}>
       <Form
         form={form}
         onSubmit={onSubmit}
@@ -107,6 +109,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
           </label>
           <select
             className="select select-bordered w-full mb-2"
+            value={category as LeagueFileCategory}
             onChange={(e) => setCategory(e.target.value as LeagueFileCategory)}>
             {LEAGUE_FILE_CATEGORIES.map((c) => (
               <option key={c.enum} value={c.enum}>
@@ -117,7 +120,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
           <label className="block mb-2 font-bold">
             Draft
           </label>
-          <DraftSelect leagueId={leagueId} onSelect={setDraft} />
+          <DraftSelect leagueId={leagueId} onSelect={setDraft} initialDraft={draft} />
         </div>
         <UploadButton />
       </Form>

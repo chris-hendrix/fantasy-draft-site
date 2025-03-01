@@ -6,7 +6,7 @@ import { DraftArgs } from '@/types'
 
 interface Props {
   leagueId: string;
-  initialDraft?: DraftArgs;
+  initialDraft?: DraftArgs | null;
   onSelect: (draft: DraftArgs | null) => void;
 }
 

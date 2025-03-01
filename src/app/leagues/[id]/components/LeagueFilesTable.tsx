@@ -17,6 +17,7 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
     isQuerying
   } = useLeagueFiles(leagueId)
   const [addModalOpen, setIsAddModalOpen] = useState(false)
+  const [fileToUpdate, setFileToUpdate] = useState<LeagueFileArgs | null>(null)
   const [fileToDelete, setFileToDelete] = useState<LeagueFileArgs | null>(null)
 
   const columns: TableColumn<LeagueFileArgs>[] = [
@@ -43,6 +44,12 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
             onClick={() => downloadLeagueFile(leagueFile.id)}
           >
             ⬇️
+          </button>
+          <button
+            className="btn btn-xs btn-square"
+            onClick={() => setFileToUpdate(leagueFile)}
+          >
+            ✏️
           </button>
           <button
             className="btn btn-xs btn-square"
@@ -76,10 +83,17 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
           onClose={() => setIsAddModalOpen(false)}
         />
       )}
+      {fileToUpdate && (
+        <LeagueFileUploadModal
+          leagueId={leagueId}
+          leagueFile={fileToUpdate}
+          onClose={() => setFileToUpdate(null)}
+        />
+      )}
       {fileToDelete && <DeleteModal />}
       <div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm"
           onClick={() => setIsAddModalOpen(true)}
         >
           Add File
