@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
-import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_BUCKET } from '@/config'
+import {
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  PUBLIC_SUPABASE_BUCKET
+} from '@/config'
 
 const createSupabaseClient = () => createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
@@ -11,28 +15,25 @@ const getSupabaseClient = () => {
 
 const supabase = getSupabaseClient()
 
-export const uploadFile = async (file: File, directory: string) => {
+export const uploadPublicFile = async (file: File, directory: string) => {
   if (!supabase) throw new Error('Supabase client not running')
-  const storageApi = supabase.storage.from(SUPABASE_BUCKET)
+  const bucket = PUBLIC_SUPABASE_BUCKET
+  const storageApi = supabase.storage.from(bucket)
   const path = `${directory}/${file.name}`
 
-  // clear existing files
-  const { data: list, error: listError } = await storageApi.list(`${directory}/`)
-  if (listError) throw new Error(listError.message)
-  if (list?.length) {
-    const { error: removeError } = await storageApi.remove(list?.map((f) => `${directory}/${f.name}`) || [])
-    if (removeError) throw new Error(removeError.message)
-  }
-
   // upload new file
-  const { error: uploadError } = await storageApi.upload(path, file, {
+  const { data, error: uploadError } = await storageApi.upload(path, file, {
     contentType: file.type, upsert: true
   })
   if (uploadError) throw new Error(uploadError.message)
 
-  // get public url
-  const { data: { publicUrl } } = await storageApi.getPublicUrl(path)
-  return publicUrl
+  return {
+    path: data.path,
+    publicUrl: storageApi.getPublicUrl(path).data.publicUrl,
+    name: file.name,
+    size: file.size,
+    type: file.type,
+  }
 }
 
 export default supabase

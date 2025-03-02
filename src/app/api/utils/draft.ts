@@ -9,11 +9,12 @@ export const getAllDraftData = async (draftId: string) => {
   const draft = await prisma.draft.findUnique({
     where: { id: draftId },
     include: {
-      league: { include: { commissioners: true } },
+      league: { include: { commissioners: true, } },
       draftTeams: { include: { team: { include: { teamUsers: true } } } },
       keepers: { include: { player: true, team: true }, orderBy: { round: 'asc' } },
       draftPicks: { include: { player: true, team: true }, orderBy: { overall: 'asc' } },
-      players: { include: { draftPicks: { include: { team: true } } } }
+      players: { include: { draftPicks: { include: { team: true } } } },
+      leagueFiles: { include: { file: true } }
     }
   })
 

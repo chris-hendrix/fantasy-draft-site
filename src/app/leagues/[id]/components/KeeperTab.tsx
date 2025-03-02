@@ -1,10 +1,12 @@
-import { useDraft } from '@/hooks/draft'
 import { useState } from 'react'
+import { useDraft } from '@/hooks/draft'
+import { useLeagueFiles } from '@/hooks/leagueFile'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
 import { useInvalidateKeepers } from '@/hooks/keeper'
 import { KeeperArgs } from '@/types'
 import { useCurrentDraftId } from '@/hooks/app'
+import { LeagueFileCategory } from '@prisma/client'
 import DraftYearTabs from './DraftYearTabs'
 import KeepersTable from './KeepersTable'
 import KeeperInfo from './KeeperInfo'
@@ -34,8 +36,11 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     isCommissioner,
     areKeepersOpen: canEditKeepers,
     updateDraft,
-    draft: { keeperEntryNote },
+    draft: { keeperEntryNote, leagueFiles },
   } = useDraft(currentDraftId as string, { skip: !currentDraftId })
+
+  const { downloadLeagueFile } = useLeagueFiles(leagueId)
+  const keeperFiles = leagueFiles?.filter((lf) => lf.category === LeagueFileCategory.keepers) || []
 
   const handleClose = () => {
     setGenerateModalOpen(false)
@@ -95,6 +100,20 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
     })
   }
 
+  const KeeperFileClickableChips = () => (
+    <div className="flex flex-wrap gap-2">
+      {keeperFiles.map((lf) => (
+        <div
+          key={lf.id}
+          onClick={() => downloadLeagueFile(lf.id)}
+          className="badge badge-secondary cursor-pointer"
+        >
+          {`${lf?.file?.name || ''} ⬇️`}
+        </div>
+      ))}
+    </div >
+  )
+
   return (
     <>
       <div className="flex flex-col items-center mt-8 mb-2">
@@ -130,10 +149,11 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       {currentDraftId && sessionTeamIds && canEditKeepers && (
         <>
           <h2 className="text-lg font-bold my-6 mx-2">📝 Keeper Entry</h2>
-          <div className="flex gap-2 mb-2">
+          <div className="flex gap-2 mb-2 items-center">
             {!teamEdit && <button id="team-keeper-edit" className="btn btn-sm w-32" onClick={() => setTeamEdit(true)}>📝 Edit</button>}
             {teamEdit && <button className="btn btn-sm w-32 btn-primary" onClick={handleSaveTeamKeepers}>💾 Save</button>}
             {teamEdit && <button className="btn btn-sm w-32 btn-error" onClick={() => setTeamEdit(false)}>❌ Cancel</button>}
+            <KeeperFileClickableChips />
           </div>
           <div className="flex flex-row">
             <KeepersTable
