@@ -108,7 +108,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
           </label>
           <select
             className="select select-bordered w-full mb-2"
-            value={category as LeagueFileCategory}
+            value={category as LeagueFileCategory || ''}
             onChange={(e) => setCategory(e.target.value as LeagueFileCategory)}>
             {LEAGUE_FILE_CATEGORIES.map((c) => (
               <option key={c.enum} value={c.enum}>
