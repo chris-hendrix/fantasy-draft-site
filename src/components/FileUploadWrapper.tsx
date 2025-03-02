@@ -14,7 +14,6 @@ interface ImageUploaderProps {
   bucketDirectory?: string;
   onFileUpload?: (fileInfo: FileInfo) => void;
   onError?: (error: any) => void;
-  asPublic?: boolean;
 }
 
 const FileUploadWrapper: React.FC<ImageUploaderProps> = ({
@@ -22,13 +21,12 @@ const FileUploadWrapper: React.FC<ImageUploaderProps> = ({
   bucketDirectory = '',
   onFileUpload,
   onError,
-  asPublic = false,
 }) => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target?.files?.[0]
       if (!file) return
-      const fileInfo = await uploadPublicFile(file, bucketDirectory, asPublic)
+      const fileInfo = await uploadPublicFile(file, bucketDirectory)
       const { publicUrl } = fileInfo
       publicUrl && onFileUpload && onFileUpload(fileInfo)
     } catch (error) {

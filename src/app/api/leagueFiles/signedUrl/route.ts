@@ -8,11 +8,11 @@ export const POST = routeWrapper(async (req: NextRequest) => {
   const { bucketPath, leagueId, isUpload, leagueFileId }: any = req.consumedBody
 
   if (!leagueId) throw new ApiError('Must specify league id', 400)
-  checkLeagueMember(leagueId)
+  await checkLeagueMember(leagueId)
 
   if (isUpload) {
     if (!bucketPath) throw new ApiError('Must specify bucket path', 400)
-    checkLeagueCommissioner(leagueId)
+    await checkLeagueCommissioner(leagueId)
     const { signedUrl } = await getSignedUploadUrl(
       bucketPath,
     )

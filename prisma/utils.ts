@@ -50,6 +50,8 @@ const generateUser = async () => {
   return user
 }
 
+export type SeedData = Awaited<ReturnType<typeof generateSeedData>>
+
 export const generateSeedData = async () => {
   const teamsCount = 10
   const keepersCount = 5
@@ -84,7 +86,8 @@ export const generateSeedData = async () => {
       leagueId: league.id,
       name: `${u.name} Team`,
       teamUsers: { create: [{ userId: u.id }] }
-    }
+    },
+    include: { teamUsers: true }
   })))
 
   // round to the nearest x places
@@ -170,12 +173,17 @@ export const generateSeedData = async () => {
     return draft
   }
 
-  await createDraft(new Date().getFullYear() - 2, true)
-  await createDraft(new Date().getFullYear() - 1, true)
-  await createDraft(new Date().getFullYear(), false)
+  const drafts = [
+    await createDraft(new Date().getFullYear() - 2, true),
+    await createDraft(new Date().getFullYear() - 1, true),
+    await createDraft(new Date().getFullYear(), false)
+  ]
 
   return {
     league,
+    teams,
+    users,
+    drafts,
     commissioner: admin,
   }
 }

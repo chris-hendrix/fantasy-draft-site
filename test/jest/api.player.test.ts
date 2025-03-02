@@ -40,7 +40,12 @@ describe('/api/players', () => {
   })
 
   test('players can be retrieved', async () => {
-    const req = createNextRequest()
+    const league = await createLeague()
+    const draft = await createDraft({ leagueId: league.id })
+    const req = createNextRequest({
+      method: 'GET',
+      searchParams: { 'where[draftId]': draft.id }
+    })
     const res = await getPlayers(req)
     expect(res.status).toBe(200)
   })

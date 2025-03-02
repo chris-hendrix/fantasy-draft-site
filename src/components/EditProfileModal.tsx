@@ -47,7 +47,6 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, setActiveForm }) 
           bucketDirectory={`image/${user.id}`}
           onFileUpload={({ publicUrl }) => setImageUrl(publicUrl || '')}
           onError={setError}
-          asPublic
         >
           <div
             className="avatar indicator tooltip tooltip-right"
