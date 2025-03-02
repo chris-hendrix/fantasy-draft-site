@@ -46,10 +46,13 @@ export const PUT = routeWrapper(
       } })
 
     // update file metadata
-    if (data.metadata) {
+    if (data.metadata || data.isArchived !== undefined) {
       await prisma.file.update({
         where: { id: updatedLeagueFile.fileId },
-        data: { metadata: data.metadata }
+        data: {
+          metadata: data.metadata,
+          archivedAt: data.isArchived ? new Date() : null
+        }
       })
     }
 

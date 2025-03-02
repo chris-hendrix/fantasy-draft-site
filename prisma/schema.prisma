@@ -235,6 +235,7 @@ model File {
   bucketPath  String
   type        String
   size        Int
+  archivedAt  DateTime?
   metadata    Json?
   user        User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   leagueFiles LeagueFile[]
@@ -264,7 +265,7 @@ enum Sport {
 
 enum LeagueFileCategory {
   backup
-  deadline_rosters
+  keepers
   league_image
   other
 }

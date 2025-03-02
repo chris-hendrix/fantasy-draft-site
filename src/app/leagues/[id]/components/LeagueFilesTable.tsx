@@ -12,6 +12,7 @@ interface Props {
 const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
   const {
     leagueFiles,
+    updateLeagueFile,
     deleteLeagueFile,
     downloadLeagueFile,
     isQuerying
@@ -21,6 +22,10 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
   const [fileToDelete, setFileToDelete] = useState<LeagueFileArgs | null>(null)
 
   const columns: TableColumn<LeagueFileArgs>[] = [
+    {
+      header: 'Date',
+      value: (leagueFile) => new Date(leagueFile.file.createdAt).toLocaleDateString(),
+    },
     {
       header: 'File',
       value: (leagueFile) => leagueFile.file.name,
@@ -50,6 +55,15 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
             onClick={() => setFileToUpdate(leagueFile)}
           >
             ✏️
+          </button>
+          <button
+            className="btn btn-xs btn-square"
+            onClick={async () => updateLeagueFile({
+              leagueFileId: leagueFile.id,
+              isArchived: !leagueFile.file.archivedAt
+            })}
+          >
+            📦
           </button>
           <button
             className="btn btn-xs btn-square"
@@ -103,6 +117,9 @@ const LeagueFilesTable: React.FC<Props> = ({ leagueId }) => {
           data={leagueFiles || []}
           isLoading={isQuerying}
           enableSort
+          rowStyle={(leagueFile) => (!leagueFile?.file?.archivedAt ? {} : {
+            className: 'bg-gray-700 italic text-gray-500'
+          })}
         />
       </div>
     </>

@@ -10,6 +10,7 @@ type FileData = {
   type?: string
   size?: number
   metadata?: Record<string, any> | null
+  isArchived?: boolean
 }
 
 export const {
@@ -34,6 +35,7 @@ type LeagueFileData = {
   category?: LeagueFileCategory
   metadata?: Record<string, any>
   draftId?: string
+  isArchived?: boolean
 }
 
 const getSignedUrl = async (leagueId: string, options: SignedUrlOptions = {}) => {
@@ -120,6 +122,7 @@ export const useLeagueFiles = (leagueId: string) => {
     category = LeagueFileCategory.other,
     draftId,
     metadata,
+    isArchived,
   }: { leagueFileId: string, file?: File } & LeagueFileData) => {
     setIsMutating(true)
     try {
@@ -138,6 +141,7 @@ export const useLeagueFiles = (leagueId: string) => {
         category,
         draftId,
         metadata,
+        isArchived,
         ...newFileData,
       })
     } catch (error) {

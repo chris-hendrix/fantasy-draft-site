@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "LeagueFileCategory" AS ENUM ('backup', 'deadline_rosters', 'league_image', 'other');
+CREATE TYPE "LeagueFileCategory" AS ENUM ('backup', 'keepers', 'league_image', 'other');
 
 -- CreateTable
 CREATE TABLE "File" (
@@ -11,6 +11,7 @@ CREATE TABLE "File" (
     "bucketPath" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
+    "archivedAt" TIMESTAMP(3),
     "metadata" JSONB,
 
     CONSTRAINT "File_pkey" PRIMARY KEY ("id")

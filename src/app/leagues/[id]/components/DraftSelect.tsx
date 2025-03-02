@@ -20,7 +20,7 @@ const DraftSelect: React.FC<Props> = ({ leagueId, initialDraft, onSelect }) => {
     <div className="flex gap-1">
       <select
         className="select select-bordered w-full"
-        value={selectedDraft?.id}
+        value={selectedDraft?.id || ''}
         onChange={(e) => {
           const draft = drafts.find((d) => d.id === e.target.value)
           setSelectedDraft(draft || null)

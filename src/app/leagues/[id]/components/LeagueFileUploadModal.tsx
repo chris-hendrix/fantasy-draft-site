@@ -18,7 +18,7 @@ interface FormProps {
 export const LEAGUE_FILE_CATEGORIES = [
   { enum: LeagueFileCategory.other, name: 'Other' },
   { enum: LeagueFileCategory.league_image, name: 'League Image' },
-  { enum: LeagueFileCategory.deadline_rosters, name: 'Deadline Rosters' },
+  { enum: LeagueFileCategory.keepers, name: 'Keepers' },
   { enum: LeagueFileCategory.backup, name: 'Backup' },
 ]
 
@@ -29,7 +29,6 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
   const [category, setCategory] = useState<LeagueFileCategory | null>(leagueFile?.category || null)
   const [draft, setDraft] = useState<DraftArgs | null>(leagueFile?.draft || null)
 
-  console.log({ leagueFile })
   const {
     addLeagueFile,
     updateLeagueFile,
@@ -120,9 +119,13 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
           <label className="block mb-2 font-bold">
             Draft
           </label>
-          <DraftSelect leagueId={leagueId} onSelect={setDraft} initialDraft={draft} />
+          <DraftSelect
+            leagueId={leagueId}
+            onSelect={setDraft}
+            initialDraft={draft}
+          />
         </div>
-        <UploadButton />
+        {!leagueFile && <UploadButton />}
       </Form>
     </Modal>
   )
