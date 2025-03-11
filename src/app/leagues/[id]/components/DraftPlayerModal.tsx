@@ -15,7 +15,13 @@ interface Props {
   goToPreviousPlayer?: () => void;
 }
 
-const PlayerData = ({ header, children }: { header: string, children: React.ReactNode }) => (
+const PlayerData = ({
+  header,
+  children
+}: {
+  header: React.ReactNode,
+  children: React.ReactNode
+}) => (
   <div className="flex flex-col gap-1">
     <div className="font-bold">{header}</div>
     <div>{children}</div>
@@ -61,7 +67,12 @@ const DraftPlayerModal: React.FC<Props> = ({
   const PlayerHeader = () => (
     <div className="flex justify-between bg-gray-700 p-4 rounded-lg items-center">
       <div className="flex flex-col gap-4">
-        <PlayerData header={getPlayerData(player, 'PlayerInfo')}>
+        <PlayerData header={(
+          <div className="flex items-center gap-2">
+            {/* TODO save button */}
+            {getPlayerData(player, 'PlayerInfo')}
+          </div>
+        )}>
           <DraftStatus />
         </PlayerData>
       </div>

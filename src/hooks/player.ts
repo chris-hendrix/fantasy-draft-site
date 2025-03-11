@@ -3,6 +3,7 @@ import { PlayerArgs, SavedPlayerArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { getPlayerData } from '@/utils/draft'
+import { useDraft } from './draft'
 
 export const {
   useGetObject: useGetPlayer,
@@ -27,6 +28,10 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
     }
   )
 
+  const { sessionTeamIds, isSessionTeam, isComplete } = useDraft(draftId)
+  const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
+  const canSave = !isComplete && sessionTeamId
+
   const players = [...(result?.data || [])].sort((a, b) => {
     const aValue = dataKey ? getPlayerData(a, dataKey) || nullValue : a.name
     const bValue = dataKey ? getPlayerData(b, dataKey) || nullValue : b.name
@@ -39,5 +44,32 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
   const { updateObject: updatePlayer, isLoading: isUpdating } = useUpdatePlayer()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
 
-  return { players, updatePlayer, isUpdating, invalidatePlayer, ...result }
+  const getIsSaved = (playerId: string) => {
+    const player = players.find((p) => p.id === playerId)
+    const savedPlayer = player?.savedPlayers?.find((sp) => isSessionTeam(sp.teamId))
+    return !savedPlayer ? null : savedPlayer.isDraftable
+  }
+
+  const handleSavePlayer = async (playerId: string) => {
+    const player = players.find((p) => p.id === playerId)
+    if (!player) return
+    const savedPlayer = player.savedPlayers.find((sp) => isSessionTeam(sp.teamId)) || null
+    if (!sessionTeamId) return
+    await updatePlayer({
+      id: player.id,
+      savedPlayer
+    })
+    await invalidatePlayer(playerId)
+  }
+
+  return {
+    players,
+    updatePlayer,
+    isUpdating,
+    invalidatePlayer,
+    getIsSaved,
+    handleSavePlayer,
+    canSave,
+    ...result
+  }
 }
