@@ -20,7 +20,7 @@ export const {
 )
 
 export const useDraftPicks = (draftId: string) => {
-  const { draft: { disableUserDraft }, teamsCount, isSessionTeam } = useDraft(draftId)
+  const { draft: { disableUserDraft }, teamsCount, isSessionTeam, isDraftOpen } = useDraft(draftId)
   const { data: draftPicks, ...rest } = useGetDraftPicks(
     {
       where: { draftId },
@@ -41,6 +41,7 @@ export const useDraftPicks = (draftId: string) => {
   }
 
   const canDraft = (player: PlayerArgs) => {
+    if (!isDraftOpen) return false
     if (disableUserDraft) return false
     if (!draftingPick) return false
     if (player.draftPicks?.length) return false

@@ -43,13 +43,18 @@ const PlayersTable: React.FC<Props> = ({
   const {
     isLoading: isDraftLoading,
     teamsCount,
-    isComplete,
     isDraftOpen,
     sessionTeamIds,
-    isSessionTeam
   } = useDraft(draftId)
+
   const { draftPicks, makeLiveSelection, draftingPick, canDraft } = useLiveDraftPicks(draftId)
-  const { players, isLoading: isPlayersLoading, updatePlayer } = useSortedPlayers(draftId, 'Rank', 9999)
+  const {
+    players,
+    isLoading: isPlayersLoading,
+    handleSavePlayer,
+    getIsSaved,
+    canSave,
+  } = useSortedPlayers(draftId, 'Rank', 9999)
   const [playerToBeDrafted, setPlayerToBeDrafted] = useState<PlayerArgs | null>(null)
   const [clickedPlayer, setClickedPlayer] = useState<PlayerArgs | null>(null)
   const [sortOption, setSortOption] = useState<PlayerSortOption | null>(null)
@@ -85,15 +90,6 @@ const PlayersTable: React.FC<Props> = ({
     }
   }
 
-  const handleSavePlayer = async (player: PlayerArgs) => {
-    const savedPlayer = player.savedPlayers.find((sp) => isSessionTeam(sp.teamId)) || null
-    if (!sessionTeamId) return
-    await updatePlayer({
-      id: player.id,
-      savedPlayer
-    })
-  }
-
   const getExpectedOverall = (player: PlayerArgs) => {
     const rank = Number(getPlayerData(player, 'Rank'))
     const picksBefore = draftingPick?.overall || rank
@@ -120,23 +116,18 @@ const PlayersTable: React.FC<Props> = ({
     playerSearch: () => true
   })
 
-  const getIsDraftable = (player: PlayerArgs) => {
-    const savedPlayer = player?.savedPlayers?.find((sp) => isSessionTeam(sp.teamId))
-    return !savedPlayer ? null : savedPlayer.isDraftable
-  }
-
   const columns: TableColumn<PlayerArgs>[] = [
     {
       header: '',
-      hidden: !sessionTeamId || isComplete,
-      value: (player) => (getIsDraftable(player) ? '⭐' : '☆'),
+      hidden: !canSave,
+      value: (player) => (getIsSaved(player.id) ? '⭐' : '☆'),
       renderedValue: (player) => (
         <Tooltip text="Save player">
           <div
-            onClick={() => handleSavePlayer(player)}
+            onClick={() => handleSavePlayer(player.id)}
             className="text-[0.5rem] flex text-center cursor-pointer"
           >
-            {getIsDraftable(player) ? '⭐' : '☆'}
+            {getIsSaved(player.id) ? '⭐' : '☆'}
           </div>
         </Tooltip>
       )
