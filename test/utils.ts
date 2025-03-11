@@ -31,10 +31,11 @@ export const createNextRequest = (options: CreateNextRequest = defaultOptions) =
 
 export const generateUserBody = (fields:any = {}) => {
   const datetime = new Date().getTime()
+  const uniqueKey = `${datetime}-${Math.floor(Math.random() * 1000)}`
   return {
-    name: `Patch Adams ${datetime}`,
-    username: `patch-adams-${datetime}`,
-    email: `patch-adams-${datetime}@${TEST_EMAIL_DOMAIN}`,
+    name: `Patch Adams ${uniqueKey}`,
+    username: `patch-adams-${uniqueKey}`,
+    email: `patch-adams-${uniqueKey}@${TEST_EMAIL_DOMAIN}`,
     password: 'Abcd1234!',
     ...fields
   }
