@@ -94,8 +94,8 @@ const PlayersTable: React.FC<Props> = ({
     const rank = Number(getPlayerData(player, 'Rank'))
     const picksBefore = draftingPick?.overall || rank
     const draftedBefore = draftPicks
-      .filter((dp) => Boolean(dp.player) && getPlayerData(dp.player, 'Rank') < rank)
-      .length
+      ?.filter((dp) => Boolean(dp.player) && getPlayerData(dp.player, 'Rank') < rank)
+      ?.length || 0
     const expected = rank + picksBefore - draftedBefore - 1
     return expected
   }
@@ -198,9 +198,10 @@ const PlayersTable: React.FC<Props> = ({
     },
   ]
 
-  const filteredPlayers = players?.filter((player) => Object
-    .values(filterOptions)
-    .every((filter) => filter(player))) || []
+  const filteredPlayers = players
+    ?.filter((player) => Object
+      .values(filterOptions)
+      .every((filter) => filter(player))) || []
 
   const sortedPlayers = (() => {
     if (!sortOption) return filteredPlayers
