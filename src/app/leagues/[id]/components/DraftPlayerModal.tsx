@@ -93,14 +93,14 @@ const DraftPlayerModal: React.FC<Props> = ({
 
   return (
     <Modal title={getPlayerData(player, 'PlayerInfo')} size="md" onClose={onClose}>
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex items-center gap-4 justify-between">
           {goToPreviousPlayer && (
             <div className="btn btn-primary" onClick={goToPreviousPlayer}>
               {'<'}
             </div>
           )}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 flex-grow">
             <PlayerHeader />
             <PlayerData header="Projections">
               {getPlayerData(player, 'Projections')}
