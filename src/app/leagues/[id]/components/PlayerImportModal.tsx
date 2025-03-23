@@ -18,7 +18,7 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [confirmUpdate, setConfirmUpdate] = useState(false)
   const [csvString, setCsvString] = useState('')
-  const { savePlayerData, isSavingPlayerData } = useSortedPlayers(draftId)
+  const { savePlayerData, isSavingPlayerData, hasSameKeysAsExisting } = useSortedPlayers(draftId)
 
   const handleSave = async () => {
     if (!draftId) return
@@ -41,12 +41,26 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
     setPlayers(imported)
   }
 
+  if (confirmUpdate && !hasSameKeysAsExisting(players)) {
+    return (
+      <ConfirmModal
+        onConfirm={handleSave}
+        onClose={() => { setConfirmUpdate(false) }}
+      >
+        <div className="text-error">
+          {`The imported player data has different keys than the existing data.
+          This will overwrite all existing player data for ${year}. Continue?`}
+        </div>
+      </ConfirmModal>
+    )
+  }
+
   if (confirmOverwrite || confirmUpdate) {
     return <ConfirmModal
       onConfirm={handleSave}
       onClose={() => {
-        setConfirmOverwrite(false)
         setConfirmUpdate(false)
+        setConfirmOverwrite(false)
       }}
     >
       {`This will ${confirmOverwrite ? 'overwrite' : 'update'} all existing player data for ${year}. Continue?`}

@@ -68,6 +68,16 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
     await invalidatePlayer(playerId)
   }
 
+  const hasSameKeysAsExisting = (playerData: PlayerData[]) => {
+    if (!playerData?.length) return true
+    const existingKeys = Object.keys(players[0].data || {})
+    const playerDataKeys = Object.keys(playerData[0].data || {})
+    return (
+      existingKeys.length === playerDataKeys.length &&
+      existingKeys.every((key) => playerDataKeys.includes(key))
+    )
+  }
+
   const savePlayerData = async (
     playerData: PlayerData[],
     options: { overwrite?: boolean } = {}
@@ -101,6 +111,7 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
     invalidatePlayer,
     invalidatePlayers,
     savePlayerData,
+    hasSameKeysAsExisting,
     isSavingPlayerData,
     getIsSaved,
     handleSavePlayer,
