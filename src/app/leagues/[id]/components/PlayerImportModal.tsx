@@ -46,6 +46,7 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
       <ConfirmModal
         onConfirm={handleSave}
         onClose={() => { setConfirmUpdate(false) }}
+        disabled={isSavingPlayerData}
       >
         <div className="text-error">
           {`The imported player data has different keys than the existing data.
@@ -62,6 +63,7 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
         setConfirmUpdate(false)
         setConfirmOverwrite(false)
       }}
+      disabled={isSavingPlayerData}
     >
       {`This will ${confirmOverwrite ? 'overwrite' : 'update'} all existing player data for ${year}. Continue?`}
     </ConfirmModal>
