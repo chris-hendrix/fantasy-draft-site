@@ -37,7 +37,9 @@ export const POST = routeWrapper(async (req: NextRequest) => {
     select: { name: true, id: true },
   })
 
-  const transactions: PrismaPromise<any>[] = []
+  const createTransactions: PrismaPromise<any>[] = []
+  const updateTransactions: PrismaPromise<any>[] = []
+  const deleteTransactions: PrismaPromise<any>[] = []
 
   // update and/or delete existing players
   if (!overwrite) {
@@ -46,7 +48,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
       const match = playerData.find((pd) => pd.name === p.name)
 
       if (match) {
-        transactions.push(prisma.player.update({
+        updateTransactions.push(prisma.player.update({
           where: { id: p.id },
           data: match,
         }))
@@ -56,7 +58,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
         // remove from playerData to avoid creating it again
         playerData.splice(playerData.indexOf(match), 1)
       } else {
-        transactions.push(prisma.player.delete({ where: { id: p.id } }))
+        deleteTransactions.push(prisma.player.delete({ where: { id: p.id } }))
         results.names.deleted.push(p.name)
         results.counts.deleted += 1
       }
@@ -69,14 +71,27 @@ export const POST = routeWrapper(async (req: NextRequest) => {
 
   // create new players
   playerData.forEach((pd) => {
-    transactions.push(prisma.player.create({
+    createTransactions.push(prisma.player.create({
       data: { draftId, name: pd.name, data: pd.data },
     }))
     results.names.created.push(pd.name)
     results.counts.created += 1
   })
 
-  await prisma.$transaction(transactions)
+  let currentTransaction = 'update'
+  try {
+    // execute transactions
+    await prisma.$transaction(updateTransactions)
+    currentTransaction = 'create'
+    await prisma.$transaction(createTransactions)
+    currentTransaction = 'delete'
+    await prisma.$transaction(deleteTransactions)
+  } catch (error) {
+    throw new ApiError(`Failed to ${currentTransaction} players`, 500)
+  }
+  await prisma.$transaction(updateTransactions)
+  await prisma.$transaction(createTransactions)
+  await prisma.$transaction(deleteTransactions)
 
   return NextResponse.json(results)
 })
