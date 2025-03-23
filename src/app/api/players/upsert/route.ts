@@ -37,9 +37,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
     select: { name: true, id: true },
   })
 
-  const createTransactions: PrismaPromise<any>[] = []
-  const updateTransactions: PrismaPromise<any>[] = []
-  const deleteTransactions: PrismaPromise<any>[] = []
+  const transactions: PrismaPromise<any>[] = []
 
   // update and/or delete existing players
   if (!overwrite) {
@@ -48,7 +46,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
       const match = playerData.find((pd) => pd.name === p.name)
 
       if (match) {
-        updateTransactions.push(prisma.player.update({
+        transactions.push(prisma.player.update({
           where: { id: p.id },
           data: match,
         }))
@@ -58,7 +56,7 @@ export const POST = routeWrapper(async (req: NextRequest) => {
         // remove from playerData to avoid creating it again
         playerData.splice(playerData.indexOf(match), 1)
       } else {
-        deleteTransactions.push(prisma.player.delete({ where: { id: p.id } }))
+        transactions.push(prisma.player.delete({ where: { id: p.id } }))
         results.names.deleted.push(p.name)
         results.counts.deleted += 1
       }
@@ -71,27 +69,24 @@ export const POST = routeWrapper(async (req: NextRequest) => {
 
   // create new players
   playerData.forEach((pd) => {
-    createTransactions.push(prisma.player.create({
+    transactions.push(prisma.player.create({
       data: { draftId, name: pd.name, data: pd.data },
     }))
     results.names.created.push(pd.name)
     results.counts.created += 1
   })
 
-  let currentTransaction = 'update'
-  try {
-    // execute transactions
-    await prisma.$transaction(updateTransactions)
-    currentTransaction = 'create'
-    await prisma.$transaction(createTransactions)
-    currentTransaction = 'delete'
-    await prisma.$transaction(deleteTransactions)
-  } catch (error) {
-    throw new ApiError(`Failed to ${currentTransaction} players`, 500)
-  }
-  await prisma.$transaction(updateTransactions)
-  await prisma.$transaction(createTransactions)
-  await prisma.$transaction(deleteTransactions)
+  // split into batch transactions
+  const batchSize = 50
+  const batchCount = Math.ceil(transactions.length / batchSize)
+  const batchedTransactions: Promise<any>[] = []
+  Array.from({ length: batchCount }).forEach((_, i) => {
+    const start = i * batchSize
+    const end = start + batchSize
+    const batch = transactions.slice(start, end)
+    batchedTransactions.push(prisma.$transaction(batch))
+  })
+  await Promise.all(batchedTransactions)
 
   return NextResponse.json(results)
 })
