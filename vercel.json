@@ -1,5 +1,10 @@
 {
   "installCommand": "npm install && npm run migrate",
+  "functions": {
+    "app/api/players/upsert/**/*": {
+      "maxDuration": 30
+    }
+  },
   "crons": [
     {
       "path": "/api/health",
