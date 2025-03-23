@@ -19,7 +19,7 @@ const readFileIntoString = async (fileName: string): Promise<string> => {
   }
 }
 
-const getPlayerData = async (): Promise<Player[]> => {
+export const generatePlayerData = async (): Promise<Player[]> => {
   const csvString = await readFileIntoString(PLAYER_DATA)
   const objects = await csv({ checkType: true }).fromString(csvString)
   const imported = objects.map((obj: any) => ({
@@ -135,7 +135,7 @@ export const generateSeedData = async () => {
       }
     })
 
-    const players = await Promise.all((await getPlayerData()).map((p) => prisma.player.create({
+    const players = await Promise.all((await generatePlayerData()).map((p) => prisma.player.create({
       data: {
         draftId: draft.id,
         name: p.name,

@@ -4,7 +4,7 @@ import { ApiError, routeWrapper, getParsedParams } from '@/app/api/utils/api'
 import { checkDraftCommissioner, checkTeamEdit } from '@/app/api/utils/permissions'
 import { createTeamIdArray, getRound } from '@/utils/draft'
 import { getUnique } from '@/utils/array'
-import { getAllDraftData, updateDraftPlayerData } from '../../utils/draft'
+import { getAllDraftData } from '../../utils/draft'
 
 export const GET = routeWrapper(
   async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
@@ -38,7 +38,6 @@ export const PUT = routeWrapper(
       keeperCount,
       setKeepers,
       teamKeepers,
-      updatePlayerData,
       ...data
     }: any = req.consumedBody
 
@@ -78,11 +77,6 @@ export const PUT = routeWrapper(
       }
     })
     if (!draft) throw new ApiError('Draft not found', 400)
-
-    if (updatePlayerData?.length) {
-      const results = await updateDraftPlayerData(draft.id, updatePlayerData)
-      return NextResponse.json(results)
-    }
 
     const teamIds = createTeamIdArray(draft.draftTeams.map((dt) => dt.teamId), keeperCount || 0)
     const updatedDraft = await prisma.draft.update({

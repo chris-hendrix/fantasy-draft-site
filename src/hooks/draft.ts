@@ -1,5 +1,5 @@
 import { draftApi } from '@/store/draft'
-import { DraftArgs, KeeperArgs, PlayerData } from '@/types'
+import { DraftArgs, KeeperArgs } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { useParams } from 'next/navigation'
@@ -19,7 +19,6 @@ export const {
   keeperCount?: number,
   setKeepers?: boolean,
   teamKeepers?: KeeperArgs[]
-  updatePlayerData?: PlayerData[],
   startDraft?: boolean;
 }>(draftApi)
 
