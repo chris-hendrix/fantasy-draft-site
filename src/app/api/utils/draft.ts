@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma'
 import { ApiError } from '@/app/api/utils/api'
 import { getRound } from '@/utils/draft'
 import { Player } from '@prisma/client'
-import { PlayerData, ImportedDraftRecord, ImportedResultsRecord } from '@/types'
+import { ImportedDraftRecord, ImportedResultsRecord } from '@/types'
 import { getUnique } from '@/utils/array'
 
 export const getAllDraftData = async (draftId: string) => {
@@ -42,29 +42,6 @@ export const getAllDraftData = async (draftId: string) => {
   })
 
   return { ...draft, players: playerData }
-}
-
-export const updateDraftPlayerData = async (draftId: string, playerData: PlayerData[]) => {
-  const results: { [key: string]: 'added' | 'updated' } = {}
-
-  await Promise.all(
-    playerData.map(async (pd) => {
-      const { count } = await prisma.player.updateMany({
-        where: { draftId, name: pd.name },
-        data: { data: pd.data },
-      })
-
-      // add player if no match
-      if (count === 0) {
-        await prisma.player.create({
-          data: { draftId, name: pd.name, data: pd.data }
-        })
-      }
-
-      results[pd.name] = count === 0 ? 'added' : 'updated'
-    })
-  )
-  return results
 }
 
 export const getNextPick = async (draftId: string, overall: number) => {

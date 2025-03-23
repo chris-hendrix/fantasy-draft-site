@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { playerApi } from '@/store/player'
-import { PlayerArgs, SavedPlayerArgs } from '@/types'
+import { PlayerArgs, SavedPlayerArgs, PlayerData } from '@/types'
 import { Prisma } from '@prisma/client'
 import { getCrudHooks } from '@/utils/getCrudHooks'
 import { getPlayerData } from '@/utils/draft'
 import { useDraft } from './draft'
+import { useAlert } from './app'
 
 export const {
   useGetObject: useGetPlayer,
@@ -32,6 +34,9 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
   const sessionTeamId = sessionTeamIds?.[0] // TODO just choose first for now
   const canSave = !isComplete && sessionTeamId
 
+  const { showAlert } = useAlert()
+  const [isSavingPlayerData, setIsSavingPlayerData] = useState(false)
+
   const players = [...(result?.data || [])].sort((a, b) => {
     const aValue = dataKey ? getPlayerData(a, dataKey) || nullValue : a.name
     const bValue = dataKey ? getPlayerData(b, dataKey) || nullValue : b.name
@@ -43,6 +48,7 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
 
   const { updateObject: updatePlayer, isLoading: isUpdating } = useUpdatePlayer()
   const { invalidateObject: invalidatePlayer } = useInvalidatePlayer()
+  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
 
   const getIsSaved = (playerId: string) => {
     const player = players.find((p) => p.id === playerId)
@@ -62,11 +68,40 @@ export const useSortedPlayers = (draftId: string, dataKey?: string, nullValue?: 
     await invalidatePlayer(playerId)
   }
 
+  const savePlayerData = async (
+    playerData: PlayerData[],
+    options: { overwrite?: boolean } = {}
+  ) => {
+    const { overwrite = false } = options
+    setIsSavingPlayerData(true)
+
+    try {
+      const res = await fetch('/api/players/upsert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          draftId,
+          playerData,
+          overwrite,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save players')
+      showAlert({ successMessage: 'Players saved successfully' })
+    } catch {
+      showAlert({ errorMessage: 'Failed to save players' })
+    }
+    invalidatePlayers()
+    setIsSavingPlayerData(false)
+  }
+
   return {
     players,
     updatePlayer,
     isUpdating,
     invalidatePlayer,
+    invalidatePlayers,
+    savePlayerData,
+    isSavingPlayerData,
     getIsSaved,
     handleSavePlayer,
     canSave,

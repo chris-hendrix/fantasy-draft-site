@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import csv from 'csvtojson'
 import { useDraft } from '@/hooks/draft'
-import { useInvalidatePlayers } from '@/hooks/player'
+import { useSortedPlayers } from '@/hooks/player'
 import Table, { TableColumn } from '@/components/Table'
 import Modal from '@/components/Modal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -13,29 +13,16 @@ interface Props {
 }
 
 const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
-  const { draft: { year }, updateDraft } = useDraft(draftId)
-  const { invalidateObjects: invalidatePlayers } = useInvalidatePlayers()
+  const { draft: { year } } = useDraft(draftId)
   const [players, setPlayers] = useState<PlayerData[]>([])
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [confirmUpdate, setConfirmUpdate] = useState(false)
   const [csvString, setCsvString] = useState('')
+  const { savePlayerData, isSavingPlayerData } = useSortedPlayers(draftId)
 
   const handleSave = async () => {
     if (!draftId) return
-    const res = await updateDraft({
-      id: draftId,
-      ...(!confirmOverwrite ? {} : {
-        players: {
-          deleteMany: {},
-          createMany: { data: players }
-        }
-      }),
-      ...(!confirmUpdate ? {} : {
-        updatePlayerData: players
-      })
-    })
-    if ('error' in res) return
-    invalidatePlayers()
+    await savePlayerData(players, { overwrite: confirmOverwrite })
     onClose()
   }
 
@@ -88,14 +75,14 @@ const PlayerImportModal: React.FC<Props> = ({ draftId, onClose }) => {
         <button
           onClick={() => setConfirmUpdate(true)}
           className="btn btn-primary w-32 mr-2"
-          disabled={!players?.length}
+          disabled={!players?.length || isSavingPlayerData}
         >
           Update
         </button>
         <button
           onClick={() => setConfirmOverwrite(true)}
           className="btn btn-error w-32 mr-2"
-          disabled={!players?.length}
+          disabled={!players?.length || isSavingPlayerData}
         >
           Overwrite
         </button>
