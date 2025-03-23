@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { routeWrapper, ApiError } from '@/app/api/utils/api'
 import { PlayerData } from '@/types'
-import { Prisma, PrismaPromise } from '@prisma/client'
+import { PrismaPromise } from '@prisma/client'
 import { checkDraftCommissioner } from '../../utils/permissions'
 
 export const POST = routeWrapper(async (req: NextRequest) => {
@@ -19,59 +19,64 @@ export const POST = routeWrapper(async (req: NextRequest) => {
   if (!playerData) throw new ApiError('Must have player data', 400)
 
   // setup results
-  type ResultItems = { [key: string]: string }[]
-  type Results = { created: ResultItems, updated: ResultItems, deleted: ResultItems }
-  const results: Results = { created: [], updated: [], deleted: [] }
+  const results = {
+    counts: {
+      created: 0,
+      updated: 0,
+      deleted: 0
+    },
+    names: {
+      created: [] as string[],
+      updated: [] as string[],
+      deleted: [] as string[]
+    }
+  }
 
   const existingPlayers = await prisma.player.findMany({
     where: { draftId },
     select: { name: true, id: true },
   })
 
-  // get transaction types
-  type PlayerUpdate = PrismaPromise<Prisma.PromiseReturnType<typeof prisma.player.update>>
-  type PlayerCreate = PrismaPromise<Prisma.PromiseReturnType<typeof prisma.player.create>>
-  type PlayerDelete = PrismaPromise<Prisma.PromiseReturnType<typeof prisma.player.delete>>
-
-  const createTransactions: PlayerCreate[] = []
+  const transactions: PrismaPromise<any>[] = []
 
   // update and/or delete existing players
   if (!overwrite) {
-    const updateTransactions: PlayerUpdate[] = []
-    const deleteTransactions: PlayerDelete[] = []
-
     existingPlayers.forEach((p) => {
       // pop matching playerData if it exists
       const match = playerData.find((pd) => pd.name === p.name)
 
       if (match) {
-        updateTransactions.push(prisma.player.update({
+        transactions.push(prisma.player.update({
           where: { id: p.id },
           data: match,
         }))
+        results.names.updated.push(p.name)
+        results.counts.updated += 1
+
         // remove from playerData to avoid creating it again
         playerData.splice(playerData.indexOf(match), 1)
-      } else if (!overwrite) {
-        deleteTransactions.push(prisma.player.delete({ where: { id: p.id } }))
+      } else {
+        transactions.push(prisma.player.delete({ where: { id: p.id } }))
+        results.names.deleted.push(p.name)
+        results.counts.deleted += 1
       }
     })
-    const updatedPlayers = await prisma.$transaction(updateTransactions)
-    const deletedPlayers = await prisma.$transaction(deleteTransactions)
-    results.updated.push(...updatedPlayers.map((p) => ({ [p.id]: p.name })))
-    results.deleted.push(...deletedPlayers.map((p) => ({ [p.id]: p.name })))
   } else {
     await prisma.player.deleteMany({ where: { draftId } })
-    results.deleted.push(...existingPlayers.map((p) => ({ [p.id]: p.name })))
+    results.names.deleted.push(...existingPlayers.map((p) => (p.name)))
+    results.counts.deleted += existingPlayers.length
   }
 
   // create new players
   playerData.forEach((pd) => {
-    createTransactions.push(prisma.player.create({
+    transactions.push(prisma.player.create({
       data: { draftId, name: pd.name, data: pd.data },
     }))
+    results.names.created.push(pd.name)
+    results.counts.created += 1
   })
-  const createdPlayers = await prisma.$transaction(createTransactions)
-  results.created.push(...createdPlayers.map((p) => ({ [p.id]: p.name })))
+
+  await prisma.$transaction(transactions)
 
   return NextResponse.json(results)
 })
