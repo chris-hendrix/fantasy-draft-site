@@ -1,55 +1,95 @@
-# Fantasy Draft Site ⚾🏈
+# Fantasy Baseball Draft Site ⚾
 
-### Description
-A Typescript fantasy baseball/football drafting site web project using [Next.js](https://nextjs.org/) (App Router) and [Tailwind](https://tailwindcss.com/), and [Postgres](https://www.postgresql.org/). User authentication (username/password) has been set up using [NextAuth.js](https://next-auth.js.org/). 
+A Next.js application for managing fantasy baseball leagues, drafts, and player data.
 
-This boilerplate contains:
-- 🔑 User auth and session management using [NextAuth.js](https://next-auth.js.org/)
-- 👪 ORM using [Prisma](https://www.prisma.io/)
-- 📄 A user signup page, sign in page, and user list page using [React](https://reactjs.org/), [Tailwind](https://tailwindcss.com/), and [Daisy UI](https://daisyui.com/) 
-- 🌍 State management using [Redux RTK query](https://redux-toolkit.js.org/rtk-query/overview)
-- ✅ CI/CD using [Github Actions](https://github.com/features/actions)
-- 💻 E2E testing using [Cypress](https://www.cypress.io/)
-- 🤡 Unit testing using [Jest](https://jestjs.io/)
+## Project Overview
 
-### Installation
-1. Install [Node LTS](https://nodejs.org/en/)
-2. Install [Docker](https://www.docker.com/)
-3. Clone this repo
-4. Create the following `.env` file
-```
-# next-auth
-SECRET=TODO
+This is a full-stack fantasy baseball application built with:
+- **Frontend**: Next.js 15 with React 19, TypeScript, TailwindCSS + DaisyUI
+- **Backend**: Next.js API routes with Prisma ORM
+- **Database**: PostgreSQL (via Prisma)
+- **Authentication**: NextAuth.js (username/password)
+- **Storage**: Supabase buckets for images and documents
+- **Real-time**: Supabase realtime for live draft updates
+- **State Management**: Redux RTK Query
+- **Testing**: Jest (unit tests) + Cypress (e2e tests)
+- **CI/CD**: GitHub Actions with automatic tagging
 
-# supabase
-NEXT_PUBLIC_SUPABASE_URL=TODO
-NEXT_PUBLIC_SUPABASE_ANON_KEY=TODO
+## Features
+- 🔑 User authentication and session management
+- 🏆 League creation and management
+- ⚡ Live draft system with real-time updates
+- 📊 Player database and statistics management
+- 🔄 Keeper system for multi-season leagues
+- 📁 Document and image upload via Supabase storage
+- 🧪 Comprehensive testing with Jest and Cypress
 
-# database
-POSTGRES_HOSTNAME=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=postgres
-DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public
-DIRECT_URI=${DATABASE_URI}
-```
-5. Run the following in the root directory
-```
-npm run install
-npm migrate
-```
-6. For [automatic tagging](https://github.com/anothrNick/github-tag-action), allow read and write permissions for workflows in your github repo's Settings > Actions > General > Workflow permissions section.
+## Quick Start
 
-### Start locally
-The following command will containerize, build, and start the database, backend, and frontend
-```
+```bash
+# 1. Clone and install
+git clone <repo-url>
+cd fantasy-draft-site
+npm install
+
+# 2. Setup environment
+cp .env.example .env.local
+# Fill in your environment variables
+
+# 3. Start database
 npm run up
+
+# 4. Setup database
+npm run migratedev
+npm run seed
+
+# 5. Start development
 npm run dev
 ```
 
-### Setup user profile image upload Supabase (optional)
-1. Sign up and create a project on [supabase](https://supabase.com/dashboard).
-2. Create a **public** storage bucket and add `SUPABASE_BUCKET` to the `.env` above
-3. Add a policy to your bucket that allows `SELECT`, `INSERT`, `UPDATE`, and `DELETE`.
-4. From Settings > API, add your URL and anon/public API keys to the `.env` as `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
+## Prerequisites
+- [Node.js LTS](https://nodejs.org/en/)
+- [Docker](https://www.docker.com/)
+- [GitHub CLI](https://cli.github.com/) (optional, for repository management)
+
+## Environment Setup
+
+```bash
+cp .env.example .env.local
+# Fill in your Supabase and database credentials
+```
+
+## Development Commands
+
+**Essential:**
+- `npm run dev` - Start development server
+- `npm run up` - Start database container
+- `npm run lint` - Run linting before commits
+- `npm run jest` - Run tests
+
+**Database:**
+- `npm run migratedev` - Create migration
+- `npm run seed` - Seed database
+- `npm run resetdb` - Reset database (when broken)
+
+## Supabase Setup
+
+1. Create a project on [Supabase](https://supabase.com/dashboard)
+2. Create a **public** storage bucket for file uploads
+3. Set bucket policy to allow `SELECT`, `INSERT`, `UPDATE`, `DELETE`
+4. Get URL and keys from Settings > API
+5. Add credentials to your `.env.local`
+
+## Deployment
+
+- **Production**: Vercel (main branch) → fantasy-baseball Supabase
+- **Preview**: Vercel (dev branches) → fantasy-baseball-preview Supabase
+- **CI/CD**: GitHub Actions with automatic tagging
+
+## Documentation
+
+For detailed development information, see [CLAUDE.md](./CLAUDE.md) which contains:
+- Architecture patterns and best practices
+- Troubleshooting guide
+- Development workflow
+- Code quality standards

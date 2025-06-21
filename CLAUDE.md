@@ -262,3 +262,11 @@ For profile image uploads:
 - **Commit Messages**: Clear, descriptive commits explaining the "why"
 - **Testing**: Write tests for new features, especially API routes
 - **Code Reviews**: Test locally before requesting review
+
+### Documentation Maintenance
+- **Always check and update** `CLAUDE.md` and `README.md` after making significant changes:
+  - New features or architecture changes
+  - Updated dependencies or tech stack
+  - New development commands or workflows
+  - Changes to deployment or environment setup
+- Keep both files synchronized and current for optimal Claude Code assistance
