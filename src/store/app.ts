@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 export type AlertType = 'normal' | 'info' | 'success' | 'warning' | 'error'

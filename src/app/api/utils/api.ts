@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
