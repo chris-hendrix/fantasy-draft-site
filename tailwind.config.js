@@ -5,17 +5,7 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  plugins: [require("@tailwindcss/typography"), require("daisyui")],
-  daisyui: {
-    themes: [
-      {
-        night: {
-          ...require('daisyui/src/theming/themes')['night'],
-          accent: '#ea6947',
-          'accent-content': '#130402'
-        },
-      },
-    ],
-  },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  plugins: [require("@tailwindcss/typography")],
   safelist: [{ pattern: /alert-+/ }] // allows dynamic strings for alert classes
 }

@@ -15,7 +15,7 @@ export const metadata = {
 const inter = Inter({ subsets: ['latin'] })
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
-  <html lang="en">
+  <html lang="en" data-theme="night">
     <body className={inter.className}>
       <Providers>
         <div className="flex flex-col min-h-screen">

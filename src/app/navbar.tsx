@@ -33,13 +33,13 @@ const UserDropdown: React.FC = () => {
         <Dropdown
           align="right-0"
           label={
-            <button
+            <a
               id="menu-button"
-              className="btn btn-ghost avatar text-primary-content"
+              className="avatar text-primary-content cursor-pointer px-4 py-2 rounded-lg flex items-center gap-2"
             >
               <Menu />
               <Avatar user={user} />
-            </button>
+            </a>
           }>
           {!isLoading && user && (
             <div>
@@ -79,9 +79,9 @@ const LeagueDropdown: React.FC = () => {
     <>
       <Dropdown
         label={
-          <div id="leagues-btn" className="btn btn-ghost text-primary-content">
+          <a id="leagues-btn" className="text-primary-content cursor-pointer px-4 rounded-lg text-sm">
             {selectedLeague ? selectedLeague.name : 'My Leagues'} 🔽
-          </div>
+          </a>
         }
       >
         {leagues?.length > 0 && <h2 className="font-bold mb-1">Leagues</h2>}
@@ -114,7 +114,7 @@ const Navbar: React.FC = () => {
           {user && <LeagueDropdown />}
         </div>
         <div className="navbar-center">
-          <Link href="/" className="btn btn-ghost text-xl text-primary-content">
+          <Link href="/" className="text-xl text-primary-content px-4 rounded-lg">
             <div className="border-white border-2 shadow-lg">
               <Image
                 src="/drafter-banner.svg"
