@@ -79,6 +79,9 @@ export const useLiveDraftPicks = (draftId: string) => {
   ) => {
     const res = await updateDraftPick({ id: pickId, playerId: newPlayerId || null })
     if ('error' in res) return false
+    // Invalidate player data since it includes draft picks
+    newPlayerId && invalidatePlayer(newPlayerId)
+    oldPlayerId && invalidatePlayer(oldPlayerId)
     await send({ pickId, oldPlayerId, newPlayerId })
     return true
   }
