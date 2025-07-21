@@ -14,7 +14,9 @@ describe('Auth flow', () => {
     const newName = 'Patch Adams'
     cy.signUpUser(user)
     cy.openMenuAndClick('Profile')
-    cy.get('#edit-profile').click()
+    // Force dropdown to close by clicking elsewhere
+    cy.get('body').click(0, 0)
+    cy.get('[id="edit-profile"]').click()
     cy.get('input[name="name"]').type(newName)
     cy.get('button[type="submit"]').click()
     cy.contains('button', 'Close').click()
@@ -32,7 +34,8 @@ describe('Auth flow', () => {
     const newPassword = 'Abcd1234!!'
     cy.loginUser(user)
     cy.openMenuAndClick('Profile')
-    cy.get('#edit-profile').click()
+    cy.get('body').click(0, 0)
+    cy.get('[id="edit-profile"]').click()
     cy.contains('button', 'Change password').click()
     cy.get('input[name="currentPassword"]').type('Abcd1234!')
     cy.get('input[name="password"]').type('Abcd1234!!')

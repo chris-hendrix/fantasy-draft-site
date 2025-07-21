@@ -33,24 +33,24 @@ const UserDropdown: React.FC = () => {
         <Dropdown
           align="right-0"
           label={
-            <a
+            <button
               id="menu-button"
               className="avatar text-primary-content cursor-pointer px-4 py-2 rounded-lg flex items-center gap-2"
             >
               <Menu />
               <Avatar user={user} />
-            </a>
+            </button>
           }>
           {!isLoading && user && (
             <div>
               <li><Link href="/profile">👤 Profile</Link></li>
-              <li><a onClick={() => signOut()}>⬅️ Log out</a></li>
+              <li><button onClick={() => signOut()}>⬅️ Log out</button></li>
             </div>
           )}
           {!isLoading && !user && (
             <div>
-              <li><a onClick={() => setLoginOpen(true)}>Log in</a></li>
-              <li><a onClick={() => setSignupOpen(true)} >Sign up</a></li>
+              <li><button onClick={() => setLoginOpen(true)}>Log in</button></li>
+              <li><button onClick={() => setSignupOpen(true)}>Sign up</button></li>
             </div>
           )}
           <div className="divider" />

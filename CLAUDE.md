@@ -69,6 +69,8 @@ This is a full-stack fantasy baseball application built with:
 - `npm run jest` - Run Jest unit tests
 - `npm run cypress:open` - Open Cypress test runner
 - `npm run cypress` - Run Cypress tests headlessly
+- `npm run cypress -- --spec "path/to/test.cy.ts"` - Run specific Cypress test
+- `npm run cypress -- --headed` - Run Cypress with visible browser for debugging
 
 ## Project Structure
 

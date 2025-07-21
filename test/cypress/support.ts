@@ -34,15 +34,14 @@ Cypress.Commands.add('signUpUser', (user = defaultUser) => {
   cy.get('input[name="email"]').type(user.email)
   cy.get('input[name="password"]').type(user.password)
   cy.get('input[name="confirmPassword"]').type(user.password)
-  cy.contains('button', 'Sign up').click()
-  cy.wait(1000)
+  cy.get('.modal-open button[type="submit"]').click()
 })
 
 Cypress.Commands.add('loginUser', (user = defaultUser) => {
   cy.openMenuAndClick('Log in')
   cy.get('input[name="email"]').type(user.email)
   cy.get('input[name="password"]').type(user.password)
-  cy.contains('button', 'Log in').click()
+  cy.get('.modal-open button[type="submit"]').click()
   cy.wait(1000)
 })
 
