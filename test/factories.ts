@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import prisma from '@/lib/prisma'
 import { generateHash } from '@/app/api/utils/hash'
 import { Prisma, Sport } from '@prisma/client'
