@@ -3,17 +3,7 @@ import tsParser from '@typescript-eslint/parser'
 
 export default [
   {
-    ignores: [
-      '**/*.js',
-      'node_modules/*',
-      '.next/*',
-      'out/*',
-      'build/*',
-      'dist/*',
-      'next-env.d.ts',
-      'global.d.ts',
-      'prisma/*'
-    ]
+    ignores: ['prisma/*', 'global.d.ts', 'next-env.d.ts', '.next/*', 'node_modules/*']
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -22,18 +12,12 @@ export default [
     },
     languageOptions: {
       parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true
-        },
         project: ['./tsconfig.json', './test/cypress/tsconfig.json']
       }
     },
     rules: {
-      // TypeScript specific rules
-      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -42,18 +26,9 @@ export default [
           caughtErrorsIgnorePattern: '^_'
         }
       ],
-      '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
-
-      // Stylistic rules (now base ESLint)
       'semi': ['error', 'never'],
       'comma-dangle': 'off',
-
-      // General rules
-      'consistent-return': 'off',
-      'jsx-quotes': ['error', 'prefer-double'],
-      'object-curly-newline': 'off',
-      'operator-linebreak': 'off'
+      'jsx-quotes': ['error', 'prefer-double']
     }
   }
 ]
