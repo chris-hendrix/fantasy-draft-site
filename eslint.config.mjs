@@ -1,34 +1,19 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import tseslint from 'typescript-eslint'
 
 export default [
+  { ignores: ['prisma', 'global.d.ts', 'next-env.d.ts', '.next'] },
+  ...tseslint.configs.recommended,
   {
-    ignores: ['prisma/*', 'global.d.ts', 'next-env.d.ts', '.next/*', 'node_modules/*']
-  },
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    plugins: {
-      '@typescript-eslint': typescriptEslint
-    },
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        project: ['./tsconfig.json', './test/cypress/tsconfig.json']
-      }
-    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
-      ],
-      'semi': ['error', 'never'],
-      'comma-dangle': 'off',
-      'jsx-quotes': ['error', 'prefer-double']
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/ban-types': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-wrapper-object-types': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      'semi': ['error', 'never']
     }
   }
 ]
