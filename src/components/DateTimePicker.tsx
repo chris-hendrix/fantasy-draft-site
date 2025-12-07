@@ -15,7 +15,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   return (
     <div>
       <input
-        className="input input-bordered"
+        className="input"
         type="datetime-local"
         value={toLocaleISOString(date)}
         onChange={(e) => {

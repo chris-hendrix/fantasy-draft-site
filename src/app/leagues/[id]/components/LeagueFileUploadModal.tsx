@@ -107,7 +107,7 @@ const LeagueFileUploadModal: React.FC<FormProps> = ({ leagueId, onClose, leagueF
             Category
           </label>
           <select
-            className="select select-bordered w-full mb-2"
+            className="select w-full mb-2"
             value={category as LeagueFileCategory || ''}
             onChange={(e) => setCategory(e.target.value as LeagueFileCategory)}>
             {LEAGUE_FILE_CATEGORIES.map((c) => (

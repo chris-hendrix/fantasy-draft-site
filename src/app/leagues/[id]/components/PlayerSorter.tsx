@@ -36,7 +36,7 @@ const PlayerSorter: React.FC<Props> = ({ onSortChange }) => {
 
   const StatSelect = () => (
     <select
-      className="select select-bordered select-xs"
+      className="select select-xs"
       value={sortOption?.key || ''}
       onChange={(e) => {
         const key = e.target.value

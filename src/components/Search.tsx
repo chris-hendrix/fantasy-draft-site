@@ -24,7 +24,7 @@ const Search: React.FC<Props> = ({ onSearch, placeholder = 'Search...' }) => {
       <div className="relative flex-1">
         <input
           type="text"
-          className="input input-bordered w-full"
+          className="input w-full"
           placeholder={placeholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}

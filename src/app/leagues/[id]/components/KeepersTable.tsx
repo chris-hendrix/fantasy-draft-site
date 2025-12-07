@@ -88,7 +88,7 @@ const KeepersTable: React.FC<Props> = ({
         if (!edit || !(isCommissioner || teamIds)) return player && <div className="">{getPlayerName(player)}</div>
         if (editKeeperId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
+            className="input input-xs w-full cursor-pointer bg-base-300"
             onClick={() => setEditKeeperId(id || null)}
           >
             {getPlayerName(player) || ''}
@@ -113,7 +113,7 @@ const KeepersTable: React.FC<Props> = ({
         return (
           <input
             type="number"
-            className="input input-bordered input-xs w-full text-xs"
+            className="input input-xs w-full text-xs"
             placeholder="Round"
             value={round || ''}
             onChange={(e) => handleEdit(id, { newRound: Number(e.target.value) })}
@@ -132,7 +132,7 @@ const KeepersTable: React.FC<Props> = ({
         return (
           <input
             type="number"
-            className="input input-bordered input-xs w-full text-xs"
+            className="input input-xs w-full text-xs"
             placeholder="Keeps"
             value={keeps || ''}
             onChange={(e) => handleEdit(id, { newKeeps: Number(e.target.value) })}

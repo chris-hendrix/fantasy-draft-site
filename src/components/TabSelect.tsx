@@ -25,7 +25,7 @@ const TabSelect: React.FC<Props> = ({ tabOptions, onSelect, initialOption }) => 
 
   return (
     <div className="w-full">
-      <div role="tablist" className="tabs tabs-lg tabs-boxed">
+      <div role="tablist" className="tabs tabs-lg tabs-box">
         {tabOptions.map((tabOption, i) => (
           <a
             key={tabOption.value}

@@ -121,7 +121,6 @@ const TextInput: React.FC<Props> = ({
     <InputElement
       className={[
         'input',
-        'input-bordered',
         'mb-1',
         'w-full',
         errors?.[name] ? 'input-error' : '',

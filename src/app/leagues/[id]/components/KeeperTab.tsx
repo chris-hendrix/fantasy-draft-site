@@ -195,7 +195,7 @@ const KeeperTab: React.FC<Props> = ({ leagueId }) => {
       {generateModalOpen && <Modal title="Generate keeper slots" onClose={handleClose} size="xs">
         <input
           type="number"
-          className="input input-bordered w-full"
+          className="input w-full"
           placeholder="Keepers"
           value={keeperCount}
           onChange={(e) => setKeeperCount(Number(e.target.value))}

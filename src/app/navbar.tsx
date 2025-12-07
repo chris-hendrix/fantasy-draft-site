@@ -27,6 +27,8 @@ const UserDropdown: React.FC = () => {
 
   useEffect(() => { isSignOutSuccess && showAlert({ successMessage: 'Successfully logged out' }) }, [isSignOutSuccess])
 
+  console.log('UserDropdown render - loginOpen:', loginOpen, 'signupOpen:', signupOpen)
+
   return (
     <>
       <div id="dropdown" className="relative group inline-block">
@@ -41,19 +43,11 @@ const UserDropdown: React.FC = () => {
               <Avatar user={user} />
             </button>
           }>
-          {!isLoading && user && (
-            <div>
-              <li><Link href="/profile">👤 Profile</Link></li>
-              <li><a onClick={() => signOut()}>⬅️ Log out</a></li>
-            </div>
-          )}
-          {!isLoading && !user && (
-            <div>
-              <li><a onClick={() => setLoginOpen(true)}>Log in</a></li>
-              <li><a onClick={() => setSignupOpen(true)} >Sign up</a></li>
-            </div>
-          )}
-          <div className="divider" />
+          {!isLoading && user && <li><Link href="/profile">👤 Profile</Link></li>}
+          {!isLoading && user && <li><a onClick={() => signOut()}>⬅️ Log out</a></li>}
+          {!isLoading && !user && <li><a onClick={() => setLoginOpen(true)}>Log in</a></li>}
+          {!isLoading && !user && <li><a onClick={() => setSignupOpen(true)}>Sign up</a></li>}
+          <li><hr className="my-2" /></li>
           <li><Link href="/">🏠 Home</Link></li>
           <li><Link href="/users">👥 Users</Link></li>
           <li><Link href="/leagues">🏆 Leagues</Link></li>

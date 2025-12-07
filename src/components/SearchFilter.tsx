@@ -21,7 +21,7 @@ const SearchFilter: React.FC<Props> = ({ onSearch, label = 'Search' }) => {
       <div className="w-full p-1">
         <input
           type="text"
-          className="input input-xs input-bordered w-full text-xs"
+          className="input input-xs w-full text-xs"
           placeholder={`${label}...`}
           value={search}
           onChange={handleSearch}

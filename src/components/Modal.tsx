@@ -16,14 +16,22 @@ const sizes = {
   xl: ' max-w-screen-xl',
 }
 
-const Modal: React.FC<Props> = ({ children, onClose, title = '', size = 'sm' }) => (
-  <div className="modal modal-open" onClick={onClose}>
-    <div className={`modal-box ${sizes[size]}`} onClick={(e) => e.stopPropagation()}>
-      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={onClose}>✕</button>
-      <h3 className="font-bold text-lg">{title}</h3>
-      <div className="mt-4">{children}</div>
+const Modal: React.FC<Props> = ({ children, onClose, title = '', size = 'sm' }) => {
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
+  return (
+    <div className="modal modal-open" onClick={handleBackdropClick}>
+      <div className={`modal-box ${sizes[size]}`}>
+        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={onClose}>✕</button>
+        <h3 className="font-bold text-lg">{title}</h3>
+        <div className="mt-4">{children}</div>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default Modal

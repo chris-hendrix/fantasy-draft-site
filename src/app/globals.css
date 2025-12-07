@@ -1,3 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  themes: night --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "night";
+  --color-accent: #ea6947;
+  --color-accent-content: #130402;
+}
+
+/* Safelist for dynamic alert classes */
+@source "../**/*.{js,ts,jsx,tsx,mdx}";

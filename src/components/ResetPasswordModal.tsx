@@ -42,7 +42,7 @@ const ResetPasswordModal: React.FC<FormProps> = ({ user, onClose }) => {
         <input
           type="text"
           placeholder="New Password"
-          className="input input-bordered w-full"
+          className="input w-full"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           disabled

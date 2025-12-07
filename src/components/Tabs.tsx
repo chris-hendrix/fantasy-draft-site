@@ -33,7 +33,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onAdd, width = 'full' }) => {
 
   return (
     <div className="w-full">
-      <div role="tablist" className="tabs tabs-lg tabs-boxed" style={{ width }}>
+      <div role="tablist" className="tabs tabs-lg tabs-box" style={{ width }}>
         {tabs.map((tab, i) => (
           <a
             key={tab.name}

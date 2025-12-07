@@ -103,7 +103,7 @@ const DraftOrderModal: React.FC<Props> = ({ draftId, onClose }) => {
         type="number"
         value={editedRounds}
         onChange={(e) => setEditedRounds(Number(e.target.value))}
-        className="input input-bordered w-16"
+        className="input w-16"
       />
     </div>
   )

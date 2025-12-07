@@ -150,7 +150,7 @@ const DraftPicksTable: React.FC<Props> = ({
         }
         if (editPickId !== id) {
           return <div
-            className="input input-xs input-bordered w-full cursor-pointer bg-base-300"
+            className="input input-xs w-full cursor-pointer bg-base-300"
             onClick={() => setEditPickId(id || null)}
           >
             {player ? getPlayerName(player) : ''}
